@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Floux — Recupera los clientes que pierdes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #F2EDE6; --white: #FFFFFF; --dark: #1A1714;
+      --body: #6B6560; --light: #DED8D0; --gold: #9A7B4F;
+      --gold-h: #7D6340; --footer-bg: #0E0C0A;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --serif-sc: 'Cormorant SC', Georgia, serif;
+      --sans: 'Inter', Helvetica Neue, Arial, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--dark); color: var(--cream); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 300; line-height: 1.1; letter-spacing: 0.03em; }
+    h1 { font-size: clamp(3rem, 7vw, 5.5rem); }
+    h2 { font-size: clamp(1.8rem, 3.5vw, 3rem); letter-spacing: 0.14em; text-transform: uppercase; font-family: var(--serif-sc); }
+    h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); letter-spacing: 0.06em; }
+    p { color: rgba(242,237,230,0.75); font-size: 1rem; font-weight: 300; line-height: 1.85; }
+    .eyebrow { display: block; font-size: 0.75rem; font-weight: 400; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); font-family: var(--serif-sc); }
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+    section { padding: 108px 0; }
+
+    /* Buttons */
+    .btn { display: inline-block; font-family: var(--sans); font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; padding: 16px 40px; border-radius: 0; cursor: pointer; transition: background .25s, color .25s, border-color .25s; border: 1px solid transparent; }
+    .btn-primary { background: transparent; color: var(--cream); border-color: var(--cream); }
+    .btn-primary:hover { background: var(--cream); color: var(--dark); }
+    .btn-outline { background: transparent; color: var(--gold); border-color: var(--gold); }
+    .btn-outline:hover { background: var(--gold); color: var(--dark); }
+
+    /* Header */
+    #header { position: fixed; inset: 0 0 auto 0; z-index: 100; background: var(--dark); border-bottom: 1px solid rgba(242,237,230,0.08); transition: box-shadow .3s; }
+    #header.scrolled { box-shadow: 0 2px 40px rgba(0,0,0,0.5); }
+    nav { display: flex; align-items: center; justify-content: space-between; height: 76px; max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+    .logo { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--cream); letter-spacing: 0.06em; }
+    .logo em { font-style: normal; color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 40px; }
+    .nav-links a { font-size: 0.625rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(242,237,230,0.6); transition: color .2s; }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-links .btn { margin-left: 16px; padding: 11px 28px; border-color: var(--cream); color: var(--cream); font-size: 0.625rem; }
+    .nav-links .btn:hover { background: var(--cream); color: var(--dark); }
+
+    /* Burger */
+    .burger { display:none; flex-direction:column; justify-content:center; gap:5px; width:36px; height:36px; background:none; border:none; cursor:pointer; padding:4px; }
+    .burger span { display:block; width:22px; height:1px; background:var(--cream); transition:transform .3s, opacity .3s; }
+    .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .mobile-drawer { display:none; position:fixed; top:76px; left:0; right:0; background:var(--dark); border-bottom:1px solid rgba(242,237,230,0.08); padding:16px 40px 32px; flex-direction:column; gap:4px; z-index:99; }
+    .mobile-drawer.open { display:flex; }
+    .mobile-drawer a { font-size:0.625rem; font-weight:500; letter-spacing:0.18em; text-transform:uppercase; color:rgba(242,237,230,0.6); padding:15px 0; border-bottom:1px solid rgba(242,237,230,0.08); transition:color .2s; }
+    .mobile-drawer a:last-of-type { border-bottom:none; }
+    .mobile-drawer a:hover { color:var(--gold); }
+    .mobile-drawer .btn { margin-top:14px; text-align:center; color:var(--white) !important; border-bottom:none !important; }
+    @media (max-width: 900px) { .nav-links { display:none; } .burger { display:flex; } }
+
+    /* Hero */
+    #hero { position: relative; height: 100vh; min-height: 640px; padding: 0; overflow: hidden; }
+    .hero-img { position: absolute; inset: 0; }
+    .hero-img img { width: 100%; height: 100%; object-fit: cover; object-position: 60% center; }
+    .hero-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(26,23,20,0.85) 0%, rgba(26,23,20,0.3) 50%, rgba(26,23,20,0.15) 100%); }
+    .hero-copy { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 40px 80px; max-width: 1280px; margin: 0 auto; z-index: 2; }
+    .hero-copy .eyebrow { margin-bottom: 20px; color: var(--gold); }
+    .hero-copy h1 { color: var(--cream); margin-bottom: 28px; max-width: 680px; font-weight: 300; }
+    .hero-copy h1 em { font-style: italic; color: var(--cream); }
+    .hero-copy > p { font-size: 1rem; margin-bottom: 40px; max-width: 420px; color: rgba(242,237,230,0.75); font-weight: 300; }
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    /* Scroll Reveal */
+    .reveal { opacity: 0; transform: translateY(36px); transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.22s; }
+    .reveal-delay-3 { transition-delay: 0.34s; }
+
+    /* Image effects */
+    .img-zoom { overflow: hidden; border-radius: 2px; }
+    .img-zoom img { transition: transform 0.9s cubic-bezier(0.16,1,0.3,1), filter 0.9s ease; filter: brightness(0.88) saturate(0.9); }
+    .img-zoom:hover img { transform: scale(1.04); filter: brightness(0.95) saturate(1.05); }
+    .img-gold-tint { position: relative; }
+    .img-gold-tint::before { content:''; position:absolute; inset:0; background: linear-gradient(135deg, rgba(154,123,79,0.12) 0%, transparent 60%); z-index:1; pointer-events:none; border-radius:2px; }
+
+    /* Footer */
+    footer { background: var(--footer-bg); padding: 60px 0 40px; }
+    .footer-top { display: grid; grid-template-columns: 1fr auto 1fr; gap: 48px; align-items: start; margin-bottom: 48px; }
+    .footer-brand .logo { display: block; color: var(--white); font-size: 1.3rem; margin-bottom: 12px; }
+    .footer-brand p { font-size: 0.8125rem; color: rgba(255,255,255,.4); line-height: 1.7; max-width: 210px; }
+    .footer-nav { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .footer-nav a { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,.45); transition: color .2s; }
+    .footer-nav a:hover { color: var(--white); }
+    .footer-contact { text-align: right; }
+    .footer-contact a { display: block; font-size: 0.875rem; color: rgba(255,255,255,.5); margin-bottom: 10px; transition: color .2s; }
+    .footer-contact a:hover { color: var(--white); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.07); padding-top: 24px; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,.25); }
+
+    /* FAQ */
+    .faq-item { border-bottom:1px solid rgba(154,123,79,0.2); }
+    .faq-btn { width:100%;background:none;border:none;display:flex;align-items:center;justify-content:space-between;padding:22px 0;cursor:pointer;text-align:left;font-family:var(--serif);font-size:1.0625rem;color:var(--cream);gap:16px; }
+    .faq-ic { flex-shrink:0;width:26px;height:26px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1rem;font-style:normal;transition:transform .3s,background .3s,color .3s; }
+    .faq-btn.open .faq-ic { transform:rotate(45deg);background:var(--gold);color:var(--white); }
+    .faq-ans { max-height:0;overflow:hidden;transition:max-height .4s ease; }
+    .faq-ans p { padding-bottom:22px;font-size:0.9375rem;line-height:1.8;color:rgba(242,237,230,0.75); }
+    .faq-item.open .faq-ans { max-height:300px; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .footer-top { grid-template-columns: 1fr; gap: 32px; }
+      .footer-contact { text-align: left; }
+      .footer-nav { align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .hero-btns { flex-direction: column; }
+      .hero-btns .btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="header">
+    <nav>
+      <a href="#" class="logo">Flou<em>x</em></a>
+      <ul class="nav-links">
+        <li><a href="#como">Cómo funciona</a></li>
+        <li><a href="#porque">Por qué Floux</a></li>
+        <li><a href="#precios">Precios</a></li>
+        <li><a href="#historia">Nuestra historia</a></li>
+        <li><a href="#faqs">FAQs</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+        <li><a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a></li>
+      </ul>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+    <div class="mobile-drawer" id="drawer">
+      <a href="#como">Cómo funciona</a>
+      <a href="#porque">Por qué Floux</a>
+      <a href="#precios">Precios</a>
+      <a href="#historia">Nuestra historia</a>
+      <a href="#faqs">FAQs</a>
+      <a href="#contacto">Contacto</a>
+      <a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section id="hero">
+      <div class="hero-img">
+        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1800&q=90&auto=format&fit=crop" alt="Salón de estética elegante Madrid" loading="eager" />
+      </div>
+      <div class="hero-copy">
+        <span class="eyebrow">Centros de estética · Madrid Oeste</span>
+        <h1>Recupera los clientes<br>que pierdes cuando<br><em>estás ocupada</em></h1>
+        <p>Llamadas perdidas convertidas en citas. Automáticamente. Sin que tengas que hacer nada.</p>
+        <div class="hero-btns">
+          <a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a>
+          <a href="#como" class="btn btn-outline">Cómo funciona</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cómo funciona -->
+    <section id="como" style="background:#231F1B; padding: 108px 0;">
+      <div class="container">
+        <div class="reveal" style="text-align:center; max-width:620px; margin: 0 auto 72px;">
+          <span class="eyebrow">El proceso</span>
+          <h2 style="color:var(--cream); margin-top:16px; margin-bottom:18px;">Mientras tú trabajas,<br><em>nosotros recuperamos tus clientes</em></h2>
+          <p>Cada llamada perdida es dinero que se va. Floux lo detiene automáticamente, en menos de 30 segundos.</p>
+          <div style="width:36px;height:1px;background:var(--gold);margin:20px auto 0;"></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 40px 1fr 40px 1fr; align-items:start; gap:0;">
+
+          <div class="reveal reveal-delay-1" style="text-align:center; padding: 0 16px;">
+            <div style="width:64px;height:64px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-family:var(--serif-sc);font-size:1.25rem;color:var(--gold);">01</div>
+            <div class="img-zoom img-gold-tint" style="margin-bottom:24px;">
+              <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80&auto=format&fit=crop" alt="Llamada perdida" style="width:100%;height:180px;object-fit:cover;" />
+            </div>
+            <span style="display:block;font-size:0.6875rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Llamada perdida</span>
+            <h3 style="color:var(--cream);margin-bottom:12px;">Estás con un cliente.<br>El teléfono suena.</h3>
+            <p style="font-size:0.9375rem;color:rgba(242,237,230,0.72);line-height:1.75;">No puedes contestar. Antes, ese cliente colgaba y llamaba a otro salón. Ahora no.</p>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:center;padding-top:100px;color:var(--gold);font-size:1.25rem;">→</div>
+
+          <div class="reveal reveal-delay-2" style="text-align:center; padding: 0 16px;">
+            <div style="width:64px;height:64px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-family:var(--serif-sc);font-size:1.25rem;color:var(--gold);">02</div>
+            <div class="img-zoom img-gold-tint" style="margin-bottom:24px;">
+              <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80&auto=format&fit=crop" alt="WhatsApp automático" style="width:100%;height:180px;object-fit:cover;" />
+            </div>
+            <span style="display:block;font-size:0.6875rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">En 30 segundos</span>
+            <h3 style="color:var(--cream);margin-bottom:12px;">Tu cliente recibe<br>un WhatsApp.</h3>
+            <p style="font-size:0.9375rem;color:rgba(242,237,230,0.72);line-height:1.75;">Una conversación cálida y profesional le pregunta qué servicio necesita y cuándo puede venir.</p>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:center;padding-top:100px;color:var(--gold);font-size:1.25rem;">→</div>
+
+          <div class="reveal reveal-delay-3" style="text-align:center; padding: 0 16px;">
+            <div style="width:64px;height:64px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-family:var(--serif-sc);font-size:1.25rem;color:var(--gold);">03</div>
+            <div class="img-zoom img-gold-tint" style="margin-bottom:24px;">
+              <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&auto=format&fit=crop" alt="Cita confirmada" style="width:100%;height:180px;object-fit:cover;" />
+            </div>
+            <span style="display:block;font-size:0.6875rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Cita lista</span>
+            <h3 style="color:var(--cream);margin-bottom:12px;">Tú recibes el resumen.<br>Solo confirmas.</h3>
+            <p style="font-size:0.9375rem;color:rgba(242,237,230,0.72);line-height:1.75;">Nombre, servicio y día preferido directo a tu móvil. Sin apps nuevas. Sin complicaciones.</p>
+          </div>
+
+        </div>
+
+        <div class="reveal" style="text-align:center; margin-top:64px;">
+          <p style="color:rgba(242,237,230,0.5);font-size:0.875rem;letter-spacing:0.06em;text-transform:uppercase;font-weight:500;">Se paga solo con un único cliente recuperado al mes</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Por qué Floux -->
+    <section id="porque" style="text-align:center; background:#1A1714;">
+      <div class="container">
+        <span class="eyebrow">Próximamente</span>
+        <h2 style="margin-top:16px; color:var(--cream);">Por qué Floux</h2>
+      </div>
+    </section>
+
+    <!-- Precios -->
+    <section id="precios" style="text-align:center; background:#231F1B;">
+      <div class="container">
+        <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto 64px;">
+          <span class="eyebrow">Inversión</span>
+          <h2 style="color:var(--cream);margin-top:16px;margin-bottom:16px;">Precios</h2>
+          <p>Sin permanencia. Sin letra pequeña. Se paga solo con un cliente recuperado.</p>
+        </div>
+        <div class="reveal" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;margin:0 auto;">
+
+          <div style="border:1px solid rgba(154,123,79,0.2);padding:40px 32px;text-align:left;">
+            <span class="eyebrow" style="margin-bottom:16px;">Básico</span>
+            <div style="font-family:var(--serif);font-size:3rem;font-weight:300;color:var(--cream);line-height:1;">€47<span style="font-size:1rem;opacity:0.5;">/mes</span></div>
+            <p style="font-size:0.8125rem;margin:20px 0 24px;color:rgba(242,237,230,0.6);">Sin setup</p>
+            <ul style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ WhatsApp automático en llamada perdida</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Mensaje personalizado con tu nombre</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.4);">— Sin conversación de reserva</li>
+            </ul>
+            <a href="mailto:flouxaim@gmail.com?subject=Plan Básico Floux" class="btn btn-outline" style="width:100%;text-align:center;">Empezar</a>
+          </div>
+
+          <div style="border:1px solid var(--gold);padding:40px 32px;text-align:left;position:relative;">
+            <span style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark);font-size:0.625rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;padding:4px 16px;">Más popular</span>
+            <span class="eyebrow" style="margin-bottom:16px;">Agente</span>
+            <div style="font-family:var(--serif);font-size:3rem;font-weight:300;color:var(--cream);line-height:1;">€97<span style="font-size:1rem;opacity:0.5;">/mes</span></div>
+            <p style="font-size:0.8125rem;margin:20px 0 24px;color:rgba(242,237,230,0.6);">+ €197 setup único</p>
+            <ul style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Todo lo del plan Básico</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Conversación completa por WhatsApp</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Recoge servicio, día y nombre</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Resumen directo a tu móvil</li>
+            </ul>
+            <a href="mailto:flouxaim@gmail.com?subject=Plan Agente Floux" class="btn btn-primary" style="width:100%;text-align:center;">Empezar</a>
+          </div>
+
+          <div style="border:1px solid rgba(154,123,79,0.2);padding:40px 32px;text-align:left;">
+            <span class="eyebrow" style="margin-bottom:16px;">Completo</span>
+            <div style="font-family:var(--serif);font-size:3rem;font-weight:300;color:var(--cream);line-height:1;">€147<span style="font-size:1rem;opacity:0.5;">/mes</span></div>
+            <p style="font-size:0.8125rem;margin:20px 0 24px;color:rgba(242,237,230,0.6);">+ €297 setup único</p>
+            <ul style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Todo lo del plan Agente</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Solicitudes de reseña en Google</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Recordatorios automáticos de cita</li>
+              <li style="font-size:0.875rem;color:rgba(242,237,230,0.7);">✓ Reactivación de clientas inactivas</li>
+            </ul>
+            <a href="mailto:flouxaim@gmail.com?subject=Plan Completo Floux" class="btn btn-outline" style="width:100%;text-align:center;">Empezar</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Nuestra Historia -->
+  <section id="historia" style="background:#1A1714; padding:108px 0;">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;">
+        <div class="reveal">
+          <span class="eyebrow">El fundador</span>
+          <h2 style="color:var(--cream);margin:16px 0 24px;line-height:1.1;">Una idea nacida<br><em>de caminar por Madrid Oeste</em></h2>
+          <p style="color:rgba(242,237,230,0.78);line-height:1.85;margin-bottom:20px;">Soy Max Herman. Emprendedor de Madrid Oeste, construyo Floux trabajando 10–15 horas a la semana fuera de mis estudios en la Universidad Europea. No vengo de Silicon Valley — vengo de las calles de Majadahonda, Boadilla y Pozuelo.</p>
+          <p style="color:rgba(242,237,230,0.78);line-height:1.85;margin-bottom:20px;">Visitando salones de estética de la zona, vi el mismo patrón repetirse: propietarias extraordinarias en su oficio, con agenda llena y manos ocupadas, incapaces de coger el teléfono cuando sonaba. Cada llamada perdida era una cita que se iba a la competencia.</p>
+          <p style="color:rgba(242,237,230,0.78);line-height:1.85;margin-bottom:36px;">Mi visión es sencilla: que ningún negocio local pierda un cliente por estar demasiado ocupado trabajando. Floux nació para hacer exactamente eso — sin contratos, sin complicaciones, con resultados desde el primer mes.</p>
+          <div style="display:flex;gap:48px;padding-top:8px;border-top:1px solid rgba(154,123,79,0.2);">
+            <div class="reveal reveal-delay-1">
+              <div style="font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--gold);line-height:1;">+15</div>
+              <div style="font-size:0.8125rem;color:rgba(242,237,230,0.55);margin-top:8px;letter-spacing:0.06em;text-transform:uppercase;line-height:1.5;">Clientes recuperados<br>de media al mes</div>
+            </div>
+            <div class="reveal reveal-delay-2">
+              <div style="font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--gold);line-height:1;">30s</div>
+              <div style="font-size:0.8125rem;color:rgba(242,237,230,0.55);margin-top:8px;letter-spacing:0.06em;text-transform:uppercase;line-height:1.5;">Tiempo de respuesta<br>automática</div>
+            </div>
+            <div class="reveal reveal-delay-3">
+              <div style="font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--gold);line-height:1;">0</div>
+              <div style="font-size:0.8125rem;color:rgba(242,237,230,0.55);margin-top:8px;letter-spacing:0.06em;text-transform:uppercase;line-height:1.5;">Cambios que tú<br>necesitas hacer</div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal reveal-delay-1 img-zoom img-gold-tint" style="height:520px;">
+          <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=85&auto=format&fit=crop" alt="Salón de estética Madrid" style="width:100%;height:520px;object-fit:cover;" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQs -->
+  <section id="faqs" style="background:#231F1B; padding:108px 0;">
+    <div class="container">
+      <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto 72px;">
+        <span class="eyebrow">Preguntas frecuentes</span>
+        <h2 style="color:var(--cream);margin-top:16px;margin-bottom:18px;">Todo lo que necesitas saber</h2>
+        <div style="width:36px;height:1px;background:var(--gold);margin:0 auto;"></div>
+      </div>
+      <div style="max-width:720px;margin:0 auto;" id="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Necesito instalar alguna aplicación o programa?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>No. Nosotros nos encargamos de toda la configuración. Tú no tienes que descargar nada ni aprender a usar ninguna plataforma. En menos de 48 horas está funcionando.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Qué pasa si el cliente hace preguntas que Floux no sabe responder?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>Si la conversación llega a un punto que requiere tu atención directa, Floux te avisa de inmediato para que puedas responder tú personalmente. El sistema sabe cuándo escalar y cuándo gestionar solo.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Puedo personalizar lo que le dice a mis clientes?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>Sí, completamente. El tono, el nombre de tu salón, los servicios y el mensaje de bienvenida son configurables. Lo ajustamos contigo durante la instalación para que suene exactamente como tú.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Funciona con cualquier número de teléfono?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>Sí. Funciona con el número que ya tienes, ya sea fijo o móvil. No necesitas cambiar tu número ni contratar una línea nueva.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Hay permanencia o contrato mínimo?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>No hay permanencia. Puedes cancelar cualquier mes con un aviso de 15 días. Sin penalizaciones, sin letra pequeña. Queremos que te quedes porque estás satisfecha, no porque estés atada.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Qué pasa cuando mi salón está cerrado o de vacaciones?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>Puedes pausar el servicio cuando quieras o configurar un mensaje especial. También podemos establecer un horario de activación automática para que solo funcione cuando tú elijas.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)"><span>¿Merece la pena económicamente?</span><i class="faq-ic">+</i></button>
+          <div class="faq-ans"><p>Una sesión media en Madrid cuesta entre €40 y €80. Con recuperar un único cliente al mes, Floux ya se paga solo. La mayoría de nuestras clientas recuperan entre 10 y 20 clientes al mes que de otra forma habrían ido a la competencia.</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section id="contacto" style="background:#1A1714; padding:108px 0;">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;">
+        <div class="reveal">
+          <span class="eyebrow">Contacto</span>
+          <h2 style="color:var(--cream);margin:16px 0 20px;">Hablemos.<br><em>Sin presión.</em></h2>
+          <p style="color:rgba(242,237,230,0.78);line-height:1.8;margin-bottom:40px;">Cuéntanos cómo funciona tu salón y te explicamos exactamente qué puede hacer Floux por ti. Sin compromisos, en español, y en menos de 15 minutos.</p>
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="width:44px;height:44px;border:1px solid rgba(154,123,79,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">✉️</div>
+              <div>
+                <div style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Email</div>
+                <a href="mailto:flouxaim@gmail.com" style="color:var(--cream);font-size:1rem;">flouxaim@gmail.com</a>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="width:44px;height:44px;border:1px solid rgba(154,123,79,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">📍</div>
+              <div>
+                <div style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Zona</div>
+                <span style="color:var(--cream);font-size:1rem;">Madrid Oeste — Majadahonda, Pozuelo, Las Rozas, Boadilla</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal reveal-delay-1" style="background:#231F1B;border:1px solid rgba(154,123,79,0.15);border-radius:2px;padding:48px 40px;">
+          <h3 style="font-family:var(--serif);font-size:1.4rem;font-weight:400;color:var(--cream);margin-bottom:28px;">Reserva una demostración gratuita</h3>
+          <form onsubmit="sendForm(event)" style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="display:block;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Nombre</label>
+              <input type="text" id="f-nombre" required placeholder="Tu nombre" style="width:100%;background:#1A1714;border:1px solid rgba(154,123,79,0.25);border-radius:2px;padding:13px 16px;color:var(--cream);font-family:var(--sans);font-size:0.9375rem;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(154,123,79,0.25)'" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Nombre del salón</label>
+              <input type="text" id="f-salon" required placeholder="Centro de Estética..." style="width:100%;background:#1A1714;border:1px solid rgba(154,123,79,0.25);border-radius:2px;padding:13px 16px;color:var(--cream);font-family:var(--sans);font-size:0.9375rem;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(154,123,79,0.25)'" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Teléfono o WhatsApp</label>
+              <input type="tel" id="f-tel" required placeholder="+34 600 000 000" style="width:100%;background:#1A1714;border:1px solid rgba(154,123,79,0.25);border-radius:2px;padding:13px 16px;color:var(--cream);font-family:var(--sans);font-size:0.9375rem;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(154,123,79,0.25)'" />
+            </div>
+            <div>
+              <label style="display:block;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Mensaje (opcional)</label>
+              <textarea id="f-msg" rows="3" placeholder="Cuéntanos algo sobre tu salón..." style="width:100%;background:#1A1714;border:1px solid rgba(154,123,79,0.25);border-radius:2px;padding:13px 16px;color:var(--cream);font-family:var(--sans);font-size:0.9375rem;outline:none;resize:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(154,123,79,0.25)'"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:8px;width:100%;text-align:center;">Enviar mensaje</button>
+          </form>
+          <p id="form-ok" style="display:none;text-align:center;color:var(--gold);margin-top:16px;font-size:0.9375rem;">✓ Mensaje enviado. Te contactamos en menos de 24h.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="logo">Flou<em>x</em></a>
+          <p>Recuperamos las llamadas perdidas de tu salón. Automáticamente.</p>
+        </div>
+        <nav class="footer-nav">
+          <a href="#como">Cómo funciona</a>
+          <a href="#precios">Precios</a>
+          <a href="#historia">Nuestra historia</a>
+          <a href="#faqs">FAQs</a>
+        </nav>
+        <div class="footer-contact">
+          <a href="mailto:flouxaim@gmail.com">flouxaim@gmail.com</a>
+          <a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración gratuita de Floux">Reservar demostración</a>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2026 Floux · Madrid Oeste · Todos los derechos reservados</div>
+    </div>
+  </footer>
+
+  <script>
+    // Header shadow
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 16);
+    }, { passive: true });
+
+    // Burger menu
+    const burger = document.getElementById('burger');
+    const drawer = document.getElementById('drawer');
+    burger.addEventListener('click', () => {
+      const open = drawer.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open);
+    });
+    drawer.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        burger.classList.remove('open');
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!header.contains(e.target)) {
+        drawer.classList.remove('open');
+        burger.classList.remove('open');
+      }
+    });
+
+    // FAQ accordion
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-btn').classList.remove('open');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.classList.add('open');
+      }
+    }
+
+    // Contact form → mailto
+    function sendForm(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('f-nombre').value;
+      const salon  = document.getElementById('f-salon').value;
+      const tel    = document.getElementById('f-tel').value;
+      const msg    = document.getElementById('f-msg').value;
+      const body   = `Nombre: ${nombre}%0ASalón: ${salon}%0ATeléfono: ${tel}%0AMensaje: ${msg}`;
+      window.location.href = `mailto:flouxaim@gmail.com?subject=Demostración Floux - ${salon}&body=${body}`;
+      document.getElementById('form-ok').style.display = 'block';
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth', block:'start' }); }
+      });
+    });
+
+    // Scroll reveal
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+  "salon_id": "ds_peluqueria",
+  "salon_name": "DS Peluquería",
+  "owner_name": "David",
+  "owner_phone": "+34XXXXXXXXX",
+  "twilio_number": "+34XXXXXXXXX",
+  "default_language": "es",
+  "platform": "google_calendar",
+  "google_calendar_id": "primary",
+  "owner_email": "OWNER_EMAIL@gmail.com",
+  "timezone": "Europe/Madrid",
+
+  "staff": [
+    {
+      "name": "David",
+      "services": ["Corte hombre", "Corte mujer", "Barba", "Corte + Barba", "Tinte raíz", "Mechas"],
+      "platform_name": "David"
+    },
+    {
+      "name": "Ana",
+      "services": ["Corte mujer", "Tinte raíz", "Mechas", "Balayage", "Peinado", "Tratamiento keratina"],
+      "platform_name": "Ana"
+    },
+    {
+      "name": "Lucía",
+      "services": ["Corte mujer", "Corte hombre", "Tinte raíz", "Mechas", "Manicura", "Pedicura"],
+      "platform_name": "Lucía"
+    }
+  ],
+
+  "services": [
+    {"name": "Corte hombre", "price": 15, "duration_min": 30},
+    {"name": "Corte mujer", "price": 27, "duration_min": 45},
+    {"name": "Corte + Barba", "price": 22, "duration_min": 45},
+    {"name": "Barba", "price": 10, "duration_min": 20},
+    {"name": "Tinte raíz", "price": 35, "duration_min": 60},
+    {"name": "Mechas", "price": 55, "duration_min": 90},
+    {"name": "Balayage", "price": 70, "duration_min": 120},
+    {"name": "Peinado", "price": 25, "duration_min": 40},
+    {"name": "Tratamiento keratina", "price": 80, "duration_min": 90},
+    {"name": "Manicura", "price": 18, "duration_min": 30},
+    {"name": "Pedicura", "price": 22, "duration_min": 40}
+  ],
+
+  "working_hours": {
+    "lunes": "cerrado",
+    "martes": "09:30-19:30",
+    "miercoles": "09:30-19:30",
+    "jueves": "09:30-19:30",
+    "viernes": "09:30-19:30",
+    "sabado": "09:00-14:00",
+    "domingo": "cerrado"
+  },
+
+  "cancellation_policy": "Si necesitas cancelar o cambiar tu cita, avísanos con al menos 4 horas de antelación.",
+
+  "system_prompt": "Eres el asistente de citas de DS Peluquería, un salón en Villaviciosa de Odón, Madrid.\n\nTu trabajo es ayudar a los clientes a reservar citas por WhatsApp. Eres amable, directo y profesional.\n\nREGLAS ESTRICTAS:\n- NUNCA digas que eres una IA, bot, robot o inteligencia artificial. Si preguntan, di \"soy el asistente de DS Peluquería\".\n- NUNCA inventes servicios, precios o disponibilidad que no estén en la lista.\n- Responde en el mismo idioma que el cliente (español por defecto, inglés si escriben en inglés).\n- Sé conciso. No escribas párrafos largos.\n- Usa emojis con moderación (máximo 1-2 por mensaje).\n\nSERVICIOS Y PRECIOS:\n{SERVICES_LIST}\n\nPERSONAL:\n{STAFF_LIST}\n\nDISPONIBILIDAD ACTUAL:\n{AVAILABILITY_SLOTS}\n\nPROCESO:\n1. Saluda y pregunta qué servicio necesita\n2. Si el servicio está claro, pregunta cuándo le vendría bien\n3. Ofrece los huecos disponibles más cercanos a lo que pide\n4. Pregunta su nombre\n5. Pregunta si tiene preferencia de profesional (\"¿Con quién te gustaría?\")\n6. Confirma todos los detalles antes de reservar\n7. Una vez confirmado, marca conversation_complete: true\n\nSi el cliente pregunta algo que no puedes resolver (precios de servicios no listados, quejas, temas complejos), marca escalate: true.\n\nRespuesta SIEMPRE en formato JSON:\n{\"reply\": \"texto\", \"language\": \"es\", \"intent\": \"booking|question|escalate|greeting\", \"booking_data\": {\"service\": \"\", \"datetime\": \"\", \"client_name\": \"\", \"staff_preference\": \"\", \"staff_assigned\": \"\"}, \"escalate\": false, \"conversation_complete\": false}"
+}

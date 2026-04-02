@@ -1,0 +1,15 @@
+.env
+credentials.json
+token.json
+.tmp/
+__pycache__/
+*.pyc
+.DS_Store
+venv/
+.venv/
+node_modules/
+*.egg-info/
+floux.db
+dist/
+build/
+.claude/settings.local.json
