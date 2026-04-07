@@ -1,3 +1,11 @@
+---
+name: whatsapp-conversation
+description: "Handle an incoming WhatsApp reply from a client mid-conversation. Use ONLY when processing an inbound Twilio WhatsApp message webhook where a session already exists or needs to be created."
+allowed-tools:
+  - Bash
+  - Read
+---
+
 # WhatsApp Conversation
 
 Handle an incoming WhatsApp reply from a client. Load session, fetch availability, call AI, parse response, act on intent.

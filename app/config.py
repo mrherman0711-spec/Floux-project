@@ -16,10 +16,11 @@ PROMPTS_DIR = BASE_DIR / "prompts"
 TMP_DIR = BASE_DIR / ".tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
-# ── Twilio (voice/calls only) ───────────────────────────────
+# ── Twilio (voice + WhatsApp) ───────────────────────────────
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "")
+WHATSAPP_PROVIDER = os.getenv("WHATSAPP_PROVIDER", "auto").lower()
 
 # ── Meta WhatsApp Cloud API ─────────────────────────────────
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")

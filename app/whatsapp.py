@@ -3,18 +3,27 @@ WhatsApp messaging — supports both Meta Cloud API (primary) and Twilio (fallba
 """
 from __future__ import annotations
 
+import asyncio
 import httpx
 import logging
 from app.config import (
     META_ACCESS_TOKEN, META_API_BASE, WHATSAPP_PHONE_NUMBER_ID,
     TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM,
+    WHATSAPP_PROVIDER,
 )
 
 log = logging.getLogger("floux.whatsapp")
 
 
 def _use_meta_api() -> bool:
-    """Use Meta Cloud API if configured, otherwise fall back to Twilio."""
+    """Determine which WhatsApp provider to use.
+
+    WHATSAPP_PROVIDER env var: "twilio", "meta", or "auto" (default).
+    """
+    if WHATSAPP_PROVIDER == "twilio":
+        return False
+    if WHATSAPP_PROVIDER == "meta":
+        return True
     return bool(META_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID)
 
 
@@ -30,7 +39,7 @@ async def send_text(to: str, body: str) -> dict:
     """
     if _use_meta_api():
         return await _meta_send_text(to, body)
-    return _twilio_send_text(to, body)
+    return await asyncio.to_thread(_twilio_send_text, to, body)
 
 
 async def send_template(to: str, template_name: str, language: str = "es",
@@ -39,7 +48,7 @@ async def send_template(to: str, template_name: str, language: str = "es",
     if not _use_meta_api():
         # Twilio doesn't support templates the same way — send as regular message
         log.warning("Template messages require Meta Cloud API. Falling back to regular message.")
-        return _twilio_send_text(to, f"[Template: {template_name}]")
+        return await asyncio.to_thread(_twilio_send_text, to, f"[Template: {template_name}]")
     return await _meta_send_template(to, template_name, language, body_params)
 
 

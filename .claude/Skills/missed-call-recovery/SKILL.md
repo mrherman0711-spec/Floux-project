@@ -1,3 +1,11 @@
+---
+name: missed-call-recovery
+description: "Handle an incoming Twilio missed-call webhook to send a WhatsApp greeting. Use ONLY when processing a raw Twilio CallStatus webhook with no-answer or busy status."
+allowed-tools:
+  - Bash
+  - Read
+---
+
 # Missed Call Recovery
 
 Detect a missed call from Twilio, identify the salon, and send a WhatsApp greeting to the client within 30 seconds.

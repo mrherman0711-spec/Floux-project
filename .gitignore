@@ -13,3 +13,4 @@ floux.db
 dist/
 build/
 .claude/settings.local.json
+client_secret_*.json

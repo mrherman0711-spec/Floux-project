@@ -174,8 +174,8 @@ async def handle_missed_call(caller: str, called: str, call_sid: str):
 
         # Send greeting
         greeting = (
-            f"Hola! Hemos visto que has llamado a {salon_name} y no hemos podido atenderte.\n\n"
-            f"En qué podemos ayudarte? Si quieres reservar una cita, dime qué servicio te interesa y cuándo te vendría bien."
+            f"Hola! 👋 Hemos visto que llamaste a {salon_name} y no pudimos atenderte.\n\n"
+            f"¿En qué te puedo ayudar? Si quieres reservar una cita, dime qué servicio te interesa y cuándo te vendría bien."
         )
 
         result = await whatsapp.send_text(caller_normalized, greeting)
@@ -382,8 +382,8 @@ def _get_availability(salon_config: dict, booking_data: dict) -> list[dict]:
         cmd.extend(["--staff", staff])
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10,
-                               cwd=str(app.title and __import__("app.config", fromlist=["BASE_DIR"]).BASE_DIR or "."))
+        from app.config import BASE_DIR
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, cwd=str(BASE_DIR))
         if result.returncode == 0:
             data = json.loads(result.stdout)
             return data.get("slots", [])

@@ -1,3 +1,11 @@
+---
+name: book-appointment
+description: "Execute a confirmed booking on Treatwell, Booksy, or Google Calendar. Use ONLY when booking_data is complete and the client has confirmed the slot — not during conversation or availability checking."
+allowed-tools:
+  - Bash
+  - Read
+---
+
 # Book Appointment
 
 Execute a booking on the salon's platform (Treatwell, Booksy, or Google Calendar) once booking_data is complete and the client has confirmed.

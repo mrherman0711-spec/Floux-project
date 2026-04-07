@@ -1,3 +1,12 @@
+---
+name: onboard-salon
+description: "Set up a brand new salon client on Floux from scratch. Use when collecting salon config, creating salonConfig JSON, generating system prompts, and running go-live verification."
+allowed-tools:
+  - Bash
+  - Write
+  - Read
+---
+
 # Onboard New Salon
 
 Set up a new salon client on Floux: collect their config, create their salonConfig JSON, generate and test their AI system prompt, verify the full flow works before going live.
@@ -125,11 +134,11 @@ All must return success before going live.
 
 ### Step 5: Simulate full conversation
 Using Twilio sandbox or test number, simulate:
-1. Missed call → WhatsApp greeting arrives within 30s ✓
-2. Reply with service + date → AI responds with available slots ✓
-3. Confirm booking → Booking executed on platform ✓
-4. Confirmation sent to client ✓
-5. Owner notification sent ✓
+1. Missed call → WhatsApp greeting arrives within 30s
+2. Reply with service + date → AI responds with available slots
+3. Confirm booking → Booking executed on platform
+4. Confirmation sent to client
+5. Owner notification sent
 
 ### Step 6: Go live checklist
 - [ ] salonConfig JSON complete and valid
