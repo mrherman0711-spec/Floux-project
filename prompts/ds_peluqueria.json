@@ -3,7 +3,7 @@
   "salon_name": "Centro de Estética Carmen",
   "owner_name": "Carmen",
   "owner_phone": "+34665776235",
-  "twilio_number": "+14155238886",
+  "twilio_number": "",
   "default_language": "es",
   "platform": "google_calendar",
   "google_calendar_id": "primary",

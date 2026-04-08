@@ -50,9 +50,9 @@ def test_phone_normalization():
 def test_salon_config():
     """Test loading salon config."""
     print("\n=== Salon Config ===")
-    config = load_salon_config("ds_peluqueria")
+    config = load_salon_config("escultor_peluqueria")
     if not config:
-        print("  FAIL: ds_peluqueria.json not found")
+        print("  FAIL: escultor_peluqueria.json not found")
         return False
 
     required_keys = ["salon_id", "salon_name", "staff", "services", "working_hours", "system_prompt"]
@@ -81,12 +81,12 @@ def test_database():
     init_db()
 
     # Test client creation
-    client = get_or_create_client("+34611222333", "ds_peluqueria")
+    client = get_or_create_client("+34611222333", "escultor_peluqueria")
     assert client["phone"] == "+34611222333", "Client phone mismatch"
     print(f"  PASS: Client created/loaded: {client['phone']}")
 
     # Test session creation
-    session = create_session("+34611222333", "ds_peluqueria", "CA_test_123")
+    session = create_session("+34611222333", "escultor_peluqueria", "CA_test_123")
     assert session is not None, "Session creation failed"
     print(f"  PASS: Session created: id={session['id']}")
 
@@ -103,7 +103,7 @@ def test_ai_prompt_building():
     print("\n=== AI Prompt Building ===")
     from app.ai_engine import build_system_prompt
 
-    config = load_salon_config("ds_peluqueria")
+    config = load_salon_config("escultor_peluqueria")
     if not config:
         print("  SKIP: No salon config")
         return True
@@ -119,10 +119,10 @@ def test_ai_prompt_building():
 
     # Check key elements are present
     checks = [
-        ("Salon name in prompt", "DS Peluquería" in prompt),
-        ("Services listed", "Corte mujer" in prompt),
-        ("Prices listed", "27" in prompt),
-        ("Staff listed", "Ana" in prompt),
+        ("Salon name in prompt", "Escultor" in prompt),
+        ("Services listed", "Corte escultor" in prompt),
+        ("Prices listed", "21" in prompt),
+        ("Staff listed", "Jesús" in prompt),
         ("Availability injected", "10:00" in prompt),
         ("JSON format instruction", "JSON" in prompt),
         ("No AI disclosure rule", "NUNCA" in prompt),

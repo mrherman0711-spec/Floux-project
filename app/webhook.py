@@ -206,7 +206,7 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
 
         if not session:
             # Client messaged without a missed call — find their salon or use default
-            client = db.get_or_create_client(phone, "ds_peluqueria")
+            client = db.get_or_create_client(phone, "escultor_peluqueria")
             session = db.create_session(phone, client["salon_id"])
 
         salon_id = session["salon_id"]
@@ -289,7 +289,7 @@ async def handle_media_message(sender: str, media_type: str, msg_id: str):
     await whatsapp.mark_as_read(msg_id)
 
     session = db.get_active_session(phone)
-    salon_id = session["salon_id"] if session else "ds_peluqueria"
+    salon_id = session["salon_id"] if session else "escultor_peluqueria"
 
     if media_type in ("audio", "voice"):
         reply = "Disculpa, no puedo escuchar audios. Me lo puedes escribir?"
