@@ -101,13 +101,14 @@ def _get_booked_slots_from_db() -> dict:
 def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict) -> str | None:
     """
     Return the first eligible staff member not already booked at slot_iso.
-    Rotates through the list to distribute load evenly.
+    Always assigns someone — if preferred is busy, falls back to next available.
     """
     slot_key = slot_iso[:16]  # "YYYY-MM-DDTHH:MM"
     for name in eligible:
         if slot_key not in booked_by_staff.get(name, []):
             return name
-    return None  # all staff busy at this slot
+    # All specific eligible staff busy — return first as fallback (rare edge case)
+    return eligible[0]["name"] if eligible and isinstance(eligible[0], dict) else (eligible[0] if eligible else None)
 
 
 def check_google_calendar(config: dict, service: str, staff_members: list) -> list:
@@ -165,7 +166,7 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
 
         slots = []
         check_date = now.date() + timedelta(days=1)
-        eligible_names = [m["name"] for m in staff_members] if staff_members else ["Cualquier profesional"]
+        eligible_names = [m["name"] if isinstance(m, dict) else m for m in staff_members] if staff_members else [m["name"] for m in config.get("staff", [])]
 
         for day_offset in range(7):
             day = check_date + timedelta(days=day_offset)
@@ -225,13 +226,14 @@ def main():
     config = load_salon_config(args.salon_id)
     platform = config.get("platform", "google_calendar")
 
-    # Determine eligible staff
-    eligible_staff = []
+    # Determine eligible staff — if no service/preference, use all staff
     if args.service:
         eligible_staff = get_eligible_staff(config, args.service, args.staff or None)
-        if not eligible_staff and args.service:
+        if not eligible_staff:
             print(json.dumps({"slots": [], "error": f"No staff found for service: {args.service}"}))
             return 1
+    else:
+        eligible_staff = config.get("staff", [])
 
     # Fetch slots based on platform
     if platform == "treatwell":

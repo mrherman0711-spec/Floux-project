@@ -314,16 +314,17 @@ async def _handle_escalation(phone: str, salon_config: dict, conversation: list,
     log.info(f"Escalated to owner {owner_phone}")
 
 
-async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: dict, conversation: list):
+async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: dict, _conversation: list):
     """Process a completed booking."""
     bd = ai_response.get("booking_data", {})
     salon_id = salon_config["salon_id"]
 
-    # Find service price and duration
+    # Find service price and duration — case-insensitive match
     price = 0.0
     duration = 60
+    service_name_lower = bd.get("service", "").lower().strip()
     for svc in salon_config.get("services", []):
-        if svc["name"] == bd.get("service", ""):
+        if svc["name"].lower().strip() == service_name_lower:
             price = svc.get("price", 0)
             duration = svc.get("duration_min", 60)
             break
@@ -370,12 +371,11 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
     owner_phone = salon_config.get("owner_phone", "")
     if owner_phone:
         notification = (
-            f"NUEVA CITA — {salon_config['salon_name']}\n\n"
+            f"Nueva cita confirmada\n\n"
             f"Cliente: {bd.get('client_name', phone)}\n"
             f"Tel: {phone}\n"
             f"Servicio: {bd.get('service', '')}\n"
             f"Fecha: {start_str}\n"
-            f"Personal: {staff_name}\n"
             f"Precio: {price}€"
         )
         await whatsapp.send_text(owner_phone, notification)
@@ -407,16 +407,9 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
 
         event = {
             "summary": f"{svc_name} — {client_name}",
-            "description": (
-                f"Reservado por Floux\n"
-                f"Servicio: {svc_name}\n"
-                f"Cliente: {client_name}\n"
-                f"Personal: {staff_name}\n"
-                f"Precio: {price}€"
-            ),
+            "description": f"Reservado por Floux\nServicio: {svc_name}\nCliente: {client_name}\nPersonal: {staff_name}\nPrecio: {price}€",
             "start": {"dateTime": start_str, "timeZone": tz},
             "end": {"dateTime": end_str, "timeZone": tz},
-            "attendees": [],
             "reminders": {"useDefault": True},
         }
 
@@ -428,14 +421,14 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
         owner_email = salon_config.get("owner_email")
         if owner_email:
             _send_booking_email(creds, owner_email, svc_name, client_name,
-                                bd.get("phone", ""), start_str, staff_name, price, event_url)
+                                start_str, staff_name, price, event_url)
 
     except Exception as e:
         log.error(f"Calendar event creation failed: {e}")
 
 
 def _send_booking_email(creds, to_email: str, service: str, client_name: str,
-                        phone: str, start_str: str, staff_name: str, price: float, event_url: str):
+                        start_str: str, staff_name: str, price: float, event_url: str):
     """Send booking confirmation email via Gmail API."""
     import base64
     from email.mime.text import MIMEText
@@ -448,7 +441,6 @@ def _send_booking_email(creds, to_email: str, service: str, client_name: str,
             f"Nueva cita confirmada\n\n"
             f"Servicio: {service}\n"
             f"Cliente: {client_name}\n"
-            f"Teléfono: {phone}\n"
             f"Fecha: {start_str}\n"
             f"Personal: {staff_name}\n"
             f"Precio: {price}€\n"
@@ -470,29 +462,49 @@ def _send_booking_email(creds, to_email: str, service: str, client_name: str,
 
 def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
                    staff_name: str, price: float):
-    """Save booking data to Google Sheets."""
+    """Save booking data to Google Sheets, creating headers if the sheet is empty."""
     sheet_url = salon_config.get("google_sheet_url", "")
     if not sheet_url:
-        log.info("No google_sheet_url in salon config, skipping Sheets logging")
         return
 
-    try:
-        from append_to_sheet import append_row_direct
+    HEADERS = ["Fecha", "Cliente", "Telefono", "Servicio", "Personal", "Precio", "Estado"]
 
-        row = {
-            "Fecha": start_str,
-            "Cliente": bd.get("client_name", ""),
-            "Teléfono": phone,
-            "Servicio": bd.get("service", ""),
-            "Personal": staff_name,
-            "Precio": f"{price}€",
-            "Estado": "Confirmada",
-        }
-        ok = append_row_direct(sheet_url, row)
-        if ok:
-            log.info("Booking saved to Google Sheets")
-        else:
-            log.warning("Failed to save booking to Google Sheets")
+    try:
+        import sys as _sys
+        _sys.path.insert(0, str(BASE_DIR / "execution"))
+        from google_auth import get_google_credentials
+        import gspread
+
+        SCOPES = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = get_google_credentials(SCOPES)
+        if not creds:
+            log.warning("Sheets: no credentials, skipping")
+            return
+
+        client = gspread.authorize(creds)
+        sheet_id = sheet_url.split("/d/")[1].split("/")[0]
+        spreadsheet = client.open_by_key(sheet_id)
+        ws = spreadsheet.sheet1
+
+        # Create headers if sheet is empty
+        existing = ws.row_values(1)
+        if not existing:
+            ws.append_row(HEADERS)
+
+        row = [
+            start_str,
+            bd.get("client_name", ""),
+            phone,
+            bd.get("service", ""),
+            staff_name,
+            f"{price}€",
+            "Confirmada",
+        ]
+        ws.append_row(row, value_input_option="RAW")
+        log.info("Booking saved to Google Sheets")
 
     except Exception as e:
         log.error(f"Google Sheets save failed: {e}")
