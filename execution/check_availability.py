@@ -111,11 +111,87 @@ def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict) 
     return eligible[0]["name"] if eligible and isinstance(eligible[0], dict) else (eligible[0] if eligible else None)
 
 
+def _generate_slots_from_schedule(config: dict, service: str, staff_members: list,
+                                   busy_periods: list) -> list:
+    """
+    Generate 30-min slots from the salon's working_hours config.
+    Filters out slots that overlap with busy_periods (from Calendar or DB).
+    Always returns slots — busy_periods can be empty if Calendar is unavailable.
+    """
+    TZ = ZoneInfo("Europe/Madrid")
+    now = datetime.now(TZ)
+
+    service_duration = 30  # default to shortest slot
+    if service:
+        for svc in config.get("services", []):
+            if svc["name"].lower().strip() == service.lower().strip():
+                service_duration = svc.get("duration_min", 30)
+                break
+
+    working_hours = config.get("working_hours", {})
+    day_map = {
+        0: "lunes", 1: "martes", 2: "miercoles",
+        3: "jueves", 4: "viernes", 5: "sabado", 6: "domingo"
+    }
+
+    booked_by_staff = _get_booked_slots_from_db()
+    all_staff = config.get("staff", [])
+    eligible_names = [m["name"] if isinstance(m, dict) else m for m in staff_members] if staff_members else [m["name"] for m in all_staff]
+    if not eligible_names:
+        eligible_names = ["Cualquier profesional"]
+    print(f"INFO: eligible_names={eligible_names} service_duration={service_duration}", file=sys.stderr)
+
+    slots = []
+    check_date = now.date() + timedelta(days=1)
+
+    for day_offset in range(7):
+        day = check_date + timedelta(days=day_offset)
+        day_name = day_map[day.weekday()]
+        hours = working_hours.get(day_name, "cerrado")
+
+        if hours == "cerrado":
+            continue
+
+        for franja in hours.split(","):
+            open_time_str, close_time_str = franja.strip().split("-")
+            open_h, open_m = map(int, open_time_str.split(":"))
+            close_h, close_m = map(int, close_time_str.split(":"))
+
+            slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
+            close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
+
+            while slot_start + timedelta(minutes=service_duration) <= close_dt:
+                slot_end = slot_start + timedelta(minutes=service_duration)
+                slot_iso = slot_start.strftime("%Y-%m-%dT%H:%M:%S")
+
+                calendar_busy = any(
+                    slot_start < datetime.fromisoformat(b["end"].replace("Z", "+00:00"))
+                    and slot_end > datetime.fromisoformat(b["start"].replace("Z", "+00:00"))
+                    for b in busy_periods
+                )
+
+                if not calendar_busy:
+                    assigned = _pick_available_staff(eligible_names, slot_iso, booked_by_staff)
+                    if assigned:
+                        slots.append({
+                            "datetime": slot_iso,
+                            "staff": assigned,
+                            "available": True,
+                        })
+
+                slot_start += timedelta(minutes=30)
+
+    return slots[:10]
+
+
 def check_google_calendar(config: dict, service: str, staff_members: list) -> list:
     """
-    Fetch availability from Google Calendar API.
-    Uses working_hours from salonConfig to determine open slots.
+    Generate available slots from the salon schedule.
+    Uses Google Calendar freebusy to filter already-booked slots.
+    Always returns slots — falls back to schedule-only if Calendar is unavailable.
     """
+    busy_periods = []
+
     try:
         from googleapiclient.discovery import build
         import sys as _sys
@@ -125,95 +201,27 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
         SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
         creds = get_google_credentials(SCOPES)
 
-        if not creds:
-            print("Error: No valid Google credentials.", file=sys.stderr)
-            return []
-
-        service_obj = build("calendar", "v3", credentials=creds)
-
-        # Get service duration
-        service_duration = 60  # default
-        for svc in config.get("services", []):
-            if svc["name"] == service:
-                service_duration = svc.get("duration_min", 60)
-                break
-
-        # Check next 7 days (all times in Europe/Madrid)
-        TZ = ZoneInfo("Europe/Madrid")
-        now = datetime.now(TZ)
-        time_min = now.isoformat()
-        time_max = (now + timedelta(days=7)).isoformat()
-
-        # Get busy times from calendar
-        calendar_id = config.get("google_calendar_id", "primary")
-        body = {
-            "timeMin": time_min,
-            "timeMax": time_max,
-            "items": [{"id": calendar_id}]
-        }
-        freebusy = service_obj.freebusy().query(body=body).execute()
-        busy_periods = freebusy.get("calendars", {}).get(calendar_id, {}).get("busy", [])
-
-        # Generate candidate slots from working hours
-        working_hours = config.get("working_hours", {})
-        day_map = {
-            0: "lunes", 1: "martes", 2: "miercoles",
-            3: "jueves", 4: "viernes", 5: "sabado", 6: "domingo"
-        }
-
-        # Load booked appointments from local DB to know who is busy per slot
-        booked_by_staff = _get_booked_slots_from_db()
-
-        slots = []
-        check_date = now.date() + timedelta(days=1)
-        eligible_names = [m["name"] if isinstance(m, dict) else m for m in staff_members] if staff_members else [m["name"] for m in config.get("staff", [])]
-
-        for day_offset in range(7):
-            day = check_date + timedelta(days=day_offset)
-            day_name = day_map[day.weekday()]
-            hours = working_hours.get(day_name, "cerrado")
-
-            if hours == "cerrado":
-                continue
-
-            # Support single "09:00-13:00" or double "09:00-13:00,17:00-21:00" franjas
-            franjas = hours.split(",")
-            for franja in franjas:
-                open_time_str, close_time_str = franja.strip().split("-")
-                open_h, open_m = map(int, open_time_str.split(":"))
-                close_h, close_m = map(int, close_time_str.split(":"))
-
-                slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
-                close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
-
-                while slot_start + timedelta(minutes=service_duration) <= close_dt:
-                    slot_end = slot_start + timedelta(minutes=service_duration)
-                    slot_iso = slot_start.strftime("%Y-%m-%dT%H:%M:%S")
-
-                    # Check Google Calendar busy (whole salon)
-                    calendar_busy = any(
-                        slot_start < datetime.fromisoformat(b["end"].replace("Z", "+00:00"))
-                        and slot_end > datetime.fromisoformat(b["start"].replace("Z", "+00:00"))
-                        for b in busy_periods
-                    )
-
-                    if not calendar_busy:
-                        # Find first available staff member for this slot
-                        assigned = _pick_available_staff(eligible_names, slot_iso, booked_by_staff)
-                        if assigned:
-                            slots.append({
-                                "datetime": slot_iso,
-                                "staff": assigned,
-                                "available": True
-                            })
-
-                    slot_start += timedelta(minutes=30)
-
-        return slots[:10]  # Return max 10 slots
+        if creds:
+            TZ = ZoneInfo("Europe/Madrid")
+            now = datetime.now(TZ)
+            service_obj = build("calendar", "v3", credentials=creds)
+            calendar_id = config.get("google_calendar_id", "primary")
+            freebusy = service_obj.freebusy().query(body={
+                "timeMin": now.isoformat(),
+                "timeMax": (now + timedelta(days=7)).isoformat(),
+                "items": [{"id": calendar_id}],
+            }).execute()
+            busy_periods = freebusy.get("calendars", {}).get(calendar_id, {}).get("busy", [])
+            print(f"INFO: Calendar OK — {len(busy_periods)} busy periods", file=sys.stderr)
+        else:
+            print("INFO: No Google credentials — using schedule only", file=sys.stderr)
 
     except Exception as e:
-        print(f"Error checking Google Calendar: {e}", file=sys.stderr)
-        return []
+        print(f"INFO: Calendar query failed ({e}) — using schedule only", file=sys.stderr)
+
+    slots = _generate_slots_from_schedule(config, service, staff_members, busy_periods)
+    print(f"INFO: Generated {len(slots)} slots for service='{service}'", file=sys.stderr)
+    return slots
 
 
 def main():

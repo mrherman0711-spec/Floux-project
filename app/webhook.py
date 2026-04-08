@@ -4,7 +4,6 @@ This is the central nervous system of Floux.
 """
 
 import asyncio
-import json
 import logging
 import sys
 from datetime import datetime, timedelta
@@ -226,8 +225,19 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
             return
 
-        # Fetch availability (non-blocking, but OK to wait)
-        availability = _get_availability(salon_config, session.get("booking_data", {}))
+        # Merge saved booking_data with any service/staff the client just mentioned
+        # so availability is fetched with the most up-to-date context
+        saved_bd = session.get("booking_data") or {}
+        # Quick parse: if client message mentions a known service, inject it
+        current_bd = dict(saved_bd)
+        if not current_bd.get("service"):
+            for svc in salon_config.get("services", []):
+                if svc["name"].lower() in text.lower():
+                    current_bd["service"] = svc["name"]
+                    break
+
+        # Fetch availability
+        availability = _get_availability(salon_config, current_bd)
 
         # Run AI conversation
         conversation = session.get("conversation", [])
@@ -510,28 +520,34 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
         log.error(f"Google Sheets save failed: {e}")
 
 
-def _get_availability(salon_config: dict, booking_data: dict) -> list[dict]:
-    """Get availability slots — runs the existing execution script."""
-    import subprocess
-    salon_id = salon_config["salon_id"]
-    service = booking_data.get("service", "")
-    staff = booking_data.get("staff_preference", "")
-
-    cmd = ["python3", "execution/check_availability.py", "--salon-id", salon_id]
-    if service:
-        cmd.extend(["--service", service])
-    if staff:
-        cmd.extend(["--staff", staff])
-
+def _get_availability(salon_config: dict, booking_data: dict) -> list[dict] | None:
+    """Get availability slots by calling check_availability functions directly."""
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, cwd=str(BASE_DIR))
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            return data.get("slots", [])
-    except Exception as e:
-        log.warning(f"Availability check failed: {e}")
+        from check_availability import get_eligible_staff, check_google_calendar
 
-    return []
+        service = booking_data.get("service", "")
+        staff_pref = booking_data.get("staff_preference", "")
+
+        if service:
+            eligible = get_eligible_staff(salon_config, service, staff_pref or None)
+            if not eligible:
+                log.warning(f"No eligible staff for service: {service}")
+                eligible = salon_config.get("staff", [])
+        else:
+            eligible = salon_config.get("staff", [])
+
+        platform = salon_config.get("platform", "google_calendar")
+        if platform == "google_calendar":
+            slots = check_google_calendar(salon_config, service, eligible)
+        else:
+            slots = []
+
+        log.info(f"Availability: {len(slots)} slots returned")
+        return slots
+
+    except Exception as e:
+        log.error(f"Availability check failed: {e}", exc_info=True)
+        return []
 
 
 # ── Health check ─────────────────────────────────────────────

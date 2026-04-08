@@ -38,7 +38,7 @@ def build_system_prompt(salon_config: dict, availability_slots: list[dict] | Non
         services_str = ", ".join(member["services"])
         staff_text += f"- {member['name']}: {services_str}\n"
 
-    # Build availability
+    # Build availability (None=error, []=no slots, [...]= slots available)
     if availability_slots:
         slots_text = ""
         for slot in availability_slots[:10]:
@@ -55,8 +55,10 @@ def build_system_prompt(salon_config: dict, availability_slots: list[dict] | Non
                 slots_text += f"- {formatted} con {staff}\n"
             except (ValueError, AttributeError):
                 slots_text += f"- {dt} con {staff}\n"
+    elif availability_slots is not None:
+        slots_text = "No hay huecos disponibles en los próximos 7 días. Comunícaselo al cliente con amabilidad y pídele que llame directamente al centro."
     else:
-        slots_text = "No se ha podido consultar la disponibilidad en este momento. Pregunta al cliente cuándo le vendría bien y confirma que verificarás el hueco."
+        slots_text = "No se pudo cargar la disponibilidad. Sigue la conversación normalmente y cuando el cliente proponga una hora, acepta provisionalmente y di que confirmarás el hueco."
 
     # Current datetime context
     now = datetime.now(ZoneInfo(TIMEZONE))
