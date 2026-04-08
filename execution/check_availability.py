@@ -142,9 +142,9 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
     print(f"INFO: eligible_names={eligible_names} service_duration={service_duration}", file=sys.stderr)
 
     slots = []
-    check_date = now.date() + timedelta(days=1)
+    check_date = now.date()  # include today if hours remain
 
-    for day_offset in range(7):
+    for day_offset in range(8):
         day = check_date + timedelta(days=day_offset)
         day_name = day_map[day.weekday()]
         hours = working_hours.get(day_name, "cerrado")
@@ -159,6 +159,13 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
 
             slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
             close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
+
+            # Skip past slots for today
+            if slot_start <= now:
+                # Advance to next 30-min boundary after now
+                minutes_ahead = int((now - slot_start).total_seconds() / 60) + 30
+                minutes_ahead = (minutes_ahead // 30) * 30
+                slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ) + timedelta(minutes=minutes_ahead)
 
             while slot_start + timedelta(minutes=service_duration) <= close_dt:
                 slot_end = slot_start + timedelta(minutes=service_duration)

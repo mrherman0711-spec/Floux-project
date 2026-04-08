@@ -56,9 +56,9 @@ def build_system_prompt(salon_config: dict, availability_slots: list[dict] | Non
             except (ValueError, AttributeError):
                 slots_text += f"- {dt} con {staff}\n"
     elif availability_slots is not None:
-        slots_text = "No hay huecos disponibles en los próximos 7 días. Comunícaselo al cliente con amabilidad y pídele que llame directamente al centro."
+        slots_text = "No hay huecos disponibles en los próximos 7 días. Comunícaselo al cliente con amabilidad y pídele que llame directamente al centro para buscar fecha."
     else:
-        slots_text = "No se pudo cargar la disponibilidad. Sigue la conversación normalmente y cuando el cliente proponga una hora, acepta provisionalmente y di que confirmarás el hueco."
+        slots_text = "Sistema de disponibilidad no disponible temporalmente. Pregunta al cliente qué día y hora le viene bien y confirma la cita directamente."
 
     # Current datetime context
     now = datetime.now(ZoneInfo(TIMEZONE))
