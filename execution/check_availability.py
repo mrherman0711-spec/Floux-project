@@ -79,22 +79,16 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
     """
     try:
         from googleapiclient.discovery import build
-        from google.oauth2.credentials import Credentials
-        from google.auth.transport.requests import Request
+        import sys as _sys
+        _sys.path.insert(0, os.path.dirname(__file__))
+        from google_auth import get_google_credentials
 
         SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-        creds = None
+        creds = get_google_credentials(SCOPES)
 
-        if os.path.exists("token.json"):
-            with open("token.json", "r") as f:
-                creds = Credentials.from_authorized_user_info(json.load(f), SCOPES)
-
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                print("Error: No valid Google credentials. Run OAuth flow first.", file=sys.stderr)
-                return []
+        if not creds:
+            print("Error: No valid Google credentials.", file=sys.stderr)
+            return []
 
         service_obj = build("calendar", "v3", credentials=creds)
 

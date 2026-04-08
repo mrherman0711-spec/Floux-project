@@ -10,6 +10,7 @@ Usage:
 
 import argparse
 import logging
+import os
 import uvicorn
 
 from app.webhook import app
@@ -28,7 +29,7 @@ async def on_startup():
 
 def main():
     parser = argparse.ArgumentParser(description="Floux webhook server")
-    parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8000)), help="Port (default: $PORT or 8000)")
     parser.add_argument("--host", default="0.0.0.0", help="Host (default: 0.0.0.0)")
     parser.add_argument("--dev", action="store_true", help="Development mode with auto-reload")
     args = parser.parse_args()

@@ -140,21 +140,15 @@ def book_google_calendar(config: dict, slot: str, service: str, staff: str, clie
     """
     try:
         from googleapiclient.discovery import build
-        from google.oauth2.credentials import Credentials
-        from google.auth.transport.requests import Request
+        import sys as _sys
+        _sys.path.insert(0, os.path.dirname(__file__))
+        from google_auth import get_google_credentials
 
         SCOPES = ["https://www.googleapis.com/auth/calendar"]
-        creds = None
+        creds = get_google_credentials(SCOPES)
 
-        if os.path.exists("token.json"):
-            with open("token.json", "r") as f:
-                creds = Credentials.from_authorized_user_info(json.load(f), SCOPES)
-
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                return {"booked": False, "error": "No valid Google credentials", "platform": "google_calendar"}
+        if not creds:
+            return {"booked": False, "error": "No valid Google credentials", "platform": "google_calendar"}
 
         service_api = build("calendar", "v3", credentials=creds)
 
