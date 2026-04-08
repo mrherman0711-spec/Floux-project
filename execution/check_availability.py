@@ -15,7 +15,8 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
@@ -99,8 +100,9 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
                 service_duration = svc.get("duration_min", 60)
                 break
 
-        # Check next 7 days
-        now = datetime.now(timezone.utc)
+        # Check next 7 days (all times in Europe/Madrid)
+        TZ = ZoneInfo("Europe/Madrid")
+        now = datetime.now(TZ)
         time_min = now.isoformat()
         time_max = (now + timedelta(days=7)).isoformat()
 
@@ -136,8 +138,8 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
             open_h, open_m = map(int, open_time_str.split(":"))
             close_h, close_m = map(int, close_time_str.split(":"))
 
-            slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=timezone.utc)
-            close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=timezone.utc)
+            slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
+            close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
 
             while slot_start + timedelta(minutes=service_duration) <= close_dt:
                 slot_end = slot_start + timedelta(minutes=service_duration)

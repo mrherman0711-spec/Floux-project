@@ -8,6 +8,7 @@
   "platform": "google_calendar",
   "google_calendar_id": "primary",
   "owner_email": "flouxaim@gmail.com",
+  "google_sheet_url": "https://docs.google.com/spreadsheets/d/1rK09r3wDOtOulgJwAbrVlywiGrd9QV3YQHTSs2gHPXs/edit?gid=0#gid=0",
   "timezone": "Europe/Madrid",
 
   "staff": [

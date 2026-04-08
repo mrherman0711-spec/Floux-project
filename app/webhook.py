@@ -6,14 +6,18 @@ This is the central nervous system of Floux.
 import asyncio
 import json
 import logging
+import sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, Request, Response, Query, BackgroundTasks
 
 from app.config import (
-    WEBHOOK_VERIFY_TOKEN, TIMEZONE, load_salon_config, find_salon_by_phone,
+    WEBHOOK_VERIFY_TOKEN, TIMEZONE, BASE_DIR, load_salon_config, find_salon_by_phone,
 )
+
+# Make execution/ scripts importable
+sys.path.insert(0, str(BASE_DIR / "execution"))
 from app import database as db
 from app import whatsapp
 from app import ai_engine
@@ -350,10 +354,21 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
     # Update client record
     db.update_client(phone, name=bd.get("client_name", ""), next_appointment_at=start_str)
 
-    # Notify owner
+    staff_name = bd.get("staff_assigned", bd.get("staff_preference", "Sin preferencia"))
+
+    # Create Google Calendar event
+    await asyncio.to_thread(
+        _create_calendar_event, salon_config, bd, start_str, end_str, staff_name, price
+    )
+
+    # Save client to Google Sheets
+    await asyncio.to_thread(
+        _save_to_sheet, salon_config, phone, bd, start_str, staff_name, price
+    )
+
+    # Notify owner via WhatsApp
     owner_phone = salon_config.get("owner_phone", "")
     if owner_phone:
-        staff_name = bd.get("staff_assigned", bd.get("staff_preference", "Sin preferencia"))
         notification = (
             f"NUEVA CITA — {salon_config['salon_name']}\n\n"
             f"Cliente: {bd.get('client_name', phone)}\n"
@@ -366,6 +381,121 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
         await whatsapp.send_text(owner_phone, notification)
 
     log.info(f"Booking created: {appointment}")
+
+
+def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str: str,
+                            staff_name: str, price: float):
+    """Create a Google Calendar event for the confirmed booking."""
+    try:
+        from google_auth import get_google_credentials
+        from googleapiclient.discovery import build
+
+        SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
+        ]
+        creds = get_google_credentials(SCOPES)
+        if not creds:
+            log.warning("Google Calendar: no credentials, skipping event creation")
+            return
+
+        service = build("calendar", "v3", credentials=creds)
+        calendar_id = salon_config.get("google_calendar_id", "primary")
+        tz = salon_config.get("timezone", "Europe/Madrid")
+        client_name = bd.get("client_name", "Cliente")
+        svc_name = bd.get("service", "Cita")
+
+        event = {
+            "summary": f"{svc_name} — {client_name}",
+            "description": (
+                f"Reservado por Floux\n"
+                f"Servicio: {svc_name}\n"
+                f"Cliente: {client_name}\n"
+                f"Personal: {staff_name}\n"
+                f"Precio: {price}€"
+            ),
+            "start": {"dateTime": start_str, "timeZone": tz},
+            "end": {"dateTime": end_str, "timeZone": tz},
+            "attendees": [],
+            "reminders": {"useDefault": True},
+        }
+
+        created = service.events().insert(calendarId=calendar_id, body=event).execute()
+        event_url = created.get("htmlLink", "")
+        log.info(f"Calendar event created: {event_url}")
+
+        # Send email notification via Gmail
+        owner_email = salon_config.get("owner_email")
+        if owner_email:
+            _send_booking_email(creds, owner_email, svc_name, client_name,
+                                bd.get("phone", ""), start_str, staff_name, price, event_url)
+
+    except Exception as e:
+        log.error(f"Calendar event creation failed: {e}")
+
+
+def _send_booking_email(creds, to_email: str, service: str, client_name: str,
+                        phone: str, start_str: str, staff_name: str, price: float, event_url: str):
+    """Send booking confirmation email via Gmail API."""
+    import base64
+    from email.mime.text import MIMEText
+    from googleapiclient.discovery import build
+
+    try:
+        gmail = build("gmail", "v1", credentials=creds)
+
+        body = (
+            f"Nueva cita confirmada\n\n"
+            f"Servicio: {service}\n"
+            f"Cliente: {client_name}\n"
+            f"Teléfono: {phone}\n"
+            f"Fecha: {start_str}\n"
+            f"Personal: {staff_name}\n"
+            f"Precio: {price}€\n"
+        )
+        if event_url:
+            body += f"\nVer en Calendar: {event_url}"
+
+        msg = MIMEText(body)
+        msg["to"] = to_email
+        msg["subject"] = f"Nueva cita — {service} ({client_name})"
+        raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+        gmail.users().messages().send(userId="me", body={"raw": raw}).execute()
+        log.info(f"Booking email sent to {to_email}")
+
+    except Exception as e:
+        log.error(f"Gmail send failed: {e}")
+
+
+def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
+                   staff_name: str, price: float):
+    """Save booking data to Google Sheets."""
+    sheet_url = salon_config.get("google_sheet_url", "")
+    if not sheet_url:
+        log.info("No google_sheet_url in salon config, skipping Sheets logging")
+        return
+
+    try:
+        from append_to_sheet import append_row_direct
+
+        row = {
+            "Fecha": start_str,
+            "Cliente": bd.get("client_name", ""),
+            "Teléfono": phone,
+            "Servicio": bd.get("service", ""),
+            "Personal": staff_name,
+            "Precio": f"{price}€",
+            "Estado": "Confirmada",
+        }
+        ok = append_row_direct(sheet_url, row)
+        if ok:
+            log.info("Booking saved to Google Sheets")
+        else:
+            log.warning("Failed to save booking to Google Sheets")
+
+    except Exception as e:
+        log.error(f"Google Sheets save failed: {e}")
 
 
 def _get_availability(salon_config: dict, booking_data: dict) -> list[dict]:
@@ -382,7 +512,6 @@ def _get_availability(salon_config: dict, booking_data: dict) -> list[dict]:
         cmd.extend(["--staff", staff])
 
     try:
-        from app.config import BASE_DIR
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, cwd=str(BASE_DIR))
         if result.returncode == 0:
             data = json.loads(result.stdout)
