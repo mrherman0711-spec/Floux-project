@@ -73,6 +73,43 @@ def check_booksy(config: dict, service: str, staff_members: list) -> list:
     return []
 
 
+def _get_booked_slots_from_db() -> dict:
+    """
+    Load already-booked slots from the local SQLite DB.
+    Returns {staff_name: [datetime_start, ...]} so we can check per-person availability.
+    """
+    booked = {}
+    try:
+        import sqlite3
+        db_path = os.path.join(os.path.dirname(__file__), "..", "floux.db")
+        if not os.path.exists(db_path):
+            return booked
+        conn = sqlite3.connect(db_path)
+        rows = conn.execute(
+            "SELECT staff, datetime_start FROM appointments WHERE status != 'cancelled'"
+        ).fetchall()
+        conn.close()
+        for staff_name, dt_start in rows:
+            if staff_name not in booked:
+                booked[staff_name] = []
+            booked[staff_name].append(dt_start[:16])  # "YYYY-MM-DDTHH:MM"
+    except Exception as e:
+        print(f"Warning: could not load DB bookings: {e}", file=sys.stderr)
+    return booked
+
+
+def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict) -> str | None:
+    """
+    Return the first eligible staff member not already booked at slot_iso.
+    Rotates through the list to distribute load evenly.
+    """
+    slot_key = slot_iso[:16]  # "YYYY-MM-DDTHH:MM"
+    for name in eligible:
+        if slot_key not in booked_by_staff.get(name, []):
+            return name
+    return None  # all staff busy at this slot
+
+
 def check_google_calendar(config: dict, service: str, staff_members: list) -> list:
     """
     Fetch availability from Google Calendar API.
@@ -123,8 +160,12 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
             3: "jueves", 4: "viernes", 5: "sabado", 6: "domingo"
         }
 
+        # Load booked appointments from local DB to know who is busy per slot
+        booked_by_staff = _get_booked_slots_from_db()
+
         slots = []
         check_date = now.date() + timedelta(days=1)
+        eligible_names = [m["name"] for m in staff_members] if staff_members else ["Cualquier profesional"]
 
         for day_offset in range(7):
             day = check_date + timedelta(days=day_offset)
@@ -134,34 +175,38 @@ def check_google_calendar(config: dict, service: str, staff_members: list) -> li
             if hours == "cerrado":
                 continue
 
-            open_time_str, close_time_str = hours.split("-")
-            open_h, open_m = map(int, open_time_str.split(":"))
-            close_h, close_m = map(int, close_time_str.split(":"))
+            # Support single "09:00-13:00" or double "09:00-13:00,17:00-21:00" franjas
+            franjas = hours.split(",")
+            for franja in franjas:
+                open_time_str, close_time_str = franja.strip().split("-")
+                open_h, open_m = map(int, open_time_str.split(":"))
+                close_h, close_m = map(int, close_time_str.split(":"))
 
-            slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
-            close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
+                slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
+                close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
 
-            while slot_start + timedelta(minutes=service_duration) <= close_dt:
-                slot_end = slot_start + timedelta(minutes=service_duration)
+                while slot_start + timedelta(minutes=service_duration) <= close_dt:
+                    slot_end = slot_start + timedelta(minutes=service_duration)
+                    slot_iso = slot_start.strftime("%Y-%m-%dT%H:%M:%S")
 
-                # Check if slot overlaps with busy periods
-                is_busy = False
-                for busy in busy_periods:
-                    busy_start = datetime.fromisoformat(busy["start"].replace("Z", "+00:00"))
-                    busy_end = datetime.fromisoformat(busy["end"].replace("Z", "+00:00"))
-                    if slot_start < busy_end and slot_end > busy_start:
-                        is_busy = True
-                        break
+                    # Check Google Calendar busy (whole salon)
+                    calendar_busy = any(
+                        slot_start < datetime.fromisoformat(b["end"].replace("Z", "+00:00"))
+                        and slot_end > datetime.fromisoformat(b["start"].replace("Z", "+00:00"))
+                        for b in busy_periods
+                    )
 
-                if not is_busy:
-                    staff_name = staff_members[0]["name"] if staff_members else "Cualquier profesional"
-                    slots.append({
-                        "datetime": slot_start.strftime("%Y-%m-%dT%H:%M:%S"),
-                        "staff": staff_name,
-                        "available": True
-                    })
+                    if not calendar_busy:
+                        # Find first available staff member for this slot
+                        assigned = _pick_available_staff(eligible_names, slot_iso, booked_by_staff)
+                        if assigned:
+                            slots.append({
+                                "datetime": slot_iso,
+                                "staff": assigned,
+                                "available": True
+                            })
 
-                slot_start += timedelta(minutes=30)  # 30-min granularity
+                    slot_start += timedelta(minutes=30)
 
         return slots[:10]  # Return max 10 slots
 

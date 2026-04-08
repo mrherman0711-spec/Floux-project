@@ -26,6 +26,11 @@
       "name": "Laura",
       "services": ["Depilación cera cuerpo", "Depilación cera facial", "Depilación láser", "Manicura", "Pedicura", "Tinte de pestañas"],
       "platform_name": "Laura"
+    },
+    {
+      "name": "Ana",
+      "services": ["Manicura", "Pedicura", "Uñas gel", "Tinte de pestañas", "Masaje relajante", "Limpieza facial"],
+      "platform_name": "Ana"
     }
   ],
 
@@ -44,11 +49,11 @@
 
   "working_hours": {
     "lunes": "cerrado",
-    "martes": "10:00-19:00",
-    "miercoles": "10:00-19:00",
-    "jueves": "10:00-19:00",
-    "viernes": "10:00-19:00",
-    "sabado": "10:00-14:00",
+    "martes": "09:00-13:00,17:00-21:00",
+    "miercoles": "09:00-13:00,17:00-21:00",
+    "jueves": "09:00-13:00,17:00-21:00",
+    "viernes": "09:00-13:00,17:00-21:00",
+    "sabado": "09:00-13:00",
     "domingo": "cerrado"
   },
 
