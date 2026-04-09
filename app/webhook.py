@@ -218,8 +218,8 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         # Log incoming message
         db.log_message(phone, salon_id, "inbound", text, msg_id)
 
-        # Check if session is in a terminal state
-        if session["status"] in ("booked", "escalated"):
+        # Check if session is in a terminal state (booked only — escalated is reactivated by get_active_session)
+        if session["status"] == "booked":
             reply = "Tu cita ya está confirmada. Si necesitas cambiar algo, escríbenos y te ayudamos."
             result = await whatsapp.send_text(phone, reply)
             db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))

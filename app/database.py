@@ -160,14 +160,24 @@ def get_inactive_clients(salon_id: str, days: int = 30) -> list[dict]:
 
 def get_active_session(phone: str) -> dict | None:
     conn = get_db()
+    # Include 'escalated' so a transient AI error doesn't wipe conversation context.
+    # Real escalations are handled by the caller checking session["status"].
     row = conn.execute(
-        "SELECT * FROM sessions WHERE phone = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1",
+        "SELECT * FROM sessions WHERE phone = ? AND status IN ('active', 'escalated') ORDER BY created_at DESC LIMIT 1",
         (phone,),
     ).fetchone()
     conn.close()
     if not row:
         return None
     session = dict(row)
+    # Reactivate escalated sessions so the conversation continues
+    if session["status"] == "escalated":
+        conn2 = get_db()
+        conn2.execute("UPDATE sessions SET status = 'active', updated_at = ? WHERE id = ?",
+                      (_now(), session["id"]))
+        conn2.commit()
+        conn2.close()
+        session["status"] = "active"
     session["conversation"] = json.loads(session["conversation"])
     session["booking_data"] = json.loads(session["booking_data"])
     return session
