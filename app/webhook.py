@@ -562,10 +562,12 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
         spreadsheet = client.open_by_key(sheet_id)
         ws = spreadsheet.sheet1
 
-        # Create headers if sheet is empty
+        # Create or update headers
         existing = ws.row_values(1)
         if not existing:
             ws.append_row(HEADERS)
+        elif existing != HEADERS:
+            ws.update("A1", [HEADERS])
 
         row = [
             start_str,
