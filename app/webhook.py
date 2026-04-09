@@ -308,22 +308,17 @@ async def handle_media_message(sender: str, media_type: str, msg_id: str):
     db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
 
 
-async def _handle_escalation(phone: str, salon_config: dict, conversation: list, last_message: str):
-    """Escalate to salon owner."""
+async def _handle_escalation(phone: str, salon_config: dict, _conversation: list, last_message: str):
+    """Escalate to salon owner — short message, just what they need to act."""
     owner_phone = salon_config.get("owner_phone", "")
     if not owner_phone:
         log.error(f"No owner phone for {salon_config.get('salon_id')}")
         return
 
-    # Build context summary
-    recent = conversation[-6:] if len(conversation) > 6 else conversation
-    context = "\n".join(f"{'Cliente' if t['role'] == 'user' else 'Floux'}: {t['content']}" for t in recent)
-
     alert = (
-        f"ESCALADO — {salon_config['salon_name']}\n\n"
-        f"Cliente: {phone}\n"
-        f"Último mensaje: {last_message}\n\n"
-        f"Conversación reciente:\n{context}"
+        f"Atención — cliente necesita ayuda\n"
+        f"Tel: {phone}\n"
+        f"Dice: {last_message[:120]}"
     )
 
     await whatsapp.send_text(owner_phone, alert)
@@ -589,7 +584,7 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
 
 
 def _get_availability(salon_config: dict, booking_data: dict) -> list[dict] | None:
-    """Get availability slots by calling check_availability functions directly."""
+    """Get availability slots from schedule. Works for any platform — always returns slots."""
     try:
         from check_availability import get_eligible_staff, check_google_calendar
 
@@ -604,18 +599,17 @@ def _get_availability(salon_config: dict, booking_data: dict) -> list[dict] | No
         else:
             eligible = salon_config.get("staff", [])
 
-        platform = salon_config.get("platform", "google_calendar")
-        if platform == "google_calendar":
-            slots = check_google_calendar(salon_config, service, eligible)
-        else:
-            slots = []
+        # Always use check_google_calendar — it falls back to schedule-only
+        # if Google Calendar is unavailable, and works regardless of platform.
+        # Treatwell/Booksy browser automation is not available in production.
+        slots = check_google_calendar(salon_config, service, eligible)
 
         log.info(f"Availability: {len(slots)} slots returned")
         return slots
 
     except Exception as e:
         log.error(f"Availability check failed: {e}", exc_info=True)
-        return []
+        return None  # None = system error, tells AI to ask client for preference
 
 
 # ── Health check ─────────────────────────────────────────────
