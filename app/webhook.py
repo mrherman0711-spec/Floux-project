@@ -218,14 +218,13 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         # Log incoming message
         db.log_message(phone, salon_id, "inbound", text, msg_id)
 
-        # Check if session is in a terminal state (booked only — escalated is reactivated by get_active_session)
+        # If session is booked, reopen it so the client can ask follow-up questions
+        # (e.g. "¿a qué hora era?", "¿puedo cambiarla?") with full context
         if session["status"] == "booked":
-            reply = "Tu cita ya está confirmada. Si necesitas cambiar algo, escríbenos y te ayudamos."
-            result = await whatsapp.send_text(phone, reply)
-            db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
-            return
+            db.update_session(session["id"], status="active")
+            session["status"] = "active"
 
-        # Merge saved booking_data with any service/staff the client just mentioned
+        # Merge saved booking_data — never overwrite existing fields with empty values
         saved_bd = session.get("booking_data") or {}
         current_bd = dict(saved_bd)
         if not current_bd.get("service"):
@@ -249,30 +248,37 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         conversation.append({"role": "user", "content": text})
         conversation.append({"role": "assistant", "content": reply})
 
+        # Merge AI booking_data with saved — never lose previously collected fields
+        new_bd = ai_response.get("booking_data", {})
+        merged_bd = dict(current_bd)
+        for k, v in new_bd.items():
+            if v:  # only overwrite if AI returned a non-empty value
+                merged_bd[k] = v
+
         # Route on intent
         if ai_response.get("escalate"):
             await _handle_escalation(phone, salon_config, conversation, text)
-            db.update_session(session["id"], status="escalated", conversation=conversation)
+            db.update_session(session["id"], status="escalated", conversation=conversation,
+                            booking_data=merged_bd)
         elif ai_response.get("conversation_complete"):
+            ai_response["booking_data"] = merged_bd
             await _handle_booking_complete(phone, salon_config, ai_response, conversation)
             db.update_session(session["id"], status="booked", conversation=conversation,
-                            booking_data=ai_response.get("booking_data", {}))
+                            booking_data=merged_bd)
         else:
             db.update_session(session["id"], conversation=conversation,
-                            booking_data=ai_response.get("booking_data", {}))
+                            booking_data=merged_bd)
 
         # Update client language if detected
         if ai_response.get("language"):
             db.update_client(phone, language=ai_response["language"])
 
-        # Update client name if collected
-        bd = ai_response.get("booking_data", {})
-        client_name = bd.get("client_name", "")
+        # Update client name and email if collected
+        client_name = merged_bd.get("client_name", "")
         if client_name:
             db.update_client(phone, name=client_name)
 
-        # Update client email if collected
-        client_email = bd.get("client_email", "")
+        client_email = merged_bd.get("client_email", "")
         if client_email and "@" in client_email:
             db.update_client(phone, email=client_email)
 
@@ -424,15 +430,26 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
         client_name = bd.get("client_name", "Cliente")
         svc_name = bd.get("service", "Cita")
 
+        client_email = bd.get("client_email", "")
+        attendees = []
+        if client_email and "@" in client_email:
+            attendees.append({"email": client_email, "displayName": client_name})
+        owner_email = salon_config.get("owner_email", "")
+        if owner_email:
+            attendees.append({"email": owner_email})
+
         event = {
             "summary": f"{svc_name} — {client_name}",
             "description": f"Reservado por Floux\nServicio: {svc_name}\nCliente: {client_name}\nPersonal: {staff_name}\nPrecio: {price}€",
             "start": {"dateTime": start_str, "timeZone": tz},
             "end": {"dateTime": end_str, "timeZone": tz},
+            "attendees": attendees,
             "reminders": {"useDefault": True},
         }
 
-        created = service.events().insert(calendarId=calendar_id, body=event).execute()
+        created = service.events().insert(
+            calendarId=calendar_id, body=event, sendUpdates="all"
+        ).execute()
         event_url = created.get("htmlLink", "")
         log.info(f"Calendar event created: {event_url}")
 

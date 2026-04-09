@@ -12,100 +12,309 @@
   "google_sheet_url": "https://docs.google.com/spreadsheets/d/1rK09r3wDOtOulgJwAbrVlywiGrd9QV3YQHTSs2gHPXs/edit?gid=0#gid=0",
   "timezone": "Europe/Madrid",
   "address": "Calle de Rodríguez San Pedro, 42, Local, Chamberí, 28015 Madrid",
-
   "staff": [
     {
       "name": "Jesús",
       "services": [
-        "Tinte", "Tinte Free Amoniac INOA", "Barros", "Matiz mechas", "Matiz tinte",
-        "Corte escultor", "Corte mujer puntas y niñas",
-        "Alisado orgánico media melena", "Alisado orgánico pelo largo",
-        "Peinado pelo corto", "Peinado pelo largo", "Recogido completo", "Extra plancha", "Lavar y peinar pelo xxl", "Semi recogido",
-        "Mechas balayage pelo largo", "Mechas reflejos", "Mechas ombré", "Baby light", "Mechas pelo corto", "Mechas bicolor pelo largo", "Decoloración entero pelo corto",
-        "Permanente", "Botox capilar", "Mascarilla Loreal", "Exfoliante capilar", "Botox capilar pelo largo", "Botox capilar pelo corto", "Masaje capilar", "Tratamiento brillo Redken", "Tratamiento reconstrucción",
-        "Trenzas boxeadoras pelo propio", "Trenzas boxeadoras pelo sintético",
-        "Extensiones de keratina", "Extensiones adhesivas"
+        "Tinte",
+        "Tinte Free Amoniac INOA",
+        "Barros",
+        "Matiz mechas",
+        "Matiz tinte",
+        "Corte escultor",
+        "Corte mujer puntas y niñas",
+        "Alisado orgánico media melena",
+        "Alisado orgánico pelo largo",
+        "Peinado pelo corto",
+        "Peinado pelo largo",
+        "Recogido completo",
+        "Extra plancha",
+        "Lavar y peinar pelo xxl",
+        "Semi recogido",
+        "Mechas balayage pelo largo",
+        "Mechas reflejos",
+        "Mechas ombré",
+        "Baby light",
+        "Mechas pelo corto",
+        "Mechas bicolor pelo largo",
+        "Decoloración entero pelo corto",
+        "Permanente",
+        "Botox capilar",
+        "Mascarilla Loreal",
+        "Exfoliante capilar",
+        "Botox capilar pelo largo",
+        "Botox capilar pelo corto",
+        "Masaje capilar",
+        "Tratamiento brillo Redken",
+        "Tratamiento reconstrucción",
+        "Trenzas boxeadoras pelo propio",
+        "Trenzas boxeadoras pelo sintético",
+        "Extensiones de keratina",
+        "Extensiones adhesivas"
       ],
       "platform_name": "JESÚS GUERRERO"
     },
     {
       "name": "Karina",
       "services": [
-        "Tinte", "Matiz mechas", "Matiz tinte",
-        "Corte escultor", "Corte mujer puntas y niñas",
-        "Peinado pelo corto", "Peinado pelo largo", "Recogido completo", "Extra plancha", "Lavar y peinar pelo xxl", "Semi recogido",
-        "Mechas reflejos", "Mechas ombré", "Baby light", "Mechas pelo corto",
-        "Botox capilar", "Mascarilla Loreal", "Masaje capilar"
+        "Tinte",
+        "Matiz mechas",
+        "Matiz tinte",
+        "Corte escultor",
+        "Corte mujer puntas y niñas",
+        "Peinado pelo corto",
+        "Peinado pelo largo",
+        "Recogido completo",
+        "Extra plancha",
+        "Lavar y peinar pelo xxl",
+        "Semi recogido",
+        "Mechas reflejos",
+        "Mechas ombré",
+        "Baby light",
+        "Mechas pelo corto",
+        "Botox capilar",
+        "Mascarilla Loreal",
+        "Masaje capilar"
       ],
       "platform_name": "Karina"
     },
     {
       "name": "Francisco",
       "services": [
-        "Corte escultor", "Corte mujer puntas y niñas",
-        "Peinado pelo corto", "Peinado pelo largo",
-        "Masaje capilar", "Mascarilla Loreal"
+        "Corte escultor",
+        "Corte mujer puntas y niñas",
+        "Peinado pelo corto",
+        "Peinado pelo largo",
+        "Masaje capilar",
+        "Mascarilla Loreal"
       ],
       "platform_name": "Francisco"
     }
   ],
-
   "services": [
-    {"name": "Tinte", "price": 33.80, "duration_min": 65, "category": "Color"},
-    {"name": "Tinte Free Amoniac INOA", "price": 50.80, "duration_min": 60, "category": "Color"},
-    {"name": "Barros", "price": 60.00, "duration_min": 75, "category": "Color"},
-    {"name": "Matiz mechas", "price": 25.00, "duration_min": 30, "category": "Color"},
-    {"name": "Matiz tinte", "price": 15.80, "duration_min": 30, "category": "Color"},
-
-    {"name": "Corte escultor", "price": 21.60, "price_original": 24.00, "duration_min": 40, "category": "Cortes"},
-    {"name": "Corte mujer puntas y niñas", "price": 20.00, "duration_min": 35, "category": "Cortes"},
-
-    {"name": "Alisado orgánico media melena", "price": 135.00, "price_original": 150.00, "duration_min": 150, "category": "Alisados"},
-    {"name": "Alisado orgánico pelo largo", "price": 171.00, "price_original": 190.00, "duration_min": 150, "category": "Alisados"},
-
-    {"name": "Peinado pelo corto", "price": 17.50, "duration_min": 35, "category": "Peinados"},
-    {"name": "Peinado pelo largo", "price": 18.80, "duration_min": 40, "category": "Peinados"},
-    {"name": "Recogido completo", "price": 55.80, "duration_min": 45, "category": "Peinados"},
-    {"name": "Extra plancha", "price": 5.00, "duration_min": 15, "category": "Peinados"},
-    {"name": "Lavar y peinar pelo xxl", "price": 29.80, "duration_min": 40, "category": "Peinados"},
-    {"name": "Semi recogido", "price": 47.90, "duration_min": 30, "category": "Peinados"},
-
-    {"name": "Mechas balayage pelo largo", "price": 97.80, "duration_min": 195, "category": "Mechas y decoloración"},
-    {"name": "Mechas reflejos", "price": 43.80, "duration_min": 45, "category": "Mechas y decoloración"},
-    {"name": "Mechas ombré", "price": 55.80, "duration_min": 100, "category": "Mechas y decoloración"},
-    {"name": "Baby light", "price": 60.80, "duration_min": 60, "category": "Mechas y decoloración"},
-    {"name": "Mechas pelo corto", "price": 38.70, "duration_min": 30, "category": "Mechas y decoloración"},
-    {"name": "Mechas bicolor pelo largo", "price": 65.00, "duration_min": 90, "category": "Mechas y decoloración"},
-    {"name": "Decoloración entero pelo corto", "price": 45.00, "duration_min": 60, "category": "Mechas y decoloración"},
-
-    {"name": "Permanente", "price": 60.00, "duration_min": 100, "category": "Tratamientos capilares"},
-    {"name": "Botox capilar", "price": 40.80, "duration_min": 90, "category": "Tratamientos capilares"},
-    {"name": "Mascarilla Loreal", "price": 7.70, "duration_min": 5, "category": "Tratamientos capilares"},
-    {"name": "Exfoliante capilar", "price": 15.00, "duration_min": 30, "category": "Tratamientos capilares"},
-    {"name": "Botox capilar pelo largo", "price": 75.00, "duration_min": 90, "category": "Tratamientos capilares"},
-    {"name": "Botox capilar pelo corto", "price": 45.00, "duration_min": 75, "category": "Tratamientos capilares"},
-    {"name": "Masaje capilar", "price": 10.00, "duration_min": 10, "category": "Tratamientos capilares"},
-    {"name": "Tratamiento brillo Redken", "price": 20.00, "duration_min": 30, "category": "Tratamientos capilares"},
-    {"name": "Tratamiento reconstrucción", "price": 30.80, "duration_min": 40, "category": "Tratamientos capilares"},
-
-    {"name": "Trenzas boxeadoras pelo propio", "price": 27.00, "duration_min": 30, "category": "Trenzas"},
-    {"name": "Trenzas boxeadoras pelo sintético", "price": 40.00, "duration_min": 40, "category": "Trenzas"},
-
-    {"name": "Extensiones de keratina", "price": 70.00, "duration_min": 120, "category": "Extensiones"},
-    {"name": "Extensiones adhesivas", "price": 55.00, "duration_min": 100, "category": "Extensiones"}
+    {
+      "name": "Tinte",
+      "price": 33.8,
+      "duration_min": 65,
+      "category": "Color"
+    },
+    {
+      "name": "Tinte Free Amoniac INOA",
+      "price": 50.8,
+      "duration_min": 60,
+      "category": "Color"
+    },
+    {
+      "name": "Barros",
+      "price": 60.0,
+      "duration_min": 75,
+      "category": "Color"
+    },
+    {
+      "name": "Matiz mechas",
+      "price": 25.0,
+      "duration_min": 30,
+      "category": "Color"
+    },
+    {
+      "name": "Matiz tinte",
+      "price": 15.8,
+      "duration_min": 30,
+      "category": "Color"
+    },
+    {
+      "name": "Corte escultor",
+      "price": 21.6,
+      "price_original": 24.0,
+      "duration_min": 40,
+      "category": "Cortes"
+    },
+    {
+      "name": "Corte mujer puntas y niñas",
+      "price": 20.0,
+      "duration_min": 35,
+      "category": "Cortes"
+    },
+    {
+      "name": "Alisado orgánico media melena",
+      "price": 135.0,
+      "price_original": 150.0,
+      "duration_min": 150,
+      "category": "Alisados"
+    },
+    {
+      "name": "Alisado orgánico pelo largo",
+      "price": 171.0,
+      "price_original": 190.0,
+      "duration_min": 150,
+      "category": "Alisados"
+    },
+    {
+      "name": "Peinado pelo corto",
+      "price": 17.5,
+      "duration_min": 35,
+      "category": "Peinados"
+    },
+    {
+      "name": "Peinado pelo largo",
+      "price": 18.8,
+      "duration_min": 40,
+      "category": "Peinados"
+    },
+    {
+      "name": "Recogido completo",
+      "price": 55.8,
+      "duration_min": 45,
+      "category": "Peinados"
+    },
+    {
+      "name": "Extra plancha",
+      "price": 5.0,
+      "duration_min": 15,
+      "category": "Peinados"
+    },
+    {
+      "name": "Lavar y peinar pelo xxl",
+      "price": 29.8,
+      "duration_min": 40,
+      "category": "Peinados"
+    },
+    {
+      "name": "Semi recogido",
+      "price": 47.9,
+      "duration_min": 30,
+      "category": "Peinados"
+    },
+    {
+      "name": "Mechas balayage pelo largo",
+      "price": 97.8,
+      "duration_min": 195,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Mechas reflejos",
+      "price": 43.8,
+      "duration_min": 45,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Mechas ombré",
+      "price": 55.8,
+      "duration_min": 100,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Baby light",
+      "price": 60.8,
+      "duration_min": 60,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Mechas pelo corto",
+      "price": 38.7,
+      "duration_min": 30,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Mechas bicolor pelo largo",
+      "price": 65.0,
+      "duration_min": 90,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Decoloración entero pelo corto",
+      "price": 45.0,
+      "duration_min": 60,
+      "category": "Mechas y decoloración"
+    },
+    {
+      "name": "Permanente",
+      "price": 60.0,
+      "duration_min": 100,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Botox capilar",
+      "price": 40.8,
+      "duration_min": 90,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Mascarilla Loreal",
+      "price": 7.7,
+      "duration_min": 5,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Exfoliante capilar",
+      "price": 15.0,
+      "duration_min": 30,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Botox capilar pelo largo",
+      "price": 75.0,
+      "duration_min": 90,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Botox capilar pelo corto",
+      "price": 45.0,
+      "duration_min": 75,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Masaje capilar",
+      "price": 10.0,
+      "duration_min": 10,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Tratamiento brillo Redken",
+      "price": 20.0,
+      "duration_min": 30,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Tratamiento reconstrucción",
+      "price": 30.8,
+      "duration_min": 40,
+      "category": "Tratamientos capilares"
+    },
+    {
+      "name": "Trenzas boxeadoras pelo propio",
+      "price": 27.0,
+      "duration_min": 30,
+      "category": "Trenzas"
+    },
+    {
+      "name": "Trenzas boxeadoras pelo sintético",
+      "price": 40.0,
+      "duration_min": 40,
+      "category": "Trenzas"
+    },
+    {
+      "name": "Extensiones de keratina",
+      "price": 70.0,
+      "duration_min": 120,
+      "category": "Extensiones"
+    },
+    {
+      "name": "Extensiones adhesivas",
+      "price": 55.0,
+      "duration_min": 100,
+      "category": "Extensiones"
+    }
   ],
-
   "working_hours": {
-    "lunes":    "10:00-19:00",
-    "martes":   "10:00-19:00",
-    "miercoles":"10:00-19:00",
-    "jueves":   "10:00-19:00",
-    "viernes":  "10:00-19:00",
-    "sabado":   "10:00-14:00",
-    "domingo":  "cerrado"
+    "lunes": "10:00-19:00",
+    "martes": "10:00-19:00",
+    "miercoles": "10:00-19:00",
+    "jueves": "10:00-19:00",
+    "viernes": "10:00-19:00",
+    "sabado": "10:00-14:00",
+    "domingo": "cerrado"
   },
-
   "cancellation_policy": "Si necesitas cancelar o cambiar tu cita, avísanos con al menos 4 horas de antelación.",
-
-  "system_prompt": "Eres el asistente de WhatsApp de Escultor Peluquería Mujer (Calle Rodríguez San Pedro 42, Chamberí, Madrid). Tu único objetivo es confirmar citas rápido.\n\nREGLAS:\n- NUNCA digas que eres IA, bot o robot. Si preguntan, di \"soy el asistente de Escultor\".\n- NUNCA inventes servicios, precios ni disponibilidad.\n- Responde en el idioma del cliente. Tutea siempre.\n- Mensajes cortos: máximo 3 líneas. Sin asteriscos ni markdown. Sin listas con guiones.\n- Un emoji por mensaje como máximo, solo si aporta calidez.\n- Tono: como alguien del equipo respondiendo desde el móvil.\n\nLEER EL CONTEXTO ANTES DE RESPONDER:\n- Si el cliente ya mencionó el servicio, NO lo vuelvas a preguntar. Extráelo directamente.\n- Si el cliente dice \"ese\" / \"ese mismo\" / \"el primero\" / \"Escultor\" / \"puntas\" después de ver una lista, interpreta como selección del servicio más obvio del contexto anterior.\n- Si ya tienes servicio + fecha + nombre, pasa directamente a pedir email.\n- Haz una sola pregunta por mensaje. Nunca dos a la vez.\n\nSI NO ENTIENDES AL CLIENTE:\n- No adivines. Pregunta de forma específica: \"¿Te refieres a [opción A] o a [opción B]?\"\n- Nunca respondas con una pregunta genérica cuando puedes ser concreto.\n- Ejemplo: si el cliente dice \"el de siempre\" y no hay historial, pregunta \"¿Cuál es tu servicio habitual?\"\n\nORDEN DE RECOGIDA DE DATOS (solo lo que falte):\n1. Servicio → 2. Fecha/hora (ofrece máx. 3 huecos) → 3. Nombre → 4. Profesional (opcional) → 5. Email (para confirmación) → 6. Confirmar\n\nPARA EL EMAIL: pídelo así: \"¿Me das tu email para mandarte la confirmación?\". Si no quiere darlo, es opcional — continúa sin él.\n\nSERVICIOS Y PRECIOS:\n{SERVICES_LIST}\n\nPERSONAL:\n{STAFF_LIST}\n\nDISPONIBILIDAD ACTUAL:\n{AVAILABILITY_SLOTS}\n\nCUANDO ESCALAR (escalate: true): quejas, preguntas sobre alergias/tratamientos médicos, situaciones que requieren al dueño.\n\nCUANDO FINALIZAR (conversation_complete: true): cliente confirmó servicio + fecha + nombre. Email opcional.\n\nRespuesta SIEMPRE en JSON válido:\n{\"reply\": \"texto\", \"language\": \"es\", \"intent\": \"booking|question|escalate|greeting\", \"booking_data\": {\"service\": \"\", \"datetime\": \"\", \"client_name\": \"\", \"staff_preference\": \"\", \"staff_assigned\": \"\", \"client_email\": \"\"}, \"escalate\": false, \"conversation_complete\": false}"
+  "system_prompt": "Eres el asistente de WhatsApp de Escultor Peluquería Mujer (Calle Rodríguez San Pedro 42, Chamberí, Madrid). Tu único objetivo es confirmar citas rápido.\n\nREGLAS:\n- NUNCA digas que eres IA, bot o robot. Si preguntan, di \"soy el asistente de Escultor\".\n- NUNCA inventes servicios, precios ni disponibilidad.\n- Responde en el idioma del cliente. Tutea siempre.\n- Mensajes cortos: máximo 3 líneas. Sin asteriscos ni markdown. Sin listas con guiones.\n- Un emoji por mensaje como máximo, solo si aporta calidez.\n- Tono: como alguien del equipo respondiendo desde el móvil.\n\nLEER EL CONTEXTO ANTES DE RESPONDER:\n- Lee toda la conversación anterior antes de responder. Si ya tienes un dato, NO lo vuelvas a pedir.\n- Si el cliente ya mencionó el servicio, extráelo directamente sin preguntar.\n- Si el cliente dice \"ese\" / \"ese mismo\" / \"el primero\" / \"Escultor\" / \"puntas\" tras ver una lista, interpreta como selección del servicio más obvio del contexto.\n- Si ya tienes servicio + fecha + nombre, pasa directamente a pedir email.\n- Haz una sola pregunta por mensaje. Nunca dos a la vez.\n- Si el cliente vuelve después de confirmar su cita y pregunta algo, respóndele con el contexto que ya tienes — no empieces de cero.\n\nSI NO ENTIENDES AL CLIENTE:\n- No adivines. Pregunta de forma específica: \"¿Te refieres a [opción A] o a [opción B]?\"\n- Nunca respondas con una pregunta genérica cuando puedes ser concreto.\n\nORDEN DE RECOGIDA DE DATOS (solo lo que falte, saltando lo que ya tienes):\n1. Servicio → 2. Fecha/hora (ofrece máx. 3 huecos) → 3. Nombre → 4. Profesional (opcional) → 5. Email (para confirmación) → 6. Confirmar\n\nPARA EL EMAIL: pídelo así: \"¿Me das tu email para mandarte la confirmación?\". Es opcional — si no quiere, confirma sin él. NO lo pidas de nuevo si ya lo tienes.\n\nSERVICIOS Y PRECIOS:\n{SERVICES_LIST}\n\nPERSONAL:\n{STAFF_LIST}\n\nDISPONIBILIDAD ACTUAL:\n{AVAILABILITY_SLOTS}\n\nCUANDO ESCALAR (escalate: true): quejas, preguntas sobre alergias/tratamientos médicos, situaciones que requieren al dueño.\n\nCUANDO FINALIZAR (conversation_complete: true): cliente confirmó servicio + fecha + nombre. Email opcional.\n\nRespuesta SIEMPRE en JSON válido:\n{\"reply\": \"texto\", \"language\": \"es\", \"intent\": \"booking|question|escalate|greeting\", \"booking_data\": {\"service\": \"\", \"datetime\": \"\", \"client_name\": \"\", \"staff_preference\": \"\", \"staff_assigned\": \"\", \"client_email\": \"\"}, \"escalate\": false, \"conversation_complete\": false}"
 }
