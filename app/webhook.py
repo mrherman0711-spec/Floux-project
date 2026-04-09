@@ -226,9 +226,7 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             return
 
         # Merge saved booking_data with any service/staff the client just mentioned
-        # so availability is fetched with the most up-to-date context
         saved_bd = session.get("booking_data") or {}
-        # Quick parse: if client message mentions a known service, inject it
         current_bd = dict(saved_bd)
         if not current_bd.get("service"):
             for svc in salon_config.get("services", []):
@@ -236,11 +234,13 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
                     current_bd["service"] = svc["name"]
                     break
 
-        # Fetch availability
-        availability = _get_availability(salon_config, current_bd)
+        # Only fetch availability once we know the service — saves ~1-2s per message
+        conversation_so_far = session.get("conversation", [])
+        needs_availability = bool(current_bd.get("service")) or len(conversation_so_far) >= 2
+        availability = _get_availability(salon_config, current_bd) if needs_availability else None
 
         # Run AI conversation
-        conversation = session.get("conversation", [])
+        conversation = conversation_so_far
         ai_response = ai_engine.chat(salon_config, conversation, text, availability)
 
         reply = ai_response["reply"]

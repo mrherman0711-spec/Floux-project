@@ -110,8 +110,8 @@ def chat(salon_config: dict, conversation: list[dict],
                 model=OPENAI_MODEL,
                 messages=messages,
                 response_format={"type": "json_object"},
-                temperature=0.3,
-                max_tokens=500,
+                temperature=0.2,
+                max_tokens=800,
             )
 
             raw = response.choices[0].message.content
