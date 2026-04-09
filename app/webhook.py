@@ -266,9 +266,15 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             db.update_client(phone, language=ai_response["language"])
 
         # Update client name if collected
-        client_name = ai_response.get("booking_data", {}).get("client_name", "")
+        bd = ai_response.get("booking_data", {})
+        client_name = bd.get("client_name", "")
         if client_name:
             db.update_client(phone, name=client_name)
+
+        # Update client email if collected
+        client_email = bd.get("client_email", "")
+        if client_email and "@" in client_email:
+            db.update_client(phone, email=client_email)
 
         # Send reply
         result = await whatsapp.send_text(phone, reply)
@@ -390,6 +396,14 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
         )
         await whatsapp.send_text(owner_phone, notification)
 
+    # Send confirmation email to client if email was collected
+    client_email = bd.get("client_email", "")
+    if client_email and "@" in client_email:
+        await asyncio.to_thread(
+            _send_client_confirmation_email,
+            salon_config, client_email, bd, start_str, staff_name, price,
+        )
+
     log.info(f"Booking created: {appointment}")
 
 
@@ -468,6 +482,60 @@ def _send_booking_email(creds, to_email: str, service: str, client_name: str,
 
     except Exception as e:
         log.error(f"Gmail send failed: {e}")
+
+
+def _send_client_confirmation_email(salon_config: dict, client_email: str, bd: dict,
+                                    start_str: str, staff_name: str, price: float):
+    """Send booking confirmation email to the client via Gmail API."""
+    import base64
+    from email.mime.text import MIMEText
+    import sys as _sys
+    _sys.path.insert(0, str(BASE_DIR / "execution"))
+    from google_auth import get_google_credentials
+    from googleapiclient.discovery import build
+
+    try:
+        SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+        creds = get_google_credentials(SCOPES)
+        if not creds:
+            log.warning("Client confirmation email: no Google credentials, skipping")
+            return
+
+        gmail = build("gmail", "v1", credentials=creds)
+        salon_name = salon_config.get("salon_name", "el salón")
+        service = bd.get("service", "")
+        client_name = bd.get("client_name", "")
+
+        # Format date nicely if possible
+        try:
+            from datetime import datetime as _dt
+            dt_obj = _dt.fromisoformat(start_str)
+            day_names = {0:"lunes",1:"martes",2:"miércoles",3:"jueves",4:"viernes",5:"sábado",6:"domingo"}
+            fecha = f"{day_names[dt_obj.weekday()]} {dt_obj.day}/{dt_obj.month}/{dt_obj.year} a las {dt_obj.strftime('%H:%M')}"
+        except Exception:
+            fecha = start_str
+
+        body = (
+            f"Hola {client_name},\n\n"
+            f"Tu cita en {salon_name} está confirmada.\n\n"
+            f"Servicio: {service}\n"
+            f"Fecha: {fecha}\n"
+            f"Profesional: {staff_name}\n"
+            f"Precio: {price}€\n\n"
+            f"Si necesitas cancelar o cambiar, avísanos con al menos 4 horas de antelación.\n\n"
+            f"Nos vemos pronto!"
+        )
+
+        msg = MIMEText(body)
+        msg["to"] = client_email
+        msg["subject"] = f"Cita confirmada — {service} en {salon_name}"
+        raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+        gmail.users().messages().send(userId="me", body={"raw": raw}).execute()
+        log.info(f"Client confirmation email sent to {client_email}")
+
+    except Exception as e:
+        log.error(f"Client confirmation email failed: {e}")
 
 
 def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,

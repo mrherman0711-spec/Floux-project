@@ -45,6 +45,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             phone TEXT UNIQUE NOT NULL,
             name TEXT DEFAULT '',
+            email TEXT DEFAULT '',
             language TEXT DEFAULT 'es',
             salon_id TEXT NOT NULL,
             notes TEXT DEFAULT '',
@@ -111,6 +112,17 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_messages_phone ON messages(phone);
     """)
     conn.commit()
+
+    # Migrations — add columns that may not exist in older DBs
+    for migration in [
+        "ALTER TABLE clients ADD COLUMN email TEXT DEFAULT ''",
+    ]:
+        try:
+            conn.execute(migration)
+            conn.commit()
+        except Exception:
+            pass  # Column already exists
+
     conn.close()
     log.info("Database initialized")
 
