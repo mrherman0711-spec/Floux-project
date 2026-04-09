@@ -17,7 +17,7 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 
 
-def get_google_credentials(scopes: list[str]) -> Credentials | None:
+def get_google_credentials(scopes: list[str]):
     """
     Return valid Google credentials, refreshing if expired.
 

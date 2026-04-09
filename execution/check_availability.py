@@ -98,7 +98,7 @@ def _get_booked_slots_from_db() -> dict:
     return booked
 
 
-def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict) -> str | None:
+def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict):
     """
     Return the first eligible staff member not already booked at slot_iso.
     Always assigns someone — if preferred is busy, falls back to next available.
