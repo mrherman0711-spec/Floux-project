@@ -144,6 +144,9 @@ async def send_daily_digest():
         owner_phone = salon.get("owner_phone", "")
         if not owner_phone:
             continue
+        if not salon.get("scheduler_enabled", True):
+            log.info(f"Scheduler disabled for {salon_id} — skipping daily digest")
+            continue
 
         # Today's stats
         stats = db.get_daily_stats(salon_id, today)
@@ -196,6 +199,9 @@ async def send_morning_briefing():
         salon_id = salon["salon_id"]
         owner_phone = salon.get("owner_phone", "")
         if not owner_phone:
+            continue
+        if not salon.get("scheduler_enabled", True):
+            log.info(f"Scheduler disabled for {salon_id} — skipping morning briefing")
             continue
 
         today_apts = db.get_appointments_for_day(salon_id, today)

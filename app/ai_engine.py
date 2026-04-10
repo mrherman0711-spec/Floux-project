@@ -129,18 +129,19 @@ def build_system_prompt(salon_config: dict, availability_slots: list[dict] | Non
     # Build availability (None=error, []=no slots, [...]= slots available)
     if availability_slots:
         slots_text = ""
+        day_names_es = {
+            0: "lunes", 1: "martes", 2: "miércoles",
+            3: "jueves", 4: "viernes", 5: "sábado", 6: "domingo"
+        }
         for slot in availability_slots[:10]:
             dt = slot.get("datetime", "")
             staff = slot.get("staff", "")
             try:
                 dt_obj = datetime.fromisoformat(dt)
-                day_names_es = {
-                    0: "lunes", 1: "martes", 2: "miércoles",
-                    3: "jueves", 4: "viernes", 5: "sábado", 6: "domingo"
-                }
                 day = day_names_es.get(dt_obj.weekday(), "")
                 formatted = f"{day} {dt_obj.day}/{dt_obj.month} a las {dt_obj.strftime('%H:%M')}"
-                slots_text += f"- {formatted} con {staff}\n"
+                # Include ISO value so bot always knows what to put in booking_data.datetime
+                slots_text += f"- {formatted} con {staff} [ISO: {dt_obj.strftime('%Y-%m-%dT%H:%M:00')}]\n"
             except (ValueError, AttributeError):
                 slots_text += f"- {dt} con {staff}\n"
     elif availability_slots is not None:
