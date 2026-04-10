@@ -256,13 +256,18 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
                 merged_bd[k] = v
 
         # Route on intent
+        log.info(f"[ai] complete={ai_response.get('conversation_complete')} escalate={ai_response.get('escalate')} bd={ai_response.get('booking_data')}")
         if ai_response.get("escalate"):
             await _handle_escalation(phone, salon_config, conversation, text)
             db.update_session(session["id"], status="escalated", conversation=conversation,
                             booking_data=merged_bd)
         elif ai_response.get("conversation_complete"):
             ai_response["booking_data"] = merged_bd
-            await _handle_booking_complete(phone, salon_config, ai_response, conversation)
+            log.info(f"[booking] conversation_complete=true, booking_data={merged_bd}")
+            try:
+                await _handle_booking_complete(phone, salon_config, ai_response, conversation)
+            except Exception as e:
+                log.error(f"[booking] _handle_booking_complete failed: {e}", exc_info=True)
             db.update_session(session["id"], status="booked", conversation=conversation,
                             booking_data=merged_bd)
         else:
