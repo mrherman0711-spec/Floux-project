@@ -142,9 +142,9 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
     print(f"INFO: eligible_names={eligible_names} service_duration={service_duration}", file=sys.stderr)
 
     slots = []
-    check_date = now.date()  # include today if hours remain
+    check_date = now.date()  # start from today, skip past slots inline
 
-    for day_offset in range(8):
+    for day_offset in range(9):  # 9 days to guarantee at least 7 open days
         day = check_date + timedelta(days=day_offset)
         day_name = day_map[day.weekday()]
         hours = working_hours.get(day_name, "cerrado")

@@ -436,20 +436,11 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
         client_name = bd.get("client_name", "Cliente")
         svc_name = bd.get("service", "Cita")
 
-        client_email = bd.get("client_email", "")
-        attendees = []
-        if client_email and "@" in client_email:
-            attendees.append({"email": client_email, "displayName": client_name})
-        owner_email = salon_config.get("owner_email", "")
-        if owner_email:
-            attendees.append({"email": owner_email})
-
         event = {
             "summary": f"{svc_name} — {client_name}",
             "description": f"Reservado por Floux\nServicio: {svc_name}\nCliente: {client_name}\nPersonal: {staff_name}\nPrecio: {price}€",
             "start": {"dateTime": start_str, "timeZone": tz},
             "end": {"dateTime": end_str, "timeZone": tz},
-            "attendees": attendees,
             "reminders": {"useDefault": True},
         }
 
