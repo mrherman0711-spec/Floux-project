@@ -25,7 +25,7 @@ Missed call → Twilio webhook → respond 200 → normalize phone → filter no
 
 | Layer | Location | Purpose |
 |-------|----------|---------|
-| Skills (SOPs) | `.claude/Skills/` | 9 Skills with YAML frontmatter — auto-loaded by trigger match |
+| Skills (SOPs) | `.claude/Skills/` | 10 Skills — loaded via @imports in this file every session |
 | Agents | `.claude/agents/` | 6 subagents — invoke for specialized tasks |
 | Rules | `.claude/rules/` | 2 rules (brand-voice, design-system) — always loaded |
 | Execution | `execution/` | 8 Python scripts — deterministic tools, call these instead of inline code |
@@ -48,6 +48,26 @@ Missed call → Twilio webhook → respond 200 → normalize phone → filter no
 | whatsapp-booking-agent | Conversation flows, edge cases, dialogue UX |
 | agentic-workflow-principles | Architecture decisions, agent loop design |
 | chrome-devtools-mcp | Browser automation — scraping, screenshots, UI research, Treatwell/Booksy |
+
+@.claude/Skills/book-appointment/SKILL.md
+@.claude/Skills/missed-call-recovery/SKILL.md
+@.claude/Skills/onboard-salon/SKILL.md
+@.claude/Skills/whatsapp-conversation/SKILL.md
+@.claude/Skills/prompt-engineer/SKILL.md
+@.claude/Skills/booking-engine/SKILL.md
+@.claude/Skills/twilio-integration/SKILL.md
+@.claude/Skills/whatsapp-booking-agent/SKILL.md
+@.claude/Skills/agentic-workflow-principles/SKILL.md
+@.claude/Skills/chrome-devtools-mcp/SKILL.md
+@.claude/Skills/sp-systematic-debugging/SKILL.md
+@.claude/Skills/sp-verification-before-completion/SKILL.md
+@.claude/Skills/sp-writing-plans/SKILL.md
+@.claude/Skills/sp-brainstorming/SKILL.md
+@.claude/Skills/sp-dispatching-parallel-agents/SKILL.md
+@.claude/Skills/sp-subagent-driven-development/SKILL.md
+@.claude/Skills/sp-writing-skills/SKILL.md
+@.claude/Skills/sp-requesting-code-review/SKILL.md
+@.claude/Skills/sp-receiving-code-review/SKILL.md
 
 ## Agents
 
