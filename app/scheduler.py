@@ -53,6 +53,12 @@ async def send_reminders():
                     f"Si necesitas cancelar o cambiar, avísanos con al menos 4 horas de antelación."
                 )
 
+                # Skip if client phone == owner phone (test bookings)
+                if apt["phone"] == salon.get("owner_phone", ""):
+                    log.info(f"Skipping 24h reminder — client phone is owner phone ({apt['phone']})")
+                    db.mark_reminder_sent(apt["id"], "24h")
+                    continue
+
                 await whatsapp.send_text(apt["phone"], msg)
                 db.mark_reminder_sent(apt["id"], "24h")
                 db.log_message(apt["phone"], salon_id, "outbound", msg)
@@ -75,6 +81,12 @@ async def send_reminders():
                 greeting = f"Hola {name}! " if name else "Hola! "
 
                 msg = f"{greeting}Tu cita es en 1 hora, a las {time_str}. Te esperamos!"
+
+                # Skip if client phone == owner phone (test bookings)
+                if apt["phone"] == salon.get("owner_phone", ""):
+                    log.info(f"Skipping 1h reminder — client phone is owner phone ({apt['phone']})")
+                    db.mark_reminder_sent(apt["id"], "1h")
+                    continue
 
                 await whatsapp.send_text(apt["phone"], msg)
                 db.mark_reminder_sent(apt["id"], "1h")
@@ -102,6 +114,12 @@ async def send_review_requests():
             )
 
             # TODO: Replace [Enlace a Google Reviews] with actual Google review link from salon config
+
+            # Skip if client phone == owner phone (test bookings)
+            if apt["phone"] == salon.get("owner_phone", ""):
+                log.info(f"Skipping review request — client phone is owner phone ({apt['phone']})")
+                db.mark_review_sent(apt["id"])
+                continue
 
             await whatsapp.send_text(apt["phone"], msg)
             db.mark_review_sent(apt["id"])

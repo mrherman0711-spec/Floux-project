@@ -404,12 +404,21 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
         await whatsapp.send_text(owner_phone, notification)
 
     # Send confirmation email to client if email was collected
+    # Prefer email from booking_data; fall back to stored client record
     client_email = bd.get("client_email", "")
+    if not client_email or "@" not in client_email:
+        client_record = db.get_or_create_client(phone, salon_id)
+        client_email = client_record.get("email", "")
+        if client_email:
+            log.info(f"[booking] client_email not in booking_data, using stored email: {client_email}")
+    log.info(f"[booking] client_email='{client_email}' bd_keys={list(bd.keys())}")
     if client_email and "@" in client_email:
         await asyncio.to_thread(
             _send_client_confirmation_email,
             salon_config, client_email, bd, start_str, staff_name, price,
         )
+    else:
+        log.warning(f"[booking] No client email found — confirmation email not sent for {phone}")
 
     log.info(f"Booking created: {appointment}")
 
