@@ -75,24 +75,36 @@ def check_booksy(config: dict, service: str, staff_members: list) -> list:
 
 def _get_booked_slots_from_db() -> dict:
     """
-    Load already-booked slots from the local SQLite DB.
+    Load already-booked slots from the SQLite DB.
     Returns {staff_name: [datetime_start, ...]} so we can check per-person availability.
+    Tries multiple paths to find floux.db — works both locally and on Railway.
     """
     booked = {}
     try:
         import sqlite3
-        db_path = os.path.join(os.path.dirname(__file__), "..", "floux.db")
-        if not os.path.exists(db_path):
+
+        # Try multiple candidate paths: Railway runs from /app, local runs from project root
+        candidates = [
+            os.path.join(os.path.dirname(__file__), "..", "floux.db"),  # local dev
+            "/app/floux.db",                                              # Railway
+            os.path.join(os.getcwd(), "floux.db"),                       # fallback cwd
+        ]
+        db_path = next((p for p in candidates if os.path.exists(p)), None)
+        if not db_path:
+            print("INFO: floux.db not found — no booked slots loaded", file=sys.stderr)
             return booked
+
         conn = sqlite3.connect(db_path)
+        # Only block future appointments — past ones don't matter for availability
         rows = conn.execute(
-            "SELECT staff, datetime_start FROM appointments WHERE status != 'cancelled'"
+            "SELECT staff, datetime_start FROM appointments WHERE status != 'cancelled' AND datetime_start > datetime('now')"
         ).fetchall()
         conn.close()
         for staff_name, dt_start in rows:
             if staff_name not in booked:
                 booked[staff_name] = []
             booked[staff_name].append(dt_start[:16])  # "YYYY-MM-DDTHH:MM"
+        print(f"INFO: Loaded {sum(len(v) for v in booked.values())} booked slots from DB", file=sys.stderr)
     except Exception as e:
         print(f"Warning: could not load DB bookings: {e}", file=sys.stderr)
     return booked
@@ -142,9 +154,11 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
     print(f"INFO: eligible_names={eligible_names} service_duration={service_duration}", file=sys.stderr)
 
     slots = []
-    check_date = now.date()  # start from today, skip past slots inline
+    check_date = now.date()  # start from today
+    # Minimum buffer: never offer a slot starting in less than 30 minutes from now
+    earliest_slot = now + timedelta(minutes=30)
 
-    for day_offset in range(9):  # 9 days to guarantee at least 7 open days
+    for day_offset in range(14):  # 14 days to guarantee enough open days
         day = check_date + timedelta(days=day_offset)
         day_name = day_map[day.weekday()]
         hours = working_hours.get(day_name, "cerrado")
@@ -160,16 +174,25 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
             slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ)
             close_dt = datetime(day.year, day.month, day.day, close_h, close_m, tzinfo=TZ)
 
-            # Skip past slots for today
-            if slot_start <= now:
-                # Advance to next 30-min boundary after now
-                minutes_ahead = int((now - slot_start).total_seconds() / 60) + 30
-                minutes_ahead = (minutes_ahead // 30) * 30
-                slot_start = datetime(day.year, day.month, day.day, open_h, open_m, tzinfo=TZ) + timedelta(minutes=minutes_ahead)
+            # If entire day is in the past, skip it
+            if close_dt <= now:
+                continue
+
+            # Advance slot_start to the first 30-min boundary after earliest_slot
+            if slot_start < earliest_slot:
+                # Round up to next 30-min boundary
+                delta_min = int((earliest_slot - slot_start).total_seconds() / 60)
+                rounded = ((delta_min + 29) // 30) * 30  # ceiling to next 30-min
+                slot_start = slot_start + timedelta(minutes=rounded)
 
             while slot_start + timedelta(minutes=service_duration) <= close_dt:
                 slot_end = slot_start + timedelta(minutes=service_duration)
                 slot_iso = slot_start.strftime("%Y-%m-%dT%H:%M:%S")
+
+                # Double-check slot is in the future (safety net)
+                if slot_start <= now:
+                    slot_start += timedelta(minutes=30)
+                    continue
 
                 calendar_busy = any(
                     slot_start < datetime.fromisoformat(b["end"].replace("Z", "+00:00"))
@@ -187,6 +210,9 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
                         })
 
                 slot_start += timedelta(minutes=30)
+
+        if len(slots) >= 10:
+            break  # stop scanning days once we have enough slots
 
     return slots[:10]
 
