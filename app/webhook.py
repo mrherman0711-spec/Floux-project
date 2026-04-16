@@ -226,9 +226,30 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             db.update_session(session["id"], status="active")
             session["status"] = "active"
 
+        # Also check if the client has a future confirmed appointment (e.g. session expired
+        # but they booked in a previous session). In that case we treat them as was_booked
+        # and pre-fill booking_data from the DB so the context injection has real data.
+        db_appointment_bd: dict = {}
+        if not was_booked:
+            upcoming = db.get_upcoming_appointments(salon_id, hours_ahead=168)  # 7 days
+            for appt in upcoming:
+                if appt["phone"] == phone:
+                    was_booked = True
+                    db_appointment_bd = {
+                        "service": appt.get("service", ""),
+                        "datetime": appt.get("datetime_start", ""),
+                        "client_name": appt.get("client_name", ""),
+                        "staff_assigned": appt.get("staff", ""),
+                    }
+                    break
+
         # Merge saved booking_data — never overwrite existing fields with empty values
+        # If we detected a DB appointment (session expired), seed current_bd from it.
         saved_bd = session.get("booking_data") or {}
-        current_bd = dict(saved_bd)
+        current_bd = dict(db_appointment_bd)  # start from DB appointment if any
+        for k, v in saved_bd.items():
+            if v:  # session data wins over DB if non-empty
+                current_bd[k] = v
         if not current_bd.get("service"):
             for svc in salon_config.get("services", []):
                 if svc["name"].lower() in text.lower():
@@ -363,6 +384,32 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
     """Process a completed booking."""
     bd = ai_response.get("booking_data", {})
     salon_id = salon_config["salon_id"]
+
+    # Guard: never create a booking with missing required fields
+    if not bd.get("service") or not bd.get("datetime") or not bd.get("client_name"):
+        log.error(
+            f"[booking] BLOCKED — missing required fields: "
+            f"service='{bd.get('service', '')}' datetime='{bd.get('datetime', '')}' "
+            f"client_name='{bd.get('client_name', '')}'"
+        )
+        return
+
+    # Normalize service name to exact catalog match (AI may return partial names)
+    service_raw = bd.get("service", "").lower().strip()
+    catalog_services = salon_config.get("services", [])
+    # First try exact match, then prefix/substring match
+    matched_service = next(
+        (s["name"] for s in catalog_services if s["name"].lower().strip() == service_raw),
+        None
+    )
+    if not matched_service:
+        matched_service = next(
+            (s["name"] for s in catalog_services if service_raw in s["name"].lower() or s["name"].lower() in service_raw),
+            bd.get("service", "")
+        )
+    if matched_service != bd.get("service"):
+        log.info(f"[booking] service normalized: '{bd.get('service')}' → '{matched_service}'")
+        bd["service"] = matched_service
 
     # Find service price and duration — case-insensitive match
     price = 0.0

@@ -66,14 +66,17 @@ def get_google_credentials(scopes: list[str]):
             client_secret = client_info.get("client_secret", "")
             token_uri = client_info.get("token_uri", "https://oauth2.googleapis.com/token")
 
-            # Rebuild credentials with client info so refresh works
+            # Rebuild credentials with client info so refresh works.
+            # Use the scopes from the token itself (not the caller's requested scopes)
+            # to avoid invalid_scope errors — the refresh token was issued with all 4 scopes.
+            token_scopes = creds.scopes or scopes
             creds = Credentials(
                 token=creds.token,
                 refresh_token=creds.refresh_token,
                 token_uri=token_uri,
                 client_id=client_id,
                 client_secret=client_secret,
-                scopes=scopes,
+                scopes=token_scopes,
             )
 
         creds.refresh(Request())

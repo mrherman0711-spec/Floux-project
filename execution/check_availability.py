@@ -108,7 +108,7 @@ def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict):
         if slot_key not in booked_by_staff.get(name, []):
             return name
     # All specific eligible staff busy — return first as fallback (rare edge case)
-    return eligible[0]["name"] if eligible and isinstance(eligible[0], dict) else (eligible[0] if eligible else None)
+    return eligible[0] if eligible else None
 
 
 def _generate_slots_from_schedule(config: dict, service: str, staff_members: list,
