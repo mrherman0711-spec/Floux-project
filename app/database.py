@@ -311,9 +311,11 @@ def cancel_appointment(appointment_id: int) -> None:
 def get_past_appointments_needing_review(salon_id: str) -> list[dict]:
     """Appointments that ended 2+ hours ago and haven't had a review request."""
     cutoff = (datetime.now(TZ) - timedelta(hours=2)).isoformat()
+    # Also require datetime_end is non-empty and looks like a real date (starts with 20)
+    # to avoid triggering on appointments saved with empty end times due to parse errors
     conn = get_db()
     rows = conn.execute(
-        "SELECT * FROM appointments WHERE salon_id = ? AND datetime_end < ? AND review_sent = 0 AND status = 'confirmed'",
+        "SELECT * FROM appointments WHERE salon_id = ? AND datetime_end != '' AND datetime_end LIKE '20%' AND datetime_end < ? AND review_sent = 0 AND status = 'confirmed'",
         (salon_id, cutoff),
     ).fetchall()
     conn.close()

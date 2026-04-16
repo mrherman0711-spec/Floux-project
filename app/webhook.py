@@ -356,8 +356,8 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
         start = datetime.fromisoformat(bd.get("datetime", ""))
         end = start + timedelta(minutes=duration)
     except (ValueError, TypeError):
-        log.error(f"[booking] datetime not ISO format: '{bd.get('datetime', '')}' — appointment saved without date")
-        end_str = ""
+        log.error(f"[booking] datetime not ISO format: '{bd.get('datetime', '')}' — using empty strings to avoid corrupted review triggers")
+        end_str = "0000-00-00T00:00:00"
         start_str = bd.get("datetime", "")
     else:
         end_str = end.isoformat()
