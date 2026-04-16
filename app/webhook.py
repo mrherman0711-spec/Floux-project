@@ -219,8 +219,10 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         db.log_message(phone, salon_id, "inbound", text, msg_id)
 
         # If session is booked, reopen it so the client can ask follow-up questions
-        # (e.g. "¿a qué hora era?", "¿puedo cambiarla?") with full context
-        if session["status"] == "booked":
+        # (e.g. "¿a qué hora era?", "¿puedo cambiarla?") with full context.
+        # Track this so we don't trigger a duplicate booking from post-booking messages.
+        was_booked = session["status"] == "booked"
+        if was_booked:
             db.update_session(session["id"], status="active")
             session["status"] = "active"
 
@@ -240,7 +242,23 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
 
         # Run AI conversation
         conversation = conversation_so_far
-        ai_response = ai_engine.chat(salon_config, conversation, text, availability)
+
+        # When re-entering a booked session, prepend a context note to the user message
+        # so the AI knows the appointment is already confirmed and doesn't ask for info again.
+        # We don't save this note to conversation history — it's a one-turn hint only.
+        ai_user_message = text
+        if was_booked and current_bd.get("service") and current_bd.get("datetime"):
+            staff = current_bd.get("staff_assigned") or current_bd.get("staff_preference") or ""
+            ai_user_message = (
+                f"[Sistema: cita ya confirmada — {current_bd.get('service')} "
+                f"el {current_bd.get('datetime')}"
+                f"{' con ' + staff if staff else ''}. "
+                f"No vuelvas a pedir datos ni marques conversation_complete. "
+                f"Responde solo la pregunta del cliente.]\n\n"
+                f"{text}"
+            )
+
+        ai_response = ai_engine.chat(salon_config, conversation, ai_user_message, availability)
 
         reply = ai_response["reply"]
 
@@ -256,12 +274,15 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
                 merged_bd[k] = v
 
         # Route on intent
-        log.info(f"[ai] complete={ai_response.get('conversation_complete')} escalate={ai_response.get('escalate')} bd={ai_response.get('booking_data')}")
+        log.info(f"[ai] complete={ai_response.get('conversation_complete')} escalate={ai_response.get('escalate')} was_booked={was_booked} bd={ai_response.get('booking_data')}")
         if ai_response.get("escalate"):
             await _handle_escalation(phone, salon_config, conversation, text)
             db.update_session(session["id"], status="escalated", conversation=conversation,
                             booking_data=merged_bd)
-        elif ai_response.get("conversation_complete"):
+        elif ai_response.get("conversation_complete") and not was_booked:
+            # Only process a new booking if this session wasn't already booked.
+            # was_booked=True means the client sent a follow-up message after booking
+            # (e.g. asking for the time again) — don't create a duplicate appointment.
             ai_response["booking_data"] = merged_bd
             log.info(f"[booking] conversation_complete=true, booking_data={merged_bd}")
             try:
@@ -270,6 +291,8 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
                 log.error(f"[booking] _handle_booking_complete failed: {e}", exc_info=True)
             db.update_session(session["id"], status="booked", conversation=conversation,
                             booking_data=merged_bd)
+        elif ai_response.get("conversation_complete") and was_booked:
+            log.info(f"[booking] conversation_complete suppressed — session was already booked (follow-up message)")
         else:
             db.update_session(session["id"], conversation=conversation,
                             booking_data=merged_bd)
