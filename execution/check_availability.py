@@ -193,10 +193,10 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
             if close_dt <= now:
                 continue
 
-            # Advance slot_start to the first 30-min boundary after earliest_slot
+            # Advance slot_start to the first booking_interval boundary after earliest_slot
             if slot_start < earliest_slot:
                 delta_min = int((earliest_slot - slot_start).total_seconds() / 60)
-                rounded = ((delta_min + 29) // 30) * 30  # ceiling to next 30-min
+                rounded = ((delta_min + booking_interval - 1) // booking_interval) * booking_interval
                 slot_start = slot_start + timedelta(minutes=rounded)
 
             while slot_start + timedelta(minutes=service_duration) <= close_dt:
@@ -205,7 +205,7 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
 
                 # Double-check slot is in the future (safety net)
                 if slot_start <= now:
-                    slot_start += timedelta(minutes=30)
+                    slot_start += timedelta(minutes=booking_interval)
                     continue
 
                 calendar_busy = any(
@@ -223,7 +223,9 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
                             "available": True,
                         })
 
-                slot_start += timedelta(minutes=30)
+                # Always advance by booking_interval (30 min), not service_duration.
+                # This allows back-to-back bookings at clean 30-min boundaries.
+                slot_start += timedelta(minutes=booking_interval)
 
                 if len(day_slots) >= MAX_SLOTS_PER_DAY:
                     break  # enough slots for this day
