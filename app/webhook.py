@@ -618,7 +618,7 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
 
     # 2. Delete / cancel Google Calendar event
     await asyncio.to_thread(
-        _cancel_calendar_event, salon_config, reference
+        _cancel_calendar_event, salon_config, reference, appt
     )
 
     # 3. Update Sheets row status to Cancelada (red)
@@ -646,34 +646,86 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     log.info(f"[cancellation] Done for {phone} — {service} {start_str}")
 
 
-def _cancel_calendar_event(salon_config: dict, event_reference: str):
-    """Delete the Google Calendar event for the cancelled appointment."""
+def _cancel_calendar_event(salon_config: dict, event_reference: str,
+                           appt: dict | None = None):
+    """Delete the Google Calendar event. Uses event_reference (id) if available,
+    falls back to searching by title+date when reference is missing."""
     try:
         from google_auth import get_google_credentials
         from googleapiclient.discovery import build
 
-        SCOPES = ["https://www.googleapis.com/auth/calendar"]
-        creds = get_google_credentials(SCOPES)
+        ALL_SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = get_google_credentials(ALL_SCOPES)
         if not creds:
             log.warning("[cancellation] No Google credentials — Calendar event not deleted")
             return
 
-        service = build("calendar", "v3", credentials=creds)
+        cal = build("calendar", "v3", credentials=creds)
         calendar_id = salon_config.get("google_calendar_id", "primary")
 
-        if not event_reference:
-            log.warning("[cancellation] No event reference — cannot delete Calendar event")
+        # Fast path: delete by known event id
+        if event_reference:
+            try:
+                cal.events().delete(calendarId=calendar_id, eventId=event_reference).execute()
+                log.info(f"[cancellation] Calendar event {event_reference} deleted")
+                return
+            except Exception as e:
+                log.warning(f"[cancellation] Delete by id failed ({e}), trying search fallback")
+
+        # Fallback: search by appointment date and find matching event
+        if not appt:
+            log.warning("[cancellation] No event reference and no appt data — cannot delete Calendar event")
             return
 
-        service.events().delete(calendarId=calendar_id, eventId=event_reference).execute()
-        log.info(f"[cancellation] Calendar event {event_reference} deleted")
+        start_str = appt.get("datetime_start", "")
+        client_name = appt.get("client_name", "")
+        service_name = appt.get("service", "")
+        if not start_str:
+            return
+
+        try:
+            from datetime import datetime as _dt, timedelta as _td
+            dt = _dt.fromisoformat(start_str)
+            time_min = (dt - _td(minutes=1)).isoformat()
+            time_max = (dt + _td(minutes=1)).isoformat()
+        except Exception:
+            log.warning(f"[cancellation] Cannot parse datetime {start_str}")
+            return
+
+        results = cal.events().list(
+            calendarId=calendar_id,
+            timeMin=time_min,
+            timeMax=time_max,
+            singleEvents=True,
+        ).execute()
+
+        events = results.get("items", [])
+        matched_id = None
+        for ev in events:
+            summary = ev.get("summary", "").lower()
+            if client_name.lower() in summary or service_name.lower() in summary:
+                matched_id = ev["id"]
+                break
+        if not matched_id and events:
+            matched_id = events[0]["id"]
+
+        if matched_id:
+            cal.events().delete(calendarId=calendar_id, eventId=matched_id).execute()
+            log.info(f"[cancellation] Calendar event {matched_id} deleted (via search fallback)")
+        else:
+            log.warning(f"[cancellation] No Calendar event found for {start_str}")
 
     except Exception as e:
-        log.error(f"[cancellation] Calendar event deletion failed: {e}")
+        log.error(f"[cancellation] Calendar event deletion failed: {e}", exc_info=True)
 
 
 def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: str):
-    """Find the row matching this phone + datetime and set Estado = Cancelada with red background."""
+    """Find the row matching this phone and set Estado = Cancelada with red background."""
     sheet_url = salon_config.get("google_sheet_url", "")
     if not sheet_url:
         return
@@ -685,11 +737,13 @@ def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: s
         import gspread
         from gspread.utils import rowcol_to_a1
 
-        SCOPES = [
+        ALL_SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
-        creds = get_google_credentials(SCOPES)
+        creds = get_google_credentials(ALL_SCOPES)
         if not creds:
             log.warning("[cancellation] Sheets: no credentials, skipping")
             return
@@ -700,44 +754,57 @@ def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: s
         ws = spreadsheet.sheet1
 
         all_values = ws.get_all_values()
-        # Find column indices from header row
         if not all_values:
             return
         headers = all_values[0]
         try:
             phone_col = headers.index("Telefono")
-            fecha_col = headers.index("Fecha")
             estado_col = headers.index("Estado")
         except ValueError:
             log.warning("[cancellation] Sheets headers not found")
             return
 
-        # Find matching row (1-indexed, skip header)
+        # fecha_col optional — used to tighten match but not required
+        fecha_col = headers.index("Fecha") if "Fecha" in headers else -1
+
+        # date prefix for optional date match (first 10 chars of ISO)
+        date_prefix = datetime_start[:10] if datetime_start else ""
+
+        # Find matching row (1-indexed, skip header row)
         target_row = None
         for i, row in enumerate(all_values[1:], start=2):
             row_phone = row[phone_col] if phone_col < len(row) else ""
-            row_fecha = row[fecha_col] if fecha_col < len(row) else ""
-            if row_phone == phone and row_fecha.startswith(datetime_start[:10]):
-                target_row = i
-                break
+            # Normalize: strip "whatsapp:" prefix and leading "+"
+            row_phone_norm = row_phone.replace("whatsapp:", "").strip()
+            phone_norm = phone.strip()
+            if row_phone_norm != phone_norm:
+                continue
+            # If we have a date column, also check the date prefix (first 10 chars)
+            if fecha_col >= 0 and date_prefix:
+                row_fecha = row[fecha_col] if fecha_col < len(row) else ""
+                # row_fecha may be full ISO, or just date — either way check prefix
+                if not row_fecha.startswith(date_prefix):
+                    continue
+            target_row = i
+            break
 
         if not target_row:
             log.warning(f"[cancellation] Sheets: no matching row for {phone} {datetime_start}")
             return
 
-        # Update Estado column value
+        # Update Estado column — gspread requires [[value]] not bare string
         estado_cell = rowcol_to_a1(target_row, estado_col + 1)
-        ws.update(estado_cell, "Cancelada")
+        ws.update(range_name=estado_cell, values=[["Cancelada"]])
 
         # Apply red background to entire row
-        red_format = {
-            "backgroundColor": {"red": 0.96, "green": 0.80, "blue": 0.80}
-        }
-        ws.format(f"A{target_row}:G{target_row}", red_format)
+        num_cols = len(headers) or 7
+        last_col_letter = chr(ord("A") + num_cols - 1)
+        ws.format(f"A{target_row}:{last_col_letter}{target_row}",
+                  {"backgroundColor": {"red": 0.96, "green": 0.80, "blue": 0.80}})
         log.info(f"[cancellation] Sheets row {target_row} updated to Cancelada (red)")
 
     except Exception as e:
-        log.error(f"[cancellation] Sheets update failed: {e}")
+        log.error(f"[cancellation] Sheets update failed: {e}", exc_info=True)
 
 
 def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
@@ -756,8 +823,13 @@ def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
         return
 
     try:
-        SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-        creds = get_google_credentials(SCOPES)
+        ALL_SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = get_google_credentials(ALL_SCOPES)
         if not creds:
             log.warning("[cancellation] Gmail: no credentials, skipping")
             return
@@ -903,11 +975,13 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
         from google_auth import get_google_credentials
         from googleapiclient.discovery import build
 
-        SCOPES = [
+        ALL_SCOPES = [
             "https://www.googleapis.com/auth/calendar",
             "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
         ]
-        creds = get_google_credentials(SCOPES)
+        creds = get_google_credentials(ALL_SCOPES)
         if not creds:
             log.warning("Google Calendar: no credentials, skipping event creation")
             return
@@ -991,8 +1065,13 @@ def _send_client_confirmation_email(salon_config: dict, client_email: str, bd: d
     from googleapiclient.discovery import build
 
     try:
-        SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-        creds = get_google_credentials(SCOPES)
+        ALL_SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = get_google_credentials(ALL_SCOPES)
         if not creds:
             log.warning("Client confirmation email: no Google credentials, skipping")
             return
@@ -1154,11 +1233,13 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
         from google_auth import get_google_credentials
         import gspread
 
-        SCOPES = [
+        ALL_SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
-        creds = get_google_credentials(SCOPES)
+        creds = get_google_credentials(ALL_SCOPES)
         if not creds:
             log.warning("Sheets: no credentials, skipping")
             return
