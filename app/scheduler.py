@@ -15,6 +15,77 @@ from app import whatsapp
 log = logging.getLogger("floux.scheduler")
 TZ = ZoneInfo(TIMEZONE)
 
+# Scheduler instance (populated by setup_scheduler)
+_scheduler = None
+
+# Track which sessions have already received a follow-up
+# Format: {phone: session_id} — keyed by session_id to avoid blocking new sessions
+_followup_sent: dict[str, int] = {}
+
+
+def get_scheduler():
+    """Return the running scheduler instance. Returns None if not yet started."""
+    return _scheduler
+
+
+def _build_followup_message(salon_name: str, booking_data: dict) -> str:
+    """
+    Choose follow-up message based on how far the booking progressed.
+    Three cases: service + datetime (near close), service only, or cold re-engagement.
+    """
+    service = (booking_data or {}).get("service", "")
+    dt      = (booking_data or {}).get("datetime", "")
+
+    if service and dt:
+        return (
+            f"Hola! 😊 Te escribo de parte de {salon_name}. "
+            f"Casi tienes tu cita lista — solo falta confirmarlo. "
+            f"Los huecos se llenan rápido, ¿lo reservamos ahora? "
+            f"Dime y lo apunto en segundos."
+        )
+    elif service:
+        return (
+            f"Hola! 😊 Te escribo de parte de {salon_name}. "
+            f"Veo que estás interesada en {service}. "
+            f"¿Qué día y hora te vendría mejor? "
+            f"Te cuento los huecos disponibles y lo reservamos."
+        )
+    else:
+        return (
+            f"Hola! 😊 Te escribo de parte de {salon_name}. "
+            f"Queremos ayudarte a reservar tu cita. "
+            f"¿En qué servicio estás pensando? "
+            f"Dime y lo organizamos en un momento."
+        )
+
+
+async def send_abandonment_followup(phone: str, session_id: int,
+                                    salon_config: dict, booking_data: dict) -> None:
+    """
+    Fires 5 min after client's last message if session is still active.
+    Guards: (1) session still active with same ID, (2) hasn't already been sent for this session.
+    """
+    session = db.get_active_session(phone)
+    if not session or session["id"] != session_id or session["status"] != "active":
+        log.info(f"[followup] Skipping {phone} — session no longer active or changed")
+        return
+
+    if _followup_sent.get(phone) == session_id:
+        log.info(f"[followup] Already sent for {phone} session {session_id}")
+        return
+
+    salon_name = salon_config.get("salon_name", "el salón")
+    msg = _build_followup_message(salon_name, booking_data)
+
+    try:
+        result = await whatsapp.send_text(phone, msg)
+        db.log_message(phone, salon_config["salon_id"], "outbound", msg,
+                       result.get("message_id", ""))
+        _followup_sent[phone] = session_id
+        log.info(f"[followup] Sent to {phone} (session {session_id})")
+    except Exception as e:
+        log.error(f"[followup] Failed to send to {phone}: {e}", exc_info=True)
+
 
 # ── Appointment Reminders ────────────────────────────────────
 
@@ -262,4 +333,6 @@ def setup_scheduler():
 
     scheduler.start()
     log.info("Scheduler started with 5 recurring tasks")
+    global _scheduler
+    _scheduler = scheduler
     return scheduler
