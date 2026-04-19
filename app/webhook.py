@@ -21,6 +21,7 @@ from app import database as db
 from app import whatsapp
 from app import ai_engine
 from app.phone import normalize_phone
+from app.scheduler import get_scheduler, send_abandonment_followup
 
 log = logging.getLogger("floux")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
@@ -201,6 +202,9 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         # Mark as read
         await whatsapp.mark_as_read(msg_id)
 
+        # Cancel any pending abandonment follow-up — client is back
+        _cancel_followup_job(phone)
+
         # Load or create session
         session = db.get_active_session(phone)
 
@@ -295,10 +299,19 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
                 merged_bd[k] = v
 
         # Route on intent
-        log.info(f"[ai] complete={ai_response.get('conversation_complete')} escalate={ai_response.get('escalate')} was_booked={was_booked} bd={ai_response.get('booking_data')}")
+        log.info(f"[ai] complete={ai_response.get('conversation_complete')} escalate={ai_response.get('escalate')} cancellation={ai_response.get('cancellation_confirmed')} was_booked={was_booked} bd={ai_response.get('booking_data')}")
         if ai_response.get("escalate"):
             await _handle_escalation(phone, salon_config, conversation, text)
             db.update_session(session["id"], status="escalated", conversation=conversation,
+                            booking_data=merged_bd)
+        elif ai_response.get("cancellation_confirmed") and was_booked and _cancellation_was_confirmed_by_client(conversation):
+            # Client confirmed cancellation of an existing appointment
+            ai_response["booking_data"] = merged_bd
+            try:
+                await _handle_cancellation(phone, salon_config, ai_response)
+            except Exception as e:
+                log.error(f"[cancellation] _handle_cancellation failed: {e}", exc_info=True)
+            db.update_session(session["id"], status="cancelled", conversation=conversation,
                             booking_data=merged_bd)
         elif ai_response.get("conversation_complete") and not was_booked:
             # Only process a new booking if this session wasn't already booked.
@@ -317,6 +330,8 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         else:
             db.update_session(session["id"], conversation=conversation,
                             booking_data=merged_bd)
+            # Schedule abandonment follow-up (replaces any previous pending job)
+            _schedule_followup(phone, session["id"], salon_config, merged_bd)
 
         # Update client language if detected
         if ai_response.get("language"):
@@ -361,6 +376,63 @@ async def handle_media_message(sender: str, media_type: str, msg_id: str):
 
     result = await whatsapp.send_text(phone, reply)
     db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
+
+
+def _cancellation_was_confirmed_by_client(conversation: list) -> bool:
+    """Guard: ensure the client explicitly confirmed cancellation in a prior message.
+    Prevents AI from firing cancellation_confirmed:true on the very first cancel request."""
+    confirm_words = {"sí", "si", "confirmo", "ok", "vale", "cancelar", "cancela", "de acuerdo", "yes"}
+    # Look at the last two user messages — if any contains a confirmation word, allow it
+    user_msgs = [m["content"].lower() for m in conversation if m.get("role") == "user"]
+    # Need at least 2 user messages: one asking to cancel, one confirming
+    if len(user_msgs) < 2:
+        return False
+    last_user = user_msgs[-1]
+    return any(w in last_user for w in confirm_words)
+
+
+def _cancel_followup_job(phone: str) -> None:
+    """Cancel any pending abandonment follow-up for this phone."""
+    scheduler = get_scheduler()
+    if not scheduler:
+        return
+    try:
+        scheduler.remove_job(f"followup_{phone}")
+        log.info(f"[followup] Cancelled pending job for {phone}")
+    except Exception:
+        pass
+
+
+def _schedule_followup(phone: str, session_id: int,
+                       salon_config: dict, booking_data: dict) -> None:
+    """Schedule a one-shot abandonment follow-up 5 minutes from now."""
+    scheduler = get_scheduler()
+    if not scheduler:
+        log.warning("[followup] Scheduler not running — cannot schedule follow-up")
+        return
+
+    job_id = f"followup_{phone}"
+
+    try:
+        scheduler.remove_job(job_id)
+    except Exception:
+        pass
+
+    run_at = datetime.now(TZ) + timedelta(minutes=5)
+    scheduler.add_job(
+        send_abandonment_followup,
+        trigger="date",
+        run_date=run_at,
+        id=job_id,
+        kwargs={
+            "phone": phone,
+            "session_id": session_id,
+            "salon_config": salon_config,
+            "booking_data": booking_data,
+        },
+        replace_existing=True,
+    )
+    log.info(f"[followup] Scheduled for {phone} at {run_at.isoformat()}")
 
 
 async def _handle_escalation(phone: str, salon_config: dict, _conversation: list, last_message: str):
@@ -491,6 +563,219 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
         log.warning(f"[booking] No client email found — confirmation email not sent for {phone}")
 
     log.info(f"Booking created: {appointment}")
+
+
+async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict):
+    """Cancel an existing appointment: DB + Calendar + Sheets + Gmail + owner WhatsApp."""
+    bd = ai_response.get("booking_data", {})
+    salon_id = salon_config["salon_id"]
+
+    # Find the confirmed appointment for this phone
+    conn = db.get_db()
+    row = conn.execute(
+        "SELECT * FROM appointments WHERE phone = ? AND salon_id = ? AND status = 'confirmed' ORDER BY datetime_start ASC LIMIT 1",
+        (phone, salon_id),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        log.warning(f"[cancellation] No confirmed appointment found for {phone}")
+        return
+
+    appt = dict(row)
+    appt_id = appt["id"]
+    service = appt.get("service", bd.get("service", ""))
+    start_str = appt.get("datetime_start", "")
+    staff_name = appt.get("staff", "")
+    client_name = appt.get("client_name", bd.get("client_name", phone))
+    price = appt.get("price", 0.0)
+    reference = appt.get("reference", "")
+
+    # 1. Mark cancelled in DB
+    db.cancel_appointment(appt_id)
+    log.info(f"[cancellation] Appointment {appt_id} marked cancelled in DB")
+
+    # 2. Delete / cancel Google Calendar event
+    await asyncio.to_thread(
+        _cancel_calendar_event, salon_config, reference
+    )
+
+    # 3. Update Sheets row status to Cancelada (red)
+    await asyncio.to_thread(
+        _update_sheet_cancellation, salon_config, phone, start_str
+    )
+
+    # 4. Send cancellation email to owner via Gmail
+    await asyncio.to_thread(
+        _send_cancellation_email, salon_config, service, client_name, start_str, staff_name, price
+    )
+
+    # 5. Notify owner via WhatsApp
+    owner_phone = salon_config.get("owner_phone", "")
+    if owner_phone:
+        notification = (
+            f"Cita cancelada\n\n"
+            f"Cliente: {client_name}\n"
+            f"Tel: {phone}\n"
+            f"Servicio: {service}\n"
+            f"Fecha: {start_str}"
+        )
+        await whatsapp.send_text(owner_phone, notification)
+
+    log.info(f"[cancellation] Done for {phone} — {service} {start_str}")
+
+
+def _cancel_calendar_event(salon_config: dict, event_reference: str):
+    """Delete the Google Calendar event for the cancelled appointment."""
+    try:
+        from google_auth import get_google_credentials
+        from googleapiclient.discovery import build
+
+        SCOPES = ["https://www.googleapis.com/auth/calendar"]
+        creds = get_google_credentials(SCOPES)
+        if not creds:
+            log.warning("[cancellation] No Google credentials — Calendar event not deleted")
+            return
+
+        service = build("calendar", "v3", credentials=creds)
+        calendar_id = salon_config.get("google_calendar_id", "primary")
+
+        if not event_reference:
+            log.warning("[cancellation] No event reference — cannot delete Calendar event")
+            return
+
+        service.events().delete(calendarId=calendar_id, eventId=event_reference).execute()
+        log.info(f"[cancellation] Calendar event {event_reference} deleted")
+
+    except Exception as e:
+        log.error(f"[cancellation] Calendar event deletion failed: {e}")
+
+
+def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: str):
+    """Find the row matching this phone + datetime and set Estado = Cancelada with red background."""
+    sheet_url = salon_config.get("google_sheet_url", "")
+    if not sheet_url:
+        return
+
+    try:
+        import sys as _sys
+        _sys.path.insert(0, str(BASE_DIR / "execution"))
+        from google_auth import get_google_credentials
+        import gspread
+        from gspread.utils import rowcol_to_a1
+
+        SCOPES = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = get_google_credentials(SCOPES)
+        if not creds:
+            log.warning("[cancellation] Sheets: no credentials, skipping")
+            return
+
+        gc = gspread.authorize(creds)
+        sheet_id = sheet_url.split("/d/")[1].split("/")[0]
+        spreadsheet = gc.open_by_key(sheet_id)
+        ws = spreadsheet.sheet1
+
+        all_values = ws.get_all_values()
+        # Find column indices from header row
+        if not all_values:
+            return
+        headers = all_values[0]
+        try:
+            phone_col = headers.index("Telefono")
+            fecha_col = headers.index("Fecha")
+            estado_col = headers.index("Estado")
+        except ValueError:
+            log.warning("[cancellation] Sheets headers not found")
+            return
+
+        # Find matching row (1-indexed, skip header)
+        target_row = None
+        for i, row in enumerate(all_values[1:], start=2):
+            row_phone = row[phone_col] if phone_col < len(row) else ""
+            row_fecha = row[fecha_col] if fecha_col < len(row) else ""
+            if row_phone == phone and row_fecha.startswith(datetime_start[:10]):
+                target_row = i
+                break
+
+        if not target_row:
+            log.warning(f"[cancellation] Sheets: no matching row for {phone} {datetime_start}")
+            return
+
+        # Update Estado column value
+        estado_cell = rowcol_to_a1(target_row, estado_col + 1)
+        ws.update(estado_cell, "Cancelada")
+
+        # Apply red background to entire row
+        red_format = {
+            "backgroundColor": {"red": 0.96, "green": 0.80, "blue": 0.80}
+        }
+        ws.format(f"A{target_row}:G{target_row}", red_format)
+        log.info(f"[cancellation] Sheets row {target_row} updated to Cancelada (red)")
+
+    except Exception as e:
+        log.error(f"[cancellation] Sheets update failed: {e}")
+
+
+def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
+                              start_str: str, staff_name: str, price: float):
+    """Send cancellation notification email to the salon owner via Gmail."""
+    import base64
+    from email.mime.text import MIMEText
+    import sys as _sys
+    _sys.path.insert(0, str(BASE_DIR / "execution"))
+    from google_auth import get_google_credentials
+    from googleapiclient.discovery import build
+
+    owner_email = salon_config.get("owner_email", "")
+    if not owner_email:
+        return
+
+    try:
+        SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+        creds = get_google_credentials(SCOPES)
+        if not creds:
+            log.warning("[cancellation] Gmail: no credentials, skipping")
+            return
+
+        gmail = build("gmail", "v1", credentials=creds)
+        salon_name = salon_config.get("salon_name", "el salón")
+
+        # Format date
+        try:
+            from datetime import datetime as _dt
+            dt_obj = _dt.fromisoformat(start_str)
+            day_names = {0:"Lunes",1:"Martes",2:"Miércoles",3:"Jueves",4:"Viernes",5:"Sábado",6:"Domingo"}
+            month_names = {1:"enero",2:"febrero",3:"marzo",4:"abril",5:"mayo",6:"junio",
+                           7:"julio",8:"agosto",9:"septiembre",10:"octubre",11:"noviembre",12:"diciembre"}
+            fecha = f"{day_names[dt_obj.weekday()]}, {dt_obj.day} de {month_names[dt_obj.month]} de {dt_obj.year}"
+            hora = dt_obj.strftime("%H:%M")
+        except Exception:
+            fecha = start_str
+            hora = ""
+
+        body = (
+            f"Cita cancelada — {salon_name}\n\n"
+            f"Cliente: {client_name}\n"
+            f"Servicio: {service}\n"
+            f"Fecha: {fecha} a las {hora}\n"
+            f"Profesional: {staff_name}\n"
+            f"Precio: {price}€\n\n"
+            f"La cita ha sido eliminada del calendario automáticamente."
+        )
+
+        msg = MIMEText(body)
+        msg["to"] = owner_email
+        msg["subject"] = f"❌ Cita cancelada — {service} ({client_name})"
+        raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+        gmail.users().messages().send(userId="me", body={"raw": raw}).execute()
+        log.info(f"[cancellation] Cancellation email sent to {owner_email}")
+
+    except Exception as e:
+        log.error(f"[cancellation] Gmail send failed: {e}")
 
 
 def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str: str,
@@ -778,7 +1063,14 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
             "Confirmada",
         ]
         ws.append_row(row, value_input_option="RAW")
-        log.info("Booking saved to Google Sheets")
+
+        # Apply green background to the new confirmed row
+        last_row = len(ws.get_all_values())
+        green_format = {
+            "backgroundColor": {"red": 0.78, "green": 0.93, "blue": 0.80}
+        }
+        ws.format(f"A{last_row}:G{last_row}", green_format)
+        log.info("Booking saved to Google Sheets (green)")
 
     except Exception as e:
         log.error(f"Google Sheets save failed: {e}")
