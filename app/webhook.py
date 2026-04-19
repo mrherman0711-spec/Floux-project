@@ -304,7 +304,7 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             await _handle_escalation(phone, salon_config, conversation, text)
             db.update_session(session["id"], status="escalated", conversation=conversation,
                             booking_data=merged_bd)
-        elif ai_response.get("cancellation_confirmed") and was_booked and _cancellation_was_confirmed_by_client(conversation):
+        elif ai_response.get("cancellation_confirmed") and was_booked:
             # Client confirmed cancellation of an existing appointment
             ai_response["booking_data"] = merged_bd
             try:
@@ -400,18 +400,6 @@ async def handle_media_message(sender: str, media_type: str, msg_id: str):
     result = await whatsapp.send_text(phone, reply)
     db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
 
-
-def _cancellation_was_confirmed_by_client(conversation: list) -> bool:
-    """Guard: ensure the client explicitly confirmed cancellation in a prior message.
-    Prevents AI from firing cancellation_confirmed:true on the very first cancel request."""
-    confirm_words = {"sí", "si", "confirmo", "ok", "vale", "cancelar", "cancela", "de acuerdo", "yes"}
-    # Look at the last two user messages — if any contains a confirmation word, allow it
-    user_msgs = [m["content"].lower() for m in conversation if m.get("role") == "user"]
-    # Need at least 2 user messages: one asking to cancel, one confirming
-    if len(user_msgs) < 2:
-        return False
-    last_user = user_msgs[-1]
-    return any(w in last_user for w in confirm_words)
 
 
 def _cancel_followup_job(phone: str) -> None:
@@ -545,10 +533,20 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
 
     staff_name = bd.get("staff_assigned", bd.get("staff_preference", "Sin preferencia"))
 
-    # Create Google Calendar event
-    await asyncio.to_thread(
+    # Create Google Calendar event and save the event_id to DB for later cancellation
+    event_id = await asyncio.to_thread(
         _create_calendar_event, salon_config, bd, start_str, end_str, staff_name, price
     )
+    if event_id and appointment:
+        try:
+            conn_ref = db.get_db()
+            conn_ref.execute("UPDATE appointments SET reference = ? WHERE id = ?",
+                             (event_id, appointment["id"]))
+            conn_ref.commit()
+            conn_ref.close()
+            log.info(f"[booking] Calendar event_id {event_id} saved to appointment {appointment['id']}")
+        except Exception as e:
+            log.error(f"[booking] Failed to save event_id to DB: {e}")
 
     # Save client to Google Sheets
     await asyncio.to_thread(
@@ -931,8 +929,9 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
         created = service.events().insert(
             calendarId=calendar_id, body=event, sendUpdates="all"
         ).execute()
+        event_id = created.get("id", "")
         event_url = created.get("htmlLink", "")
-        log.info(f"Calendar event created: {event_url}")
+        log.info(f"Calendar event created: {event_url} (id={event_id})")
 
         # Send email notification via Gmail
         owner_email = salon_config.get("owner_email")
@@ -940,8 +939,11 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
             _send_booking_email(creds, owner_email, svc_name, client_name,
                                 start_str, staff_name, price, event_url)
 
+        return event_id
+
     except Exception as e:
         log.error(f"Calendar event creation failed: {e}")
+    return None
 
 
 def _send_booking_email(creds, to_email: str, service: str, client_name: str,
