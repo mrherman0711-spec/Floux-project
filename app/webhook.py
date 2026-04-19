@@ -345,6 +345,29 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         client_email = merged_bd.get("client_email", "")
         if client_email and "@" in client_email:
             db.update_client(phone, email=client_email)
+            # If the session was already booked and the client just provided/corrected
+            # their email, send the confirmation email now (it was skipped at booking time).
+            if was_booked:
+                existing_appt = None
+                try:
+                    conn_tmp = db.get_db()
+                    existing_appt = conn_tmp.execute(
+                        "SELECT * FROM appointments WHERE phone = ? AND salon_id = ? AND status = 'confirmed' ORDER BY datetime_start ASC LIMIT 1",
+                        (phone, salon_id),
+                    ).fetchone()
+                    conn_tmp.close()
+                except Exception:
+                    pass
+                if existing_appt:
+                    appt = dict(existing_appt)
+                    await asyncio.to_thread(
+                        _send_client_confirmation_email,
+                        salon_config, client_email,
+                        {"service": appt["service"], "client_name": appt["client_name"],
+                         "client_email": client_email},
+                        appt["datetime_start"], appt["staff"], appt["price"],
+                    )
+                    log.info(f"[booking] Resent confirmation email to {client_email} (post-booking email update)")
 
         # Send reply
         result = await whatsapp.send_text(phone, reply)
