@@ -142,11 +142,12 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
     TZ = ZoneInfo("Europe/Madrid")
     now = datetime.now(TZ)
 
-    service_duration = 30  # default to shortest slot
+    booking_interval = config.get("booking_interval_min", 30)
+    service_duration = booking_interval  # default to interval
     if service:
         for svc in config.get("services", []):
             if svc["name"].lower().strip() == service.lower().strip():
-                service_duration = svc.get("duration_min", 30)
+                service_duration = svc.get("duration_min", booking_interval)
                 break
 
     working_hours = config.get("working_hours", {})

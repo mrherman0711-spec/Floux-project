@@ -721,8 +721,9 @@ def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: s
 
 def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
                               start_str: str, staff_name: str, price: float):
-    """Send cancellation notification email to the salon owner via Gmail."""
+    """Send HTML cancellation notification email to the salon owner via Gmail."""
     import base64
+    from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     import sys as _sys
     _sys.path.insert(0, str(BASE_DIR / "execution"))
@@ -742,6 +743,7 @@ def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
 
         gmail = build("gmail", "v1", credentials=creds)
         salon_name = salon_config.get("salon_name", "el salón")
+        salon_address = salon_config.get("address", "")
 
         # Format date
         try:
@@ -756,21 +758,116 @@ def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
             fecha = start_str
             hora = ""
 
-        body = (
+        html = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f5f0eb;font-family:'Georgia',serif;">
+
+  <!-- Header -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;">
+    <tr>
+      <td align="center" style="padding:36px 24px 28px;">
+        <p style="margin:0;font-size:11px;letter-spacing:4px;color:#e07070;text-transform:uppercase;">Cita cancelada</p>
+        <h1 style="margin:10px 0 0;font-size:26px;font-weight:400;color:#ffffff;letter-spacing:1px;">{salon_name}</h1>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Main card -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;">
+    <tr>
+      <td style="padding:0 24px;">
+
+        <!-- Red bar -->
+        <div style="height:3px;background:linear-gradient(90deg,#c0392b,#e74c3c,#c0392b);margin-bottom:0;"></div>
+
+        <!-- Details card -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:0 0 8px 8px;">
+          <tr>
+            <td style="padding:36px 40px 32px;">
+
+              <p style="margin:0 0 24px;font-size:16px;color:#2c2c2c;line-height:1.6;">
+                La siguiente cita ha sido <strong>cancelada por el cliente</strong>.<br>
+                El hueco ha quedado libre en el calendario.
+              </p>
+
+              <!-- Detail rows -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f0ebe4;">
+
+                <tr>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:12px;letter-spacing:2px;color:#c0392b;text-transform:uppercase;width:38%;">Cliente</td>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:15px;color:#1a1a1a;font-weight:600;">{client_name}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:12px;letter-spacing:2px;color:#c0392b;text-transform:uppercase;">Servicio</td>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:15px;color:#1a1a1a;">{service}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:12px;letter-spacing:2px;color:#c0392b;text-transform:uppercase;">Fecha</td>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:15px;color:#1a1a1a;">{fecha}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:12px;letter-spacing:2px;color:#c0392b;text-transform:uppercase;">Hora</td>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:15px;color:#1a1a1a;">{hora}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:12px;letter-spacing:2px;color:#c0392b;text-transform:uppercase;">Profesional</td>
+                  <td style="padding:14px 0;border-bottom:1px solid #f0ebe4;font-size:15px;color:#1a1a1a;">{staff_name}</td>
+                </tr>
+
+                <tr>
+                  <td style="padding:14px 0;font-size:12px;letter-spacing:2px;color:#c0392b;text-transform:uppercase;">Precio perdido</td>
+                  <td style="padding:14px 0;font-size:15px;color:#c0392b;font-weight:600;">{price}€</td>
+                </tr>
+
+              </table>
+
+              {"" if not salon_address else f'<p style="margin:24px 0 0;font-size:13px;color:#888;line-height:1.6;">📍 {salon_address}</p>'}
+
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer -->
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center" style="padding:28px 24px;">
+              <p style="margin:0;font-size:12px;color:#aaa;letter-spacing:1px;">Gestión automática por <strong style="color:#c9a96e;">Floux</strong></p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>"""
+
+        plain = (
             f"Cita cancelada — {salon_name}\n\n"
             f"Cliente: {client_name}\n"
             f"Servicio: {service}\n"
             f"Fecha: {fecha} a las {hora}\n"
             f"Profesional: {staff_name}\n"
-            f"Precio: {price}€\n\n"
-            f"La cita ha sido eliminada del calendario automáticamente."
+            f"Precio perdido: {price}€\n\n"
+            f"El hueco ha quedado libre en el calendario."
         )
 
-        msg = MIMEText(body)
+        msg = MIMEMultipart("alternative")
         msg["to"] = owner_email
         msg["subject"] = f"❌ Cita cancelada — {service} ({client_name})"
-        raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+        msg.attach(MIMEText(plain, "plain"))
+        msg.attach(MIMEText(html, "html"))
 
+        raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
         gmail.users().messages().send(userId="me", body={"raw": raw}).execute()
         log.info(f"[cancellation] Cancellation email sent to {owner_email}")
 
