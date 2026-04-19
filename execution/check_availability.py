@@ -112,15 +112,24 @@ def _get_booked_slots_from_db() -> dict:
 
 def _pick_available_staff(eligible: list, slot_iso: str, booked_by_staff: dict):
     """
-    Return the first eligible staff member not already booked at slot_iso.
+    Return the least-busy eligible staff member not already booked at slot_iso.
+    Uses round-robin by workload count to distribute evenly across the team.
     Always assigns someone — if preferred is busy, falls back to next available.
     """
     slot_key = slot_iso[:16]  # "YYYY-MM-DDTHH:MM"
-    for name in eligible:
+
+    # Sort eligible by number of already-booked future slots (ascending = least busy first)
+    eligible_sorted = sorted(
+        eligible,
+        key=lambda name: len(booked_by_staff.get(name, []))
+    )
+
+    for name in eligible_sorted:
         if slot_key not in booked_by_staff.get(name, []):
             return name
-    # All specific eligible staff busy — return first as fallback (rare edge case)
-    return eligible[0] if eligible else None
+
+    # All specific eligible staff busy at this slot — return least busy as fallback
+    return eligible_sorted[0] if eligible_sorted else None
 
 
 def _generate_slots_from_schedule(config: dict, service: str, staff_members: list,
@@ -157,14 +166,19 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
     check_date = now.date()  # start from today
     # Minimum buffer: never offer a slot starting in less than 30 minutes from now
     earliest_slot = now + timedelta(minutes=30)
+    # Max slots per day — ensures we spread across multiple days (better UX)
+    MAX_SLOTS_PER_DAY = 3
+    open_days_with_slots = 0
 
-    for day_offset in range(14):  # 14 days to guarantee enough open days
+    for day_offset in range(21):  # scan up to 3 weeks to find enough open days
         day = check_date + timedelta(days=day_offset)
         day_name = day_map[day.weekday()]
         hours = working_hours.get(day_name, "cerrado")
 
         if hours == "cerrado":
             continue
+
+        day_slots = []
 
         for franja in hours.split(","):
             open_time_str, close_time_str = franja.strip().split("-")
@@ -180,7 +194,6 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
 
             # Advance slot_start to the first 30-min boundary after earliest_slot
             if slot_start < earliest_slot:
-                # Round up to next 30-min boundary
                 delta_min = int((earliest_slot - slot_start).total_seconds() / 60)
                 rounded = ((delta_min + 29) // 30) * 30  # ceiling to next 30-min
                 slot_start = slot_start + timedelta(minutes=rounded)
@@ -203,7 +216,7 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
                 if not calendar_busy:
                     assigned = _pick_available_staff(eligible_names, slot_iso, booked_by_staff)
                     if assigned:
-                        slots.append({
+                        day_slots.append({
                             "datetime": slot_iso,
                             "staff": assigned,
                             "available": True,
@@ -211,8 +224,18 @@ def _generate_slots_from_schedule(config: dict, service: str, staff_members: lis
 
                 slot_start += timedelta(minutes=30)
 
-        if len(slots) >= 10:
-            break  # stop scanning days once we have enough slots
+                if len(day_slots) >= MAX_SLOTS_PER_DAY:
+                    break  # enough slots for this day
+
+            if len(day_slots) >= MAX_SLOTS_PER_DAY:
+                break
+
+        if day_slots:
+            slots.extend(day_slots)
+            open_days_with_slots += 1
+
+        if len(slots) >= 10 and open_days_with_slots >= 3:
+            break  # at least 3 different days covered
 
     return slots[:10]
 
