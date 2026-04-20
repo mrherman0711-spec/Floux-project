@@ -16,18 +16,15 @@ PROMPTS_DIR = BASE_DIR / "prompts"
 TMP_DIR = BASE_DIR / ".tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
-# ── Twilio (voice + WhatsApp) ───────────────────────────────
+# ── Twilio (voice — missed-call detection only) ─────────────
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "")
-WHATSAPP_PROVIDER = os.getenv("WHATSAPP_PROVIDER", "auto").lower()
-
-# ── Meta WhatsApp Cloud API ─────────────────────────────────
-META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "")
-WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
 WEBHOOK_VERIFY_TOKEN = os.getenv("WEBHOOK_VERIFY_TOKEN", "floux-verify-2026")
-META_API_VERSION = "v21.0"
-META_API_BASE = f"https://graph.facebook.com/{META_API_VERSION}/{WHATSAPP_PHONE_NUMBER_ID}/messages"
+
+# ── Evolution API (WhatsApp messaging via eSIM real) ─────────
+EVOLUTION_BASE_URL = os.getenv("EVOLUTION_BASE_URL", "").rstrip("/")
+EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
+EVOLUTION_INSTANCE = os.getenv("EVOLUTION_INSTANCE", "floux_salon_1")
 
 # ── OpenAI ──────────────────────────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
