@@ -108,6 +108,39 @@ def extract_learning(salon_id: str, conversation: list[dict],
         log.error(f"Learning extraction failed: {e}")
 
 
+# ── Service matching helpers ─────────────────────────────────
+
+def find_matching_services(catalog: list[dict], query: str) -> list[dict]:
+    """Return services matching query. Exact match wins (returns 1). Otherwise
+    all services whose name contains query (or vice versa) — ambiguous if >1.
+    Excludes add-on services (addon: true) from substring matches since those
+    aren't standalone bookings.
+
+    Returns:
+      []           → no match
+      [svc]        → unambiguous: safe to book
+      [s1, s2,...] → ambiguous: caller must disambiguate, do NOT book
+    """
+    if not query or not catalog:
+        return []
+    q = query.lower().strip()
+
+    # Exact match wins immediately — even if it's an addon.
+    for svc in catalog:
+        if svc.get("name", "").lower().strip() == q:
+            return [svc]
+
+    # Substring match — both directions, excluding add-ons.
+    matches = []
+    for svc in catalog:
+        if svc.get("addon"):
+            continue
+        name = svc.get("name", "").lower().strip()
+        if q in name or name in q:
+            matches.append(svc)
+    return matches
+
+
 # ── Prompt builder ───────────────────────────────────────────
 
 def build_system_prompt(salon_config: dict, availability_slots: list[dict] | None = None) -> str:
@@ -115,9 +148,11 @@ def build_system_prompt(salon_config: dict, availability_slots: list[dict] | Non
     base_prompt = salon_config.get("system_prompt", "")
     salon_id = salon_config.get("salon_id", "")
 
-    # Build services list
+    # Build services list — exclude add-ons from standalone bookings
     services_text = ""
     for svc in salon_config.get("services", []):
+        if svc.get("addon"):
+            continue
         services_text += f"- {svc['name']}: {svc['price']}€ ({svc['duration_min']} min)\n"
 
     # Build staff list
@@ -248,6 +283,7 @@ def chat(salon_config: dict, conversation: list[dict],
                 }),
                 "escalate": parsed.get("escalate", False),
                 "conversation_complete": parsed.get("conversation_complete", False),
+                "cancellation_confirmed": parsed.get("cancellation_confirmed", False),
             }
 
             if not result["reply"]:
