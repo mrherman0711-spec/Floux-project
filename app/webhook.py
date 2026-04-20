@@ -265,7 +265,12 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         # Only fetch availability once we know the service — saves ~1-2s per message
         conversation_so_far = session.get("conversation", [])
         needs_availability = bool(current_bd.get("service")) or len(conversation_so_far) >= 2
-        availability = _get_availability(salon_config, current_bd) if needs_availability else None
+        if needs_availability:
+            availability = _get_availability(salon_config, current_bd)
+        else:
+            # Service not yet known — pass empty list (not None) so the AI focuses on
+            # asking about the service rather than seeing "sistema no disponible".
+            availability = []
 
         # Run AI conversation
         conversation = conversation_so_far
