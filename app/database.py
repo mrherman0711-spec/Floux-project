@@ -172,11 +172,17 @@ def get_inactive_clients(salon_id: str, days: int = 30) -> list[dict]:
 
 def get_active_session(phone: str) -> dict | None:
     conn = get_db()
-    # Include 'booked' and 'escalated' so returning clients don't lose their booking context.
-    # webhook.py checks session["status"] == "booked" to set was_booked=True and avoid duplicates.
+    # 'booked' sessions kept for 4h post-confirmation (follow-up questions, reviews).
+    # After 4h or if cancelled, client starts fresh.
+    four_hours_ago = (datetime.now(TZ) - timedelta(hours=4)).isoformat()
     row = conn.execute(
-        "SELECT * FROM sessions WHERE phone = ? AND status IN ('active', 'escalated', 'booked') ORDER BY created_at DESC LIMIT 1",
-        (phone,),
+        """SELECT * FROM sessions WHERE phone = ?
+           AND (
+             status IN ('active', 'escalated')
+             OR (status = 'booked' AND updated_at >= ?)
+           )
+           ORDER BY created_at DESC LIMIT 1""",
+        (phone, four_hours_ago),
     ).fetchone()
     conn.close()
     if not row:
