@@ -116,27 +116,45 @@ async def twilio_voice_webhook(request: Request, background_tasks: BackgroundTas
     )
 
 
-# ── Twilio WhatsApp webhook (fallback if not using Meta API) ─
+# ── Evolution API WhatsApp webhook (new number) ───────────────
 
-@app.post("/twilio/whatsapp")
-async def twilio_whatsapp_webhook(request: Request, background_tasks: BackgroundTasks):
-    """Handle incoming WhatsApp via Twilio (fallback)."""
-    form = await request.form()
+@app.post("/webhook/evolution")
+async def evolution_webhook(request: Request, background_tasks: BackgroundTasks):
+    """Handle incoming WhatsApp messages from Evolution API."""
+    body = await request.json()
 
-    sender = form.get("From", "").replace("whatsapp:", "")
-    body = form.get("Body", "")
-    num_media = int(form.get("NumMedia", "0"))
-    msg_sid = form.get("MessageSid", "")
+    # Evolution API payload: {"event": "messages.upsert", "instance": "floux_salon_1", "data": {"key": {"remoteJid": "+34..."}, "message": {"conversation": "hola"}}}
+    event = body.get("event", "")
+    if event != "messages.upsert":
+        return Response(status_code=200)
 
-    if num_media > 0 or not body:
-        background_tasks.add_task(handle_media_message, sender, "audio", msg_sid)
-    else:
-        background_tasks.add_task(handle_whatsapp_message, sender, body, msg_sid)
+    try:
+        data = body.get("data", {})
+        key = data.get("key", {})
+        message = data.get("message", {})
 
-    return Response(
-        content='<?xml version="1.0" encoding="UTF-8"?><Response/>',
-        media_type="application/xml",
-    )
+        remote_jid = key.get("remoteJid", "")  # "+34XXXXXXXXX@s.whatsapp.net"
+        from_me = key.get("fromMe", False)
+
+        if from_me:  # Ignore our own messages
+            return Response(status_code=200)
+
+        # Extract phone and text
+        if "@" in remote_jid:
+            phone = remote_jid.split("@")[0]
+        else:
+            phone = remote_jid
+
+        text = message.get("conversation", "")
+        msg_id = key.get("id", "")
+
+        if text:
+            background_tasks.add_task(handle_whatsapp_message, f"+{phone}", text, msg_id)
+
+    except Exception as e:
+        log.error(f"Evolution webhook error: {e}", exc_info=True)
+
+    return Response(status_code=200)
 
 
 # ── Core logic ───────────────────────────────────────────────

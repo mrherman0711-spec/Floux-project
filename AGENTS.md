@@ -68,7 +68,7 @@ When something breaks:
 **Directory structure:**
 ```
 .claude/Skills/     Skills with YAML frontmatter (the instruction set — what to do)
-.claude/agents/     Subagents for specialized tasks (prospector, sales-coach, etc.)
+.claude/agents/     Subagents for specialized tasks (dream100 orchestrator + sub-agents, prospector, etc.)
 .claude/rules/      Brand voice, design system (always loaded)
 execution/          Python scripts (deterministic tools — how to do it)
 app/                FastAPI application (webhook handler, AI engine, database)

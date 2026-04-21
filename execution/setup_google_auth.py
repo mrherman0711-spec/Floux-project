@@ -10,6 +10,7 @@ Usage:
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -45,7 +46,19 @@ def main():
             if not CREDS_PATH.exists():
                 print(f"ERROR: credentials.json not found at {CREDS_PATH}")
                 sys.exit(1)
-            flow = InstalledAppFlow.from_client_secrets_file(str(CREDS_PATH), SCOPES)
+            with open(CREDS_PATH) as f:
+                creds_data = json.load(f)
+            # Support both "installed" (Desktop) and "web" credential types
+            if "web" in creds_data:
+                # Web credentials need a redirect URI — use localhost for local flow
+                creds_data["web"]["redirect_uris"] = ["http://localhost"]
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
+                    json.dump(creds_data, tmp)
+                    tmp_path = tmp.name
+                flow = InstalledAppFlow.from_client_secrets_file(tmp_path, SCOPES)
+                os.unlink(tmp_path)
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(str(CREDS_PATH), SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open(TOKEN_PATH, "w") as f:

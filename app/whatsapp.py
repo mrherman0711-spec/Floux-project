@@ -15,9 +15,25 @@ def _headers() -> dict:
     return {"apikey": EVOLUTION_API_KEY, "Content-Type": "application/json"}
 
 
-async def send_text(to: str, body: str) -> dict:
-    """Send a WhatsApp text message via Evolution API."""
+async def _send_typing(to: str, state: str = "typing") -> None:
+    """Send typing indicator (state: 'typing' or 'recording') to prevent ban."""
     to_clean = to.replace("whatsapp:", "").replace("+", "").strip()
+    url = f"{EVOLUTION_BASE_URL}/chat/typing/{EVOLUTION_INSTANCE}"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(url, headers=_headers(),
+                            json={"number": to_clean, "typing": state == "typing", "recording": state == "recording"})
+    except Exception as e:
+        log.warning(f"Typing indicator failed: {e}")
+
+
+async def send_text(to: str, body: str) -> dict:
+    """Send a WhatsApp text message via Evolution API with typing indicator."""
+    to_clean = to.replace("whatsapp:", "").replace("+", "").strip()
+
+    # Send typing indicator first
+    await _send_typing(to, "typing")
+
     url = f"{EVOLUTION_BASE_URL}/message/sendText/{EVOLUTION_INSTANCE}"
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
