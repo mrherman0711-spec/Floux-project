@@ -16,6 +16,10 @@ PROMPTS_DIR = BASE_DIR / "prompts"
 TMP_DIR = BASE_DIR / ".tmp"
 TMP_DIR.mkdir(exist_ok=True)
 
+# Persistent data dir — use /data if it exists (Railway volume), else BASE_DIR
+_data_dir = Path("/data") if Path("/data").exists() else BASE_DIR
+DATA_DIR = _data_dir
+
 # ── Twilio (voice — missed-call detection only) ─────────────
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")

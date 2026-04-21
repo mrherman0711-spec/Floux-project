@@ -17,11 +17,11 @@ import logging
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from app.config import BASE_DIR, TIMEZONE
+from app.config import DATA_DIR, TIMEZONE
 
 log = logging.getLogger("floux.db")
 
-DB_PATH = BASE_DIR / "floux.db"
+DB_PATH = DATA_DIR / "floux.db"
 TZ = ZoneInfo(TIMEZONE)
 
 
@@ -172,10 +172,10 @@ def get_inactive_clients(salon_id: str, days: int = 30) -> list[dict]:
 
 def get_active_session(phone: str) -> dict | None:
     conn = get_db()
-    # Include 'escalated' so a transient AI error doesn't wipe conversation context.
-    # Real escalations are handled by the caller checking session["status"].
+    # Include 'booked' and 'escalated' so returning clients don't lose their booking context.
+    # webhook.py checks session["status"] == "booked" to set was_booked=True and avoid duplicates.
     row = conn.execute(
-        "SELECT * FROM sessions WHERE phone = ? AND status IN ('active', 'escalated') ORDER BY created_at DESC LIMIT 1",
+        "SELECT * FROM sessions WHERE phone = ? AND status IN ('active', 'escalated', 'booked') ORDER BY created_at DESC LIMIT 1",
         (phone,),
     ).fetchone()
     conn.close()
