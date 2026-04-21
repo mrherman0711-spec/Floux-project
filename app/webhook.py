@@ -248,22 +248,26 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             db.update_session(session["id"], status="active")
             session["status"] = "active"
 
-        # Also check if the client has a future confirmed appointment (e.g. session expired
-        # but they booked in a previous session). In that case we treat them as was_booked
-        # and pre-fill booking_data from the DB so the context injection has real data.
+        # Also check if the client has a confirmed appointment in DB (future OR recent past)
+        # e.g. session expired but they booked in a previous session, or appointment is today.
+        # Pre-fill booking_data so cancellation confirmation shows real service+date.
         db_appointment_bd: dict = {}
         if not was_booked:
-            upcoming = db.get_upcoming_appointments(salon_id, hours_ahead=168)  # 7 days
-            for appt in upcoming:
-                if appt["phone"] == phone:
-                    was_booked = True
-                    db_appointment_bd = {
-                        "service": appt.get("service", ""),
-                        "datetime": appt.get("datetime_start", ""),
-                        "client_name": appt.get("client_name", ""),
-                        "staff_assigned": appt.get("staff", ""),
-                    }
-                    break
+            conn_tmp = db.get_db()
+            appt_row = conn_tmp.execute(
+                "SELECT * FROM appointments WHERE phone = ? AND salon_id = ? AND status = 'confirmed' ORDER BY datetime_start DESC LIMIT 1",
+                (phone, salon_id),
+            ).fetchone()
+            conn_tmp.close()
+            if appt_row:
+                appt = dict(appt_row)
+                was_booked = True
+                db_appointment_bd = {
+                    "service": appt.get("service", ""),
+                    "datetime": appt.get("datetime_start", ""),
+                    "client_name": appt.get("client_name", ""),
+                    "staff_assigned": appt.get("staff", ""),
+                }
 
         # Merge saved booking_data — never overwrite existing fields with empty values
         # If we detected a DB appointment (session expired), seed current_bd from it.
