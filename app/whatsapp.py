@@ -4,6 +4,7 @@ Twilio solo maneja voz (missed-call detection) — no se usa para mensajería.
 """
 from __future__ import annotations
 
+import asyncio
 import httpx
 import logging
 from app.config import EVOLUTION_BASE_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCE
@@ -45,6 +46,35 @@ async def send_template(to: str, template_name: str, language: str = "es",  # no
     return await send_text(to, text)
 
 
-async def mark_as_read(message_id: str) -> None:
-    """No-op: Evolution API gestiona el estado de lectura internamente."""
-    pass
+async def send_with_presence(remote_jid: str, body: str) -> dict:
+    """Read → wait 2s → typing indicator → send message."""
+    await asyncio.sleep(2)
+    await send_presence(remote_jid, "composing")
+    await asyncio.sleep(1.5)
+    await send_presence(remote_jid, "paused")
+    return await send_text(remote_jid, body)
+
+
+async def mark_as_read(remote_jid: str, message_id: str) -> None:
+    """Mark a message as read (double blue tick) via Evolution API."""
+    url = f"{EVOLUTION_BASE_URL}/chat/markMessageAsRead/{EVOLUTION_INSTANCE}"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(url, headers=_headers(), json={
+                "readMessages": [{"remoteJid": remote_jid, "id": message_id, "fromMe": False}]
+            })
+    except Exception as e:
+        log.warning(f"mark_as_read failed: {e}")
+
+
+async def send_presence(remote_jid: str, presence: str = "composing") -> None:
+    """Emit a presence event (composing = typing indicator) via Evolution API."""
+    url = f"{EVOLUTION_BASE_URL}/chat/sendPresence/{EVOLUTION_INSTANCE}"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(url, headers=_headers(), json={
+                "number": remote_jid,
+                "options": {"presence": presence, "delay": 1200}
+            })
+    except Exception as e:
+        log.warning(f"send_presence failed: {e}")

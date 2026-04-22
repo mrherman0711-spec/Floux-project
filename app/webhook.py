@@ -149,7 +149,7 @@ async def evolution_webhook(request: Request, background_tasks: BackgroundTasks)
         msg_id = key.get("id", "")
 
         if text:
-            background_tasks.add_task(handle_whatsapp_message, f"+{phone}", text, msg_id)
+            background_tasks.add_task(handle_whatsapp_message, f"+{phone}", text, msg_id, remote_jid)
 
     except Exception as e:
         log.error(f"Evolution webhook error: {e}", exc_info=True)
@@ -209,7 +209,7 @@ async def handle_missed_call(caller: str, called: str, call_sid: str):
         log.error(f"Error handling missed call: {e}", exc_info=True)
 
 
-async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
+async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_jid: str = ""):
     """Process an incoming WhatsApp text message."""
     try:
         phone = normalize_phone(sender)
@@ -217,8 +217,9 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
             log.error(f"Invalid sender phone: {sender}")
             return
 
-        # Mark as read
-        await whatsapp.mark_as_read(msg_id)
+        # Mark as read (double blue tick) — requires remote_jid for Evolution API
+        jid = remote_jid or f"{phone.lstrip('+')}@s.whatsapp.net"
+        await whatsapp.mark_as_read(jid, msg_id)
 
         # Cancel any pending abandonment follow-up — client is back
         _cancel_followup_job(phone)
@@ -398,8 +399,8 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
                     )
                     log.info(f"[booking] Resent confirmation email to {client_email} (post-booking email update)")
 
-        # Send reply
-        result = await whatsapp.send_text(phone, reply)
+        # Send reply with presence simulation (read → 2s wait → typing → send)
+        result = await whatsapp.send_with_presence(jid, reply)
         db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
 
         log.info(f"Reply sent to {phone}: {reply[:50]}...")
@@ -408,13 +409,14 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str):
         log.error(f"Error handling message from {sender}: {e}", exc_info=True)
 
 
-async def handle_media_message(sender: str, media_type: str, msg_id: str):
+async def handle_media_message(sender: str, media_type: str, msg_id: str, remote_jid: str = ""):
     """Handle voice notes, images, etc. — ask client to type instead."""
     phone = normalize_phone(sender)
     if not phone:
         return
 
-    await whatsapp.mark_as_read(msg_id)
+    jid = remote_jid or f"{phone.lstrip('+')}@s.whatsapp.net"
+    await whatsapp.mark_as_read(jid, msg_id)
 
     session = db.get_active_session(phone)
     salon_id = session["salon_id"] if session else "escultor_peluqueria"
@@ -426,7 +428,7 @@ async def handle_media_message(sender: str, media_type: str, msg_id: str):
     else:
         reply = "Disculpa, solo puedo leer mensajes de texto. Me escribes qué necesitas?"
 
-    result = await whatsapp.send_text(phone, reply)
+    result = await whatsapp.send_with_presence(jid, reply)
     db.log_message(phone, salon_id, "outbound", reply, result.get("message_id", ""))
 
 
