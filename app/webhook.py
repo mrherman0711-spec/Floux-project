@@ -642,7 +642,6 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     start_str = appt.get("datetime_start", "")
     staff_name = appt.get("staff", "")
     client_name = appt.get("client_name", bd.get("client_name", phone))
-    price = appt.get("price", 0.0)
     reference = appt.get("reference", "")
 
     # Lookup client email upfront (for cancellation email)
@@ -655,7 +654,7 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
 
     log.info(f"[cancel] appt={appt_id} service='{service}' start={start_str} staff={staff_name} email={client_email} reference={reference}")
 
-    results = {"db": False, "cal": False, "sheet": False, "mail_owner": False,
+    results = {"db": False, "cal": False, "sheet": False,
                "mail_client": False, "wa_owner": False, "wa_client": False}
 
     # 1. Mark cancelled in DB
@@ -686,17 +685,7 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     except Exception as e:
         log.error(f"[cancel] step3 Sheets FAILED: {e}", exc_info=True)
 
-    # 4. Send cancellation email to owner via Gmail
-    try:
-        ok = await asyncio.to_thread(
-            _send_cancellation_email, salon_config, service, client_name, start_str, staff_name, price
-        )
-        results["mail_owner"] = bool(ok)
-        log.info(f"[cancel] step4 Mail owner: ok={results['mail_owner']}")
-    except Exception as e:
-        log.error(f"[cancel] step4 Mail owner FAILED: {e}", exc_info=True)
-
-    # 5. Send cancellation email to client via Gmail (if email known)
+    # 4. Send cancellation email to client via Gmail (if email known)
     if client_email and "@" in client_email:
         try:
             ok = await asyncio.to_thread(
