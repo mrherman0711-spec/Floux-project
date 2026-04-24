@@ -335,14 +335,42 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
             db.update_session(session["id"], status="escalated", conversation=conversation,
                             booking_data=merged_bd)
         elif ai_response.get("cancellation_confirmed") and was_booked:
-            # Client confirmed cancellation of an existing appointment
-            ai_response["booking_data"] = merged_bd
-            try:
-                await _handle_cancellation(phone, salon_config, ai_response)
-            except Exception as e:
-                log.error(f"[cancellation] _handle_cancellation failed: {e}", exc_info=True)
-            db.update_session(session["id"], status="cancelled", conversation=conversation,
-                            booking_data=merged_bd)
+            # Guard: only allow cancellation if the bot's previous message asked
+            # for explicit confirmation (contains "cancelar"/"cancel") AND the
+            # client's reply is a short affirmation — prevents accidental cancel
+            # from post-booking thank-you/closing messages.
+            prev_bot_msg = ""
+            for turn in reversed(conversation_so_far):
+                if turn["role"] == "assistant":
+                    prev_bot_msg = turn["content"].lower()
+                    break
+            user_msg_lower = text.lower().strip()
+            bot_asked_to_cancel = any(w in prev_bot_msg for w in ["cancelar", "cancel", "cancela"])
+            user_said_affirm = any(
+                user_msg_lower.startswith(w) or user_msg_lower == w
+                for w in ["sí", "si", "yes", "ok", "okay", "dale", "venga",
+                          "claro", "exacto", "confirmo", "confirm"]
+            ) or any(w in user_msg_lower for w in ["sí cancela", "si cancela",
+                                                    "confirmo cancel", "cancela",
+                                                    "cancel it", "confirm cancel"])
+
+            if not (bot_asked_to_cancel and user_said_affirm):
+                log.warning(
+                    f"[cancellation] BLOCKED — GPT hallucinated cancellation_confirmed. "
+                    f"bot_asked={bot_asked_to_cancel} user_affirm={user_said_affirm} "
+                    f"prev_bot='{prev_bot_msg[:80]}' user='{user_msg_lower[:80]}'"
+                )
+                db.update_session(session["id"], conversation=conversation,
+                                booking_data=merged_bd)
+            else:
+                # Client confirmed cancellation of an existing appointment
+                ai_response["booking_data"] = merged_bd
+                try:
+                    await _handle_cancellation(phone, salon_config, ai_response)
+                except Exception as e:
+                    log.error(f"[cancellation] _handle_cancellation failed: {e}", exc_info=True)
+                db.update_session(session["id"], status="cancelled", conversation=conversation,
+                                booking_data=merged_bd)
         elif ai_response.get("conversation_complete") and not was_booked:
             # Only process a new booking if this session wasn't already booked.
             # was_booked=True means the client sent a follow-up message after booking
