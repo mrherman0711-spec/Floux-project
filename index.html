@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Floux — Agente WhatsApp Salón Madrid | Recupera Clientes Perdidos</title>
   <meta name="description" content="Floux recupera las llamadas perdidas de tu salón de estética en Madrid Oeste. Tu cliente recibe un WhatsApp automático en 30 segundos. Sin apps. Sin contratos. Desde €47/mes en Majadahonda, Pozuelo, Boadilla, Villaviciosa." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <link rel="canonical" href="https://floux.es/" />
+  <link rel="alternate" hreflang="es" href="https://floux.es/" />
+  <link rel="alternate" hreflang="x-default" href="https://floux.es/" />
+  <meta name="geo.region" content="ES-MD" />
+  <meta name="geo.placename" content="Madrid" />
+  <meta name="geo.position" content="40.4168;-3.7038" />
+  <meta name="ICBM" content="40.4168, -3.7038" />
   <meta property="og:title" content="Floux — Asistente WhatsApp para Salones de Estética en Madrid" />
   <meta property="og:description" content="Recupera los clientes que pierdes cuando no puedes coger el teléfono. Agente IA automático, WhatsApp nativo, sin comisiones." />
   <meta property="og:type" content="website" />
@@ -19,6 +27,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.remove('no-js');</script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -225,6 +234,11 @@
 
     /* ── SCROLL REVEAL ── */
     .reveal { opacity:0; transform:translateY(44px); transition:opacity 0.9s var(--ease-spring), transform 0.9s var(--ease-spring); }
+    /* Fallback: si el usuario prefiere reduced motion o JS no carga, mostrar contenido */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-left { opacity:1 !important; transform:none !important; transition:none !important; }
+    }
+    .no-js .reveal, .no-js .reveal-left { opacity:1 !important; transform:none !important; }
     .reveal.visible { opacity:1; transform:translateY(0); }
     .reveal-delay-1 { transition-delay:0.12s; }
     .reveal-delay-2 { transition-delay:0.24s; }
@@ -580,7 +594,7 @@
       </div>
       <div class="hero-copy">
         <span class="eyebrow">El asistente de WhatsApp para salones · Madrid</span>
-        <h1 class="hero-h1" id="hero-h1" aria-label="Recupera los clientes que pierdes mientras trabajas"></h1>
+        <h1 class="hero-h1" id="hero-h1">Recupera los clientes que pierdes mientras trabajas</h1>
         <p class="hero-sub">El asistente de WhatsApp para salones de estética en Madrid. Cada llamada perdida, convertida en cita confirmada — en 30 segundos.</p>
         <div class="hero-btns">
           <a href="#contacto" class="btn btn-primary">Ver demostración</a>
@@ -832,6 +846,7 @@
               <div>
                 <div style="font-size:0.625rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Email</div>
                 <a href="mailto:max@floux.es" style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300;">max@floux.es</a>
+                <a href="tel:+34665776235" style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300; display:block; margin-top:0.5rem;">+34 665 77 62 35</a>
                 <a href="https://wa.me/34665776235" target="_blank" rel="noopener" class="btn-whatsapp-contact">
                   Escríbenos por WhatsApp
                 </a>
@@ -913,6 +928,7 @@
         <div class="footer-col">
           <h4>Contacto</h4>
           <a href="mailto:max@floux.es">max@floux.es</a>
+          <a href="tel:+34665776235">+34 665 77 62 35</a>
           <a href="#contacto">Reservar demostración</a>
         </div>
       </div>
@@ -926,10 +942,14 @@
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
   <script>
-    /* ── HERO SPLIT TEXT ── */
+    /* ── HERO SPLIT TEXT ──
+       Progressive enhancement: el H1 ya viene con texto puro en el HTML
+       (para SEO/SSR). Aquí lo vaciamos y lo reconstruimos palabra a palabra
+       para la animación. Si JS falla, el texto puro queda visible. */
     const heroWords = ['Recupera', 'los', 'clientes', 'que', 'pierdes', 'mientras', 'trabajas'];
     const heroItalic = ['pierdes', 'mientras', 'trabajas'];
     const h1 = document.getElementById('hero-h1');
+    h1.textContent = '';
     heroWords.forEach((word, i) => {
       const wrap = document.createElement('span');
       wrap.className = 'hero-word' + (heroItalic.includes(word) ? ' hero-word-em' : '');

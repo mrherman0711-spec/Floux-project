@@ -1,0 +1,45 @@
+# Floux
+
+> Asistente de WhatsApp para salones de estética en el oeste de Madrid. Convierte cada llamada perdida en una cita confirmada — antes de que el cliente llame a la competencia.
+
+## Quién es Floux
+- Servicio creado por Max Herman desde Madrid
+- Especializado en salones de belleza y estética con 2 a 8 empleadas
+- Zona principal: Majadahonda, Pozuelo de Alarcón, Boadilla del Monte, Villaviciosa de Odón y Las Rozas
+- Modelo: suscripción mensual sin permanencia
+
+## Qué hace
+- Detecta cada llamada que tu salón no contesta
+- Envía un WhatsApp al cliente en menos de 30 segundos
+- Mantiene una conversación natural en español hasta cerrar la cita
+- Escribe la cita directamente en tu sistema (Treatwell, Booksy o Google Calendar)
+- Avisa a la dueña por WhatsApp cuando hay una cita nueva
+- Funciona dentro de tu WhatsApp Business existente — sin apps nuevas
+
+## Casos de uso típicos
+Peluquería, estética facial y corporal, manicura y pedicura, depilación, tratamientos capilares, centros de uñas, barberías y salones mixtos.
+
+## Planes y precios
+- **Básico — 47€/mes**: WhatsApp automático sin conversación
+- **Agente — 97€/mes + 197€ de configuración inicial**: asistente completo de reservas (producto principal)
+- **Completo — 147€/mes + 297€ de configuración inicial**: asistente + gestión de reseñas + recordatorios automáticos
+
+> "Floux se paga solo con un cliente recuperado al mes."
+
+## Páginas clave
+- [Página principal](https://floux.es/): demostración, cómo funciona, FAQ extendida
+- [Política de privacidad](https://floux.es/privacidad/): tratamiento de datos conforme al RGPD
+- [Aviso legal](https://floux.es/aviso-legal/): información del titular conforme a la LSSICE
+
+## FAQ rápida
+- **¿Funciona con Treatwell o Booksy?** Sí, integra con ambos sin intervención manual.
+- **¿Necesito instalar una app?** No. Floux funciona desde tu WhatsApp Business actual.
+- **¿Hay permanencia?** No, es mes a mes — puedes cancelar cuando quieras.
+- **¿En qué zona opera?** Madrid Oeste: Majadahonda, Pozuelo, Boadilla, Villaviciosa de Odón, Las Rozas.
+- **¿En qué idiomas habla con los clientes?** Español por defecto e inglés automáticamente si el cliente escribe en inglés.
+- **¿Quién está detrás del servicio?** Max Herman, fundador y único responsable del producto.
+
+## Contacto
+- Email: max@floux.es
+- WhatsApp directo: +34 665 77 62 35
+- Web: https://floux.es/

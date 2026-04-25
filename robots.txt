@@ -3,4 +3,26 @@ Allow: /
 Disallow: /admin/
 Disallow: /private/
 
+# AI crawlers — explícitamente permitidos para citación en LLMs
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
 Sitemap: https://floux.es/sitemap.xml
