@@ -95,21 +95,28 @@ async def meta_webhook(request: Request, background_tasks: BackgroundTasks):
 
 @app.post("/twilio/voice")
 async def twilio_voice_webhook(request: Request, background_tasks: BackgroundTasks):
-    """Detect missed calls via Twilio voice webhook. Respond 200 IMMEDIATELY."""
+    """Detect missed calls via Twilio voice webhook. Respond 200 IMMEDIATELY.
+
+    With call forwarding: the mobile forwards to Twilio, so Twilio receives
+    the call as "ringing"/"in-progress" — never "no-answer". We treat any
+    incoming call to our number as a missed call and trigger WhatsApp recovery.
+    """
     form = await request.form()
 
     call_status = form.get("CallStatus", "")
     caller = form.get("From", "")
     called = form.get("To", "")
     call_sid = form.get("CallSid", "")
+    direction = form.get("Direction", "")
 
-    log.info(f"Twilio voice: {call_status} from {caller} to {called} (SID: {call_sid})")
+    log.info(f"Twilio voice: {call_status} dir={direction} from {caller} to {called} (SID: {call_sid})")
 
-    # Only process missed calls
-    if call_status in ("no-answer", "busy"):
+    # Trigger WhatsApp on any inbound call — the mobile forwarding already
+    # means the salon couldn't answer. Skip outbound legs.
+    if direction != "outbound-dial" and call_status in ("ringing", "in-progress", "no-answer", "busy"):
         background_tasks.add_task(handle_missed_call, caller, called, call_sid)
 
-    # ALWAYS respond with empty TwiML immediately
+    # ALWAYS respond with empty TwiML immediately — hangs up cleanly
     return Response(
         content='<?xml version="1.0" encoding="UTF-8"?><Response/>',
         media_type="application/xml",
