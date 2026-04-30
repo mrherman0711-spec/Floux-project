@@ -396,96 +396,75 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
             if v:  # only overwrite if AI returned a non-empty value
                 merged_bd[k] = v
 
-        # Route on intent
-        log.info(f"[ai] complete={ai_response.get('conversation_complete')} escalate={ai_response.get('escalate')} cancellation={ai_response.get('cancellation_confirmed')} was_booked={was_booked} bd={ai_response.get('booking_data')}")
+        # Route on intent — DB-backed source of truth for active bookings
+        old_appt = db.get_latest_confirmed_appointment(phone, salon_id)
+        has_active_booking = old_appt is not None
+
+        is_reschedule = bool(
+            has_active_booking
+            and ai_response.get("cancellation_confirmed")
+            and ai_response.get("conversation_complete")
+            and new_bd.get("datetime")
+            and new_bd["datetime"] != old_appt.get("datetime_start")
+        )
+        is_pure_cancellation = bool(
+            has_active_booking
+            and ai_response.get("cancellation_confirmed")
+            and not is_reschedule
+        )
+
+        log.info(
+            f"[ai] complete={ai_response.get('conversation_complete')} "
+            f"escalate={ai_response.get('escalate')} "
+            f"cancellation={ai_response.get('cancellation_confirmed')} "
+            f"has_booking={has_active_booking} is_reschedule={is_reschedule} "
+            f"is_cancel={is_pure_cancellation} bd={ai_response.get('booking_data')}"
+        )
+
         if ai_response.get("escalate"):
             await _handle_escalation(phone, salon_config, conversation, text)
             db.update_session(session["id"], status="escalated", conversation=conversation,
                             booking_data=merged_bd)
-        elif ai_response.get("cancellation_confirmed") and was_booked:
+
+        elif is_reschedule:
             if not _passes_cancellation_guard(conversation_so_far, text):
-                log.warning(
-                    f"[cancellation] BLOCKED — GPT hallucinated cancellation_confirmed. "
-                    f"user='{text.lower().strip()[:80]}'"
-                )
-                db.update_session(session["id"], conversation=conversation,
-                                booking_data=merged_bd)
+                log.warning(f"[reschedule] BLOCKED by guard — user='{text.lower().strip()[:80]}'")
+                db.update_session(session["id"], conversation=conversation, booking_data=merged_bd)
             else:
-                # Client confirmed cancellation of an existing appointment.
-                # Use silent=True when reschedule is detected in same turn — new booking notification covers it.
+                ok = await _handle_reschedule(phone, salon_config, old_appt, new_bd, conversation)
+                final_status = "booked" if ok else "active"
+                db.update_session(session["id"], status=final_status,
+                                conversation=conversation, booking_data=merged_bd)
+
+        elif is_pure_cancellation:
+            if not _passes_cancellation_guard(conversation_so_far, text):
+                log.warning(f"[cancellation] BLOCKED by guard — user='{text.lower().strip()[:80]}'")
+                db.update_session(session["id"], conversation=conversation, booking_data=merged_bd)
+            else:
                 ai_response["booking_data"] = merged_bd
-                same_turn_reschedule = (
-                    ai_response.get("conversation_complete")
-                    and new_bd.get("datetime")
-                    and new_bd.get("service")
-                    and (new_bd.get("client_name") or merged_bd.get("client_name"))
-                )
                 try:
-                    await _handle_cancellation(phone, salon_config, ai_response, silent=same_turn_reschedule)
+                    await _handle_cancellation(phone, salon_config, ai_response)
                 except Exception as e:
                     log.error(f"[cancellation] _handle_cancellation failed: {e}", exc_info=True)
-                # If cancellation also carries a complete new booking (rescheduling in one turn),
-                # process it immediately. Otherwise mark cancelled so next message can rebook.
-                # IMPORTANT: use new_bd (AI output this turn) for datetime — merged_bd may still
-                # carry the OLD appointment date from the DB, which would rebook the same slot.
-                if same_turn_reschedule:
-                    log.info(f"[reschedule] Cancellation + new booking detected in same turn")
-                    rebook_bd = dict(merged_bd)
-                    rebook_bd["datetime"] = new_bd["datetime"]  # always use the new date
-                    if new_bd.get("service"):
-                        rebook_bd["service"] = new_bd["service"]
-                    ai_response["booking_data"] = rebook_bd
-                    try:
-                        await _handle_booking_complete(phone, salon_config, ai_response, conversation)
-                    except Exception as e:
-                        log.error(f"[reschedule] _handle_booking_complete failed: {e}", exc_info=True)
-                    db.update_session(session["id"], status="booked", conversation=conversation,
-                                    booking_data=rebook_bd)
-                else:
-                    # Mark cancelled — next message from client will start fresh booking
-                    db.update_session(session["id"], status="cancelled", conversation=conversation,
-                                    booking_data=merged_bd)
-        elif ai_response.get("conversation_complete") and not was_booked:
-            # Only process a new booking if this session wasn't already booked.
-            # was_booked=True means the client sent a follow-up message after booking
-            # (e.g. asking for the time again) — don't create a duplicate appointment.
+                db.update_session(session["id"], status="cancelled",
+                                conversation=conversation, booking_data=merged_bd)
+
+        elif ai_response.get("conversation_complete") and not has_active_booking:
             ai_response["booking_data"] = merged_bd
-            log.info(f"[booking] conversation_complete=true, booking_data={merged_bd}")
             try:
                 await _handle_booking_complete(phone, salon_config, ai_response, conversation)
             except Exception as e:
                 log.error(f"[booking] _handle_booking_complete failed: {e}", exc_info=True)
             db.update_session(session["id"], status="booked", conversation=conversation,
                             booking_data=merged_bd)
-        elif ai_response.get("conversation_complete") and was_booked:
-            # was_booked=True on a follow-up (e.g. "what time was it?") — suppress duplicate booking.
-            # But if the session is now cancelled (rescheduling flow), allow the new booking.
-            if session.get("status") == "cancelled":
-                log.info(f"[reschedule] New booking after cancellation — processing")
-                # Cancel the old confirmed appointment before creating the new one
-                try:
-                    await _handle_cancellation(phone, salon_config, {"booking_data": merged_bd}, silent=True)
-                except Exception as e:
-                    log.error(f"[reschedule] _handle_cancellation failed: {e}", exc_info=True)
-                # Build rebook_bd: use new_bd datetime (the new date), not the old one
-                rebook_bd = dict(merged_bd)
-                if new_bd.get("datetime"):
-                    rebook_bd["datetime"] = new_bd["datetime"]
-                if new_bd.get("service"):
-                    rebook_bd["service"] = new_bd["service"]
-                ai_response["booking_data"] = rebook_bd
-                try:
-                    await _handle_booking_complete(phone, salon_config, ai_response, conversation)
-                except Exception as e:
-                    log.error(f"[reschedule] _handle_booking_complete failed: {e}", exc_info=True)
-                db.update_session(session["id"], status="booked", conversation=conversation,
-                                booking_data=rebook_bd)
-            else:
-                log.info(f"[booking] conversation_complete suppressed — session was already booked (follow-up message)")
+
+        elif ai_response.get("conversation_complete") and has_active_booking:
+            # Follow-up message after a confirmed booking ("at what time was it?") — suppress duplicate booking
+            log.info(f"[booking] follow-up suppressed — client already has confirmed appointment {old_appt['id']}")
+            db.update_session(session["id"], conversation=conversation, booking_data=merged_bd)
+
         else:
-            db.update_session(session["id"], conversation=conversation,
-                            booking_data=merged_bd)
-            # Schedule abandonment follow-up (replaces any previous pending job)
+            db.update_session(session["id"], conversation=conversation, booking_data=merged_bd)
             _schedule_followup(phone, session["id"], salon_config, merged_bd)
 
         # Update client language if detected
