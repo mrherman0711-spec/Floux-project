@@ -414,12 +414,19 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
         old_appt = db.get_latest_confirmed_appointment(phone, salon_id)
         has_active_booking = old_appt is not None
 
+        _new_dt = new_bd.get("datetime", "")
+        _old_dt = old_appt.get("datetime_start", "") if old_appt else ""
+        _valid_new_dt = bool(_new_dt and _new_dt != "2026-MM-DDTHH:MM:00" and _new_dt != _old_dt)
+        # Reschedule signal: either AI explicitly set cancellation_confirmed,
+        # OR the client has a confirmed booking and AI says conversation_complete
+        # with a NEW datetime (AI skips the flag but the intent is clear).
         is_reschedule = bool(
             has_active_booking
-            and ai_response.get("cancellation_confirmed")
-            and new_bd.get("datetime")
-            and new_bd["datetime"] != old_appt.get("datetime_start")
-            and new_bd["datetime"] != "2026-MM-DDTHH:MM:00"
+            and _valid_new_dt
+            and (
+                ai_response.get("cancellation_confirmed")
+                or ai_response.get("conversation_complete")
+            )
         )
         is_pure_cancellation = bool(
             has_active_booking
@@ -441,7 +448,11 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
                             booking_data=merged_bd)
 
         elif is_reschedule:
-            if not _passes_cancellation_guard(conversation_so_far, text):
+            # Guard only applies when no new datetime was given (pure affirmation like "sí").
+            # If the user provided a new date directly ("Al lunes a las 11"), that IS the
+            # confirmation — no need for a separate affirmation guard.
+            _user_gave_new_date = bool(_valid_new_dt and not ai_response.get("cancellation_confirmed"))
+            if not _user_gave_new_date and not _passes_cancellation_guard(conversation_so_far, text):
                 log.warning(f"[reschedule] BLOCKED by guard — user='{text.lower().strip()[:80]}'")
                 db.update_session(session["id"], conversation=conversation, booking_data=merged_bd)
             else:
