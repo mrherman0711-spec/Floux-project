@@ -994,6 +994,106 @@ async def _persist_cancellation(phone: str, salon_config: dict, old_appt: dict) 
     return results
 
 
+async def _handle_reschedule(phone: str, salon_config: dict, old_appt: dict,
+                              new_bd: dict, _conversation: list) -> bool:
+    """Reschedule end-to-end: create new first, then cancel old, then notify.
+    Order rationale: if creation fails, the client keeps the original appointment.
+    Returns True on full success, False if creation failed (old preserved)."""
+    salon_id = salon_config["salon_id"]
+    log.info(f"[reschedule] START phone={phone} from={old_appt.get('datetime_start')} to={new_bd.get('datetime')}")
+
+    client_record = db.get_or_create_client(phone, salon_id)
+    rebook_bd = {
+        "service": new_bd.get("service") or old_appt.get("service", ""),
+        "datetime": new_bd["datetime"],
+        "client_name": new_bd.get("client_name") or old_appt.get("client_name", ""),
+        "staff_preference": new_bd.get("staff_preference", ""),
+        "staff_assigned": new_bd.get("staff_assigned") or old_appt.get("staff", ""),
+        "client_email": new_bd.get("client_email") or client_record.get("email", ""),
+    }
+
+    # Step 1: persist new appointment (DB + Calendar + Sheets, no notifications)
+    new_appt = await _persist_new_appointment(phone, salon_config, rebook_bd)
+    if not new_appt:
+        log.error(f"[reschedule] FAILED creating new appointment — old kept intact")
+        try:
+            await whatsapp.send_text(
+                phone,
+                "Disculpa, ha habido un problema confirmando la nueva fecha. "
+                "Tu cita original sigue activa. Te contactamos enseguida."
+            )
+        except Exception:
+            pass
+        owner_phone = salon_config.get("owner_phone", "")
+        if owner_phone:
+            try:
+                await whatsapp.send_text(
+                    owner_phone,
+                    f"⚠️ Falló reschedule para {phone}. Cita original sigue activa: "
+                    f"{old_appt.get('service')} {old_appt.get('datetime_start')}. Revisar manualmente."
+                )
+            except Exception:
+                pass
+        return False
+
+    # Step 2: cancel old appointment (DB + Calendar + Sheets, no notifications)
+    cancel_results = await _persist_cancellation(phone, salon_config, old_appt)
+    if not cancel_results.get("db"):
+        log.warning(f"[reschedule] DB cancellation of old appt {old_appt['id']} failed — owner alerted")
+        owner_phone = salon_config.get("owner_phone", "")
+        if owner_phone:
+            try:
+                await whatsapp.send_text(
+                    owner_phone,
+                    f"⚠️ Reschedule parcial para {phone}: nueva cita OK pero la vieja "
+                    f"({old_appt.get('datetime_start')}) no se canceló. Revisar manualmente."
+                )
+            except Exception:
+                pass
+
+    # Step 3: send single client confirmation email for the new appointment
+    if rebook_bd.get("client_email") and "@" in rebook_bd["client_email"]:
+        price = 0.0
+        for svc in salon_config.get("services", []):
+            if svc["name"].lower().strip() == rebook_bd["service"].lower().strip():
+                price = svc.get("price", 0)
+                break
+        try:
+            await asyncio.to_thread(
+                _send_client_confirmation_email,
+                salon_config, rebook_bd["client_email"], rebook_bd,
+                rebook_bd["datetime"], rebook_bd["staff_assigned"], price,
+            )
+        except Exception as e:
+            log.error(f"[reschedule] client email failed: {e}")
+
+    # Step 4: single owner notification — WhatsApp + email "Cita reagendada"
+    owner_phone = salon_config.get("owner_phone", "")
+    if owner_phone:
+        try:
+            old_d = old_appt.get("datetime_start", "")
+            new_d = rebook_bd["datetime"]
+            msg = (
+                f"Cita reagendada\n\n"
+                f"Cliente: {rebook_bd['client_name']}\n"
+                f"Tel: {phone}\n"
+                f"Servicio: {rebook_bd['service']}\n"
+                f"Antes: {old_d}\n"
+                f"Ahora: {new_d}"
+            )
+            await whatsapp.send_text(owner_phone, msg)
+        except Exception as e:
+            log.error(f"[reschedule] owner WhatsApp failed: {e}")
+
+    try:
+        await asyncio.to_thread(_send_owner_reschedule_email, salon_config, old_appt, rebook_bd)
+    except Exception as e:
+        log.error(f"[reschedule] owner email failed: {e}")
+
+    log.info(f"[reschedule] DONE phone={phone} new_appt={new_appt['id']}")
+    return True
+
+
 def _cancel_calendar_event(salon_config: dict, event_reference: str,
                            appt: dict | None = None) -> bool:
     """Delete the Google Calendar event. Uses event_reference (id) if available,
