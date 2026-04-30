@@ -346,10 +346,23 @@ def test_passes_cancellation_guard():
          "sí", True),
         ([{"role": "assistant", "content": "¿Confirmas mover tu cita al martes?"}],
          "sí", True),
+        # Affirmation anywhere in short message should pass
+        ([{"role": "assistant", "content": "¿Confirmas que quieres mover tu cita al lunes?"}],
+         "perfecto entonces sí", True),
+        ([{"role": "assistant", "content": "¿Confirmas mover tu cita?"}],
+         "sí, confirmo", True),
+        ([{"role": "assistant", "content": "¿Confirmas que quieres cancelar?"}],
+         "perfecto", True),
+        # Bot didn't ask to cancel/move → reject even with affirmation
         ([{"role": "assistant", "content": "¡Perfecto! Tu cita está confirmada."}],
          "sí gracias", False),
+        # User negates → reject
         ([{"role": "assistant", "content": "¿Confirmas que quieres cancelar?"}],
          "no, déjala", False),
+        # Long affirmative message (>8 words) without explicit phrase → reject
+        ([{"role": "assistant", "content": "¿Confirmas mover tu cita?"}],
+         "pues la verdad es que creo que sí me gustaría cambiarla", False),
+        # Empty conversation → reject
         ([], "sí", False),
     ]
     for conv, text, expected in cases:

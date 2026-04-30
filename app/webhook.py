@@ -50,7 +50,9 @@ def _sanitize_reply(text: str) -> str:
 
 
 _CANCEL_AFFIRM_WORDS = ["sí", "si", "yes", "ok", "okay", "dale", "venga",
-                         "claro", "exacto", "confirmo", "confirm"]
+                         "claro", "exacto", "confirmo", "confirm", "perfecto",
+                         "correcto", "adelante", "de acuerdo", "por supuesto",
+                         "va", "sale", "listo", "bueno"]
 _CANCEL_AFFIRM_PHRASES = ["sí cancela", "si cancela", "confirmo cancel",
                            "cancela", "cancel it", "confirm cancel",
                            "sí mueve", "si mueve", "muévela", "muevela",
@@ -60,7 +62,7 @@ _CANCEL_AFFIRM_PHRASES = ["sí cancela", "si cancela", "confirmo cancel",
 def _passes_cancellation_guard(conversation_so_far: list, user_text: str) -> bool:
     """Guard that prevents GPT-hallucinated cancellations/reschedules.
     Requires the bot's previous message to mention cancel/move AND the user's
-    reply to be a short affirmation."""
+    reply to be or contain an affirmation (short message ≤8 words)."""
     prev_bot_msg = ""
     for turn in reversed(conversation_so_far):
         if turn["role"] == "assistant":
@@ -69,9 +71,13 @@ def _passes_cancellation_guard(conversation_so_far: list, user_text: str) -> boo
     user_msg_lower = user_text.lower().strip()
     bot_asked = any(w in prev_bot_msg for w in
                     ["cancelar", "cancel", "cancela", "mover", "cambiar", "mueve", "cambia"])
+    # Allow affirmation anywhere in the message if it's short (≤8 words)
+    # e.g. "perfecto entonces sí", "sí, confirmo", "ok dale"
+    word_count = len(user_msg_lower.split())
     user_affirm = any(
-        user_msg_lower.startswith(w) or user_msg_lower == w
+        w in user_msg_lower
         for w in _CANCEL_AFFIRM_WORDS
+        if word_count <= 8
     ) or any(w in user_msg_lower for w in _CANCEL_AFFIRM_PHRASES)
     return bot_asked and user_affirm
 
@@ -411,9 +417,9 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
         is_reschedule = bool(
             has_active_booking
             and ai_response.get("cancellation_confirmed")
-            and ai_response.get("conversation_complete")
             and new_bd.get("datetime")
             and new_bd["datetime"] != old_appt.get("datetime_start")
+            and new_bd["datetime"] != "2026-MM-DDTHH:MM:00"
         )
         is_pure_cancellation = bool(
             has_active_booking
