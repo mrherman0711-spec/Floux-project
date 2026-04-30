@@ -314,6 +314,20 @@ def cancel_appointment(appointment_id: int) -> None:
     conn.close()
 
 
+def get_latest_confirmed_appointment(phone: str, salon_id: str) -> dict | None:
+    """Return the most recent confirmed appointment for this client.
+    Source of truth for 'does this client currently have a booking?' —
+    independent of session state (sessions expire after 4h)."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM appointments WHERE phone = ? AND salon_id = ? "
+        "AND status = 'confirmed' ORDER BY datetime_start DESC LIMIT 1",
+        (phone, salon_id),
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def get_past_appointments_needing_review(salon_id: str) -> list[dict]:
     """Appointments that ended 2+ hours ago and haven't had a review request."""
     cutoff = (datetime.now(TZ) - timedelta(hours=2)).isoformat()

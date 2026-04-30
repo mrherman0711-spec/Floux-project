@@ -181,6 +181,64 @@ def print_scenarios():
         print(f"  {name}: {len(user_msgs)} messages — {user_msgs[0][:50]}...")
 
 
+def test_get_latest_confirmed_appointment():
+    """get_latest_confirmed_appointment must return the most recent confirmed
+    appointment for a phone, ignoring cancelled ones."""
+    from app.database import (
+        init_db, create_appointment, cancel_appointment,
+        get_latest_confirmed_appointment, get_db,
+    )
+    init_db()
+
+    phone = "+34611999001"
+    salon = "escultor_peluqueria"
+    conn = get_db()
+    conn.execute("DELETE FROM appointments WHERE phone=?", (phone,))
+    conn.commit()
+    conn.close()
+
+    print("\n=== get_latest_confirmed_appointment ===")
+    all_pass = True
+
+    if get_latest_confirmed_appointment(phone, salon) is not None:
+        print("  FAIL: expected None when no appointments"); all_pass = False
+    else:
+        print("  PASS: returns None when no appointments")
+
+    a1 = create_appointment(phone, salon, "Corte", "Pablo",
+                             "2026-05-04T10:00:00", "2026-05-04T11:00:00",
+                             price=30, client_name="Test")
+    res = get_latest_confirmed_appointment(phone, salon)
+    if not res or res["id"] != a1["id"]:
+        print(f"  FAIL: expected appt {a1['id']}, got {res}"); all_pass = False
+    else:
+        print("  PASS: returns the only confirmed")
+
+    a2 = create_appointment(phone, salon, "Corte", "Pablo",
+                             "2026-05-05T10:00:00", "2026-05-05T11:00:00",
+                             price=30, client_name="Test")
+    res = get_latest_confirmed_appointment(phone, salon)
+    if not res or res["id"] != a2["id"]:
+        print(f"  FAIL: expected newer appt {a2['id']}, got {res and res['id']}"); all_pass = False
+    else:
+        print("  PASS: returns most recent of two confirmed")
+
+    cancel_appointment(a2["id"])
+    res = get_latest_confirmed_appointment(phone, salon)
+    if not res or res["id"] != a1["id"]:
+        print(f"  FAIL: expected older appt {a1['id']} after cancel, got {res and res['id']}"); all_pass = False
+    else:
+        print("  PASS: ignores cancelled, returns remaining confirmed")
+
+    cancel_appointment(a1["id"])
+    if get_latest_confirmed_appointment(phone, salon) is not None:
+        print("  FAIL: expected None when all cancelled"); all_pass = False
+    else:
+        print("  PASS: returns None when all cancelled")
+
+    return all_pass
+
+
 def main():
     parser = argparse.ArgumentParser(description="Test Floux conversation engine")
     parser.add_argument("--scenario", default="none", help="Scenario to run (booking, english, all, none)")
@@ -193,6 +251,7 @@ def main():
     results.append(("Salon config", test_salon_config()))
     results.append(("Database", test_database()))
     results.append(("AI prompt building", test_ai_prompt_building()))
+    results.append(("get_latest_confirmed_appointment", test_get_latest_confirmed_appointment()))
 
     if args.scenario != "none":
         print_scenarios()
