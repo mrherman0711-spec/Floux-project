@@ -748,6 +748,76 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
     log.info(f"Booking created: {appointment}")
 
 
+async def _persist_new_appointment(phone: str, salon_config: dict, bd: dict) -> dict | None:
+    """Persist a new booking: DB + Calendar + Sheets. NO notifications.
+    Returns the appointment dict on success, None on failure.
+    Caller is responsible for emails and WhatsApp notifications."""
+    salon_id = salon_config["salon_id"]
+
+    if not bd.get("service") or not bd.get("datetime") or not bd.get("client_name"):
+        log.error(
+            f"[persist_new] BLOCKED — missing fields: "
+            f"service='{bd.get('service','')}' datetime='{bd.get('datetime','')}' "
+            f"client_name='{bd.get('client_name','')}'"
+        )
+        return None
+
+    catalog_services = salon_config.get("services", [])
+    matches = ai_engine.find_matching_services(catalog_services, bd.get("service", ""))
+    if len(matches) != 1:
+        log.error(f"[persist_new] BLOCKED — service '{bd.get('service')}' matches {len(matches)} catalog entries")
+        return None
+    bd["service"] = matches[0]["name"]
+
+    price = 0.0
+    duration = 60
+    sname_lower = bd["service"].lower().strip()
+    for svc in catalog_services:
+        if svc["name"].lower().strip() == sname_lower:
+            price = svc.get("price", 0)
+            duration = svc.get("duration_min", 60)
+            break
+
+    try:
+        start = datetime.fromisoformat(bd["datetime"])
+        end = start + timedelta(minutes=duration)
+        start_str = start.isoformat()
+        end_str = end.isoformat()
+    except (ValueError, TypeError):
+        log.error(f"[persist_new] datetime not ISO: '{bd.get('datetime')}'")
+        return None
+
+    staff_name = bd.get("staff_assigned") or bd.get("staff_preference") or ""
+
+    appointment = db.create_appointment(
+        phone=phone, salon_id=salon_id,
+        service=bd["service"], staff=staff_name,
+        datetime_start=start_str, datetime_end=end_str,
+        price=price, client_name=bd["client_name"],
+    )
+    db.update_client(phone, name=bd["client_name"], next_appointment_at=start_str)
+
+    event_id = await asyncio.to_thread(
+        _create_calendar_event, salon_config, bd, start_str, end_str, staff_name, price
+    )
+    if event_id and appointment:
+        try:
+            conn = db.get_db()
+            conn.execute("UPDATE appointments SET reference = ? WHERE id = ?",
+                         (event_id, appointment["id"]))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            log.error(f"[persist_new] could not save event_id: {e}")
+
+    await asyncio.to_thread(
+        _save_to_sheet, salon_config, phone, bd, start_str, staff_name, price
+    )
+
+    log.info(f"[persist_new] DONE appt={appointment['id']} cal={bool(event_id)}")
+    return appointment
+
+
 async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict, silent: bool = False):
     """Cancel an existing appointment end-to-end: DB + Calendar + Sheets + emails
     (owner + client) + WhatsApp notifications. Each step is isolated so one
