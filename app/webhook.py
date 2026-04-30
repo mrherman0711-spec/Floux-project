@@ -369,8 +369,16 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
         # When re-entering a booked session, prepend a context note to the user message
         # so the AI knows the appointment is already confirmed and doesn't ask for info again.
         # We don't save this note to conversation history — it's a one-turn hint only.
+        # EXCEPTION: skip the override if the bot is mid-reschedule flow (last bot message
+        # contains "mover" or "cambiar") — that override blocks cancellation_confirmed: true.
         ai_user_message = text
-        if was_booked and current_bd.get("service") and current_bd.get("datetime"):
+        _last_bot_msg = ""
+        for _turn in reversed(conversation_so_far):
+            if _turn["role"] == "assistant":
+                _last_bot_msg = _turn["content"].lower()
+                break
+        _bot_asked_reschedule = any(w in _last_bot_msg for w in ["mover", "cambiar", "mueve", "cambia", "reagenda"])
+        if was_booked and current_bd.get("service") and current_bd.get("datetime") and not _bot_asked_reschedule:
             staff = current_bd.get("staff_assigned") or current_bd.get("staff_preference") or ""
             ai_user_message = (
                 f"[Sistema: cita ya confirmada — {current_bd.get('service')} "
