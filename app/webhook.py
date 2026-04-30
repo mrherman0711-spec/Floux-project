@@ -2,9 +2,11 @@
 Webhook handler — receives Twilio voice webhooks and Meta WhatsApp webhooks.
 This is the central nervous system of Floux.
 """
+from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -27,6 +29,56 @@ log = logging.getLogger("floux")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 
 app = FastAPI(title="Floux", version="1.0.0")
+
+_WAIT_ONLY = re.compile(
+    r"^(espera(?: un momento)?|un momento|dame un segundo|"
+    r"ahora te (?:muestro|digo|busco|enseño)|buscando\.{0,3}|consultando\.{0,3})"
+    r"[.…!\s]*$",
+    re.IGNORECASE,
+)
+_WAIT_PREFIX = re.compile(
+    r"^(espera(?: un momento)?|un momento|dame un segundo)[.…,\s]+",
+    re.IGNORECASE,
+)
+
+def _sanitize_reply(text: str) -> str:
+    """Remove AI 'wait a moment' messages that would leave the client hanging."""
+    t = text.strip()
+    if _WAIT_ONLY.match(t):
+        return ""
+    return _WAIT_PREFIX.sub("", t).strip()
+
+
+_CANCEL_AFFIRM_WORDS = ["sí", "si", "yes", "ok", "okay", "dale", "venga",
+                         "claro", "exacto", "confirmo", "confirm"]
+_CANCEL_AFFIRM_PHRASES = ["sí cancela", "si cancela", "confirmo cancel",
+                           "cancela", "cancel it", "confirm cancel",
+                           "sí mueve", "si mueve", "muévela", "muevela",
+                           "cámbiala", "cambiala"]
+
+
+def _passes_cancellation_guard(conversation_so_far: list, user_text: str) -> bool:
+    """Guard that prevents GPT-hallucinated cancellations/reschedules.
+    Requires the bot's previous message to mention cancel/move AND the user's
+    reply to be a short affirmation."""
+    prev_bot_msg = ""
+    for turn in reversed(conversation_so_far):
+        if turn["role"] == "assistant":
+            prev_bot_msg = turn["content"].lower()
+            break
+    user_msg_lower = user_text.lower().strip()
+    bot_asked = any(w in prev_bot_msg for w in
+                    ["cancelar", "cancel", "cancela", "mover", "cambiar", "mueve", "cambia"])
+    user_affirm = any(
+        user_msg_lower.startswith(w) or user_msg_lower == w
+        for w in _CANCEL_AFFIRM_WORDS
+    ) or any(w in user_msg_lower for w in _CANCEL_AFFIRM_PHRASES)
+    return bot_asked and user_affirm
+
+# In-memory deduplication: CallSid → exact duplicates, phone → time-window duplicates
+_processing_calls: set[str] = set()
+_recent_greetings: dict[str, datetime] = {}  # phone → last greeting time
+_GREETING_COOLDOWN_SECS = 60
 TZ = ZoneInfo(TIMEZONE)
 
 
@@ -95,11 +147,15 @@ async def meta_webhook(request: Request, background_tasks: BackgroundTasks):
 
 @app.post("/twilio/voice")
 async def twilio_voice_webhook(request: Request, background_tasks: BackgroundTasks):
-    """Detect missed calls via Twilio voice webhook. Respond 200 IMMEDIATELY.
+    """Handle Twilio voice webhook — two roles:
 
-    With call forwarding: the mobile forwards to Twilio, so Twilio receives
-    the call as "ringing"/"in-progress" — never "no-answer". We treat any
-    incoming call to our number as a missed call and trigger WhatsApp recovery.
+    1. Voice URL (CallStatus=ringing): return <Reject> TwiML so Twilio hangs up
+       and fires the StatusCallback with the real caller number.
+    2. StatusCallback (CallStatus=completed/busy/no-answer/failed): trigger
+       WhatsApp recovery with the actual caller.
+
+    Using <Reject reason="busy"/> guarantees Twilio fires StatusCallback with
+    From= set to the original caller (not the forwarding number).
     """
     form = await request.form()
 
@@ -111,12 +167,11 @@ async def twilio_voice_webhook(request: Request, background_tasks: BackgroundTas
 
     log.info(f"Twilio voice: {call_status} dir={direction} from {caller} to {called} (SID: {call_sid})")
 
-    # Trigger WhatsApp on any inbound call — the mobile forwarding already
-    # means the salon couldn't answer. Skip outbound legs.
-    if direction != "outbound-dial" and call_status in ("ringing", "in-progress", "no-answer", "busy"):
+    # Only process missed calls — matches what Orange sends via StatusCallback
+    if call_status in ("no-answer", "busy"):
         background_tasks.add_task(handle_missed_call, caller, called, call_sid)
 
-    # ALWAYS respond with empty TwiML immediately — hangs up cleanly
+    # ALWAYS respond with empty TwiML immediately
     return Response(
         content='<?xml version="1.0" encoding="UTF-8"?><Response/>',
         media_type="application/xml",
@@ -177,10 +232,19 @@ async def handle_missed_call(caller: str, called: str, call_sid: str):
             log.error(f"Invalid phone: caller={caller}, called={called}")
             return
 
-        # Deduplicate by CallSid
-        if db.check_duplicate_call(call_sid):
-            log.info(f"Duplicate call {call_sid}, skipping")
+        # Deduplicate by CallSid — covers exact duplicate webhooks
+        if call_sid in _processing_calls or db.check_duplicate_call(call_sid):
+            log.info(f"Duplicate CallSid {call_sid}, skipping")
             return
+        _processing_calls.add(call_sid)
+
+        # Deduplicate by phone + time window — covers Orange double-call on forwarding
+        now = datetime.now(TZ)
+        last = _recent_greetings.get(caller_normalized)
+        if last and (now - last).total_seconds() < _GREETING_COOLDOWN_SECS:
+            log.info(f"Greeting cooldown active for {caller_normalized} ({int((now-last).total_seconds())}s ago), skipping")
+            return
+        _recent_greetings[caller_normalized] = now
 
         # Find salon by Twilio number
         salon_config = find_salon_by_phone(called_normalized)
@@ -190,12 +254,6 @@ async def handle_missed_call(caller: str, called: str, call_sid: str):
 
         salon_id = salon_config["salon_id"]
         salon_name = salon_config["salon_name"]
-
-        # Check for existing active session
-        existing = db.get_active_session(caller_normalized)
-        if existing:
-            log.info(f"Active session exists for {caller_normalized}, skipping greeting")
-            return
 
         # Create client record + session
         db.get_or_create_client(caller_normalized, salon_id)
@@ -284,7 +342,10 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
         for k, v in saved_bd.items():
             if v:  # session data wins over DB if non-empty
                 current_bd[k] = v
-        if not current_bd.get("service"):
+        # Only auto-extract service from longer messages — short replies like "sí", "ese",
+        # "el viernes" are confirmations, not service descriptions, and would return 0 matches
+        # causing the AI to re-ask "¿te refieres a un servicio?".
+        if not current_bd.get("service") and len(text.split()) > 3:
             catalog = salon_config.get("services", [])
             matches = ai_engine.find_matching_services(catalog, text)
             if len(matches) == 1:
@@ -320,7 +381,7 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
                 f"{text}"
             )
 
-        ai_response = ai_engine.chat(salon_config, conversation, ai_user_message, availability)
+        ai_response = ai_engine.chat(salon_config, conversation, ai_user_message, availability, current_bd)
 
         reply = ai_response["reply"]
 
@@ -342,42 +403,48 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
             db.update_session(session["id"], status="escalated", conversation=conversation,
                             booking_data=merged_bd)
         elif ai_response.get("cancellation_confirmed") and was_booked:
-            # Guard: only allow cancellation if the bot's previous message asked
-            # for explicit confirmation (contains "cancelar"/"cancel") AND the
-            # client's reply is a short affirmation — prevents accidental cancel
-            # from post-booking thank-you/closing messages.
-            prev_bot_msg = ""
-            for turn in reversed(conversation_so_far):
-                if turn["role"] == "assistant":
-                    prev_bot_msg = turn["content"].lower()
-                    break
-            user_msg_lower = text.lower().strip()
-            bot_asked_to_cancel = any(w in prev_bot_msg for w in ["cancelar", "cancel", "cancela"])
-            user_said_affirm = any(
-                user_msg_lower.startswith(w) or user_msg_lower == w
-                for w in ["sí", "si", "yes", "ok", "okay", "dale", "venga",
-                          "claro", "exacto", "confirmo", "confirm"]
-            ) or any(w in user_msg_lower for w in ["sí cancela", "si cancela",
-                                                    "confirmo cancel", "cancela",
-                                                    "cancel it", "confirm cancel"])
-
-            if not (bot_asked_to_cancel and user_said_affirm):
+            if not _passes_cancellation_guard(conversation_so_far, text):
                 log.warning(
                     f"[cancellation] BLOCKED — GPT hallucinated cancellation_confirmed. "
-                    f"bot_asked={bot_asked_to_cancel} user_affirm={user_said_affirm} "
-                    f"prev_bot='{prev_bot_msg[:80]}' user='{user_msg_lower[:80]}'"
+                    f"user='{text.lower().strip()[:80]}'"
                 )
                 db.update_session(session["id"], conversation=conversation,
                                 booking_data=merged_bd)
             else:
-                # Client confirmed cancellation of an existing appointment
+                # Client confirmed cancellation of an existing appointment.
+                # Use silent=True when reschedule is detected in same turn — new booking notification covers it.
                 ai_response["booking_data"] = merged_bd
+                same_turn_reschedule = (
+                    ai_response.get("conversation_complete")
+                    and new_bd.get("datetime")
+                    and new_bd.get("service")
+                    and (new_bd.get("client_name") or merged_bd.get("client_name"))
+                )
                 try:
-                    await _handle_cancellation(phone, salon_config, ai_response)
+                    await _handle_cancellation(phone, salon_config, ai_response, silent=same_turn_reschedule)
                 except Exception as e:
                     log.error(f"[cancellation] _handle_cancellation failed: {e}", exc_info=True)
-                db.update_session(session["id"], status="cancelled", conversation=conversation,
-                                booking_data=merged_bd)
+                # If cancellation also carries a complete new booking (rescheduling in one turn),
+                # process it immediately. Otherwise mark cancelled so next message can rebook.
+                # IMPORTANT: use new_bd (AI output this turn) for datetime — merged_bd may still
+                # carry the OLD appointment date from the DB, which would rebook the same slot.
+                if same_turn_reschedule:
+                    log.info(f"[reschedule] Cancellation + new booking detected in same turn")
+                    rebook_bd = dict(merged_bd)
+                    rebook_bd["datetime"] = new_bd["datetime"]  # always use the new date
+                    if new_bd.get("service"):
+                        rebook_bd["service"] = new_bd["service"]
+                    ai_response["booking_data"] = rebook_bd
+                    try:
+                        await _handle_booking_complete(phone, salon_config, ai_response, conversation)
+                    except Exception as e:
+                        log.error(f"[reschedule] _handle_booking_complete failed: {e}", exc_info=True)
+                    db.update_session(session["id"], status="booked", conversation=conversation,
+                                    booking_data=rebook_bd)
+                else:
+                    # Mark cancelled — next message from client will start fresh booking
+                    db.update_session(session["id"], status="cancelled", conversation=conversation,
+                                    booking_data=merged_bd)
         elif ai_response.get("conversation_complete") and not was_booked:
             # Only process a new booking if this session wasn't already booked.
             # was_booked=True means the client sent a follow-up message after booking
@@ -391,7 +458,30 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
             db.update_session(session["id"], status="booked", conversation=conversation,
                             booking_data=merged_bd)
         elif ai_response.get("conversation_complete") and was_booked:
-            log.info(f"[booking] conversation_complete suppressed — session was already booked (follow-up message)")
+            # was_booked=True on a follow-up (e.g. "what time was it?") — suppress duplicate booking.
+            # But if the session is now cancelled (rescheduling flow), allow the new booking.
+            if session.get("status") == "cancelled":
+                log.info(f"[reschedule] New booking after cancellation — processing")
+                # Cancel the old confirmed appointment before creating the new one
+                try:
+                    await _handle_cancellation(phone, salon_config, {"booking_data": merged_bd}, silent=True)
+                except Exception as e:
+                    log.error(f"[reschedule] _handle_cancellation failed: {e}", exc_info=True)
+                # Build rebook_bd: use new_bd datetime (the new date), not the old one
+                rebook_bd = dict(merged_bd)
+                if new_bd.get("datetime"):
+                    rebook_bd["datetime"] = new_bd["datetime"]
+                if new_bd.get("service"):
+                    rebook_bd["service"] = new_bd["service"]
+                ai_response["booking_data"] = rebook_bd
+                try:
+                    await _handle_booking_complete(phone, salon_config, ai_response, conversation)
+                except Exception as e:
+                    log.error(f"[reschedule] _handle_booking_complete failed: {e}", exc_info=True)
+                db.update_session(session["id"], status="booked", conversation=conversation,
+                                booking_data=rebook_bd)
+            else:
+                log.info(f"[booking] conversation_complete suppressed — session was already booked (follow-up message)")
         else:
             db.update_session(session["id"], conversation=conversation,
                             booking_data=merged_bd)
@@ -410,9 +500,11 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
         client_email = merged_bd.get("client_email", "")
         if client_email and "@" in client_email:
             db.update_client(phone, email=client_email)
-            # If the session was already booked and the client just provided/corrected
-            # their email, send the confirmation email now (it was skipped at booking time).
-            if was_booked:
+            # Only resend confirmation email if the email was just provided in THIS message
+            # (not already in saved_bd from a previous turn) — prevents duplicate sends
+            # during rescheduling conversations where email is already in merged_bd.
+            email_just_provided = client_email and not saved_bd.get("client_email")
+            if was_booked and email_just_provided:
                 existing_appt = None
                 try:
                     conn_tmp = db.get_db()
@@ -433,6 +525,12 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
                         appt["datetime_start"], appt["staff"], appt["price"],
                     )
                     log.info(f"[booking] Resent confirmation email to {client_email} (post-booking email update)")
+
+        # Strip AI "wait a moment" messages before sending
+        reply = _sanitize_reply(reply)
+        if not reply:
+            log.info(f"[sanitize] Suppressed wait-phrase reply for {phone}")
+            return
 
         # Send reply with presence simulation (read → 2s wait → typing → send)
         result = await whatsapp.send_with_presence(jid, reply)
@@ -650,7 +748,7 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
     log.info(f"Booking created: {appointment}")
 
 
-async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict):
+async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict, silent: bool = False):
     """Cancel an existing appointment end-to-end: DB + Calendar + Sheets + emails
     (owner + client) + WhatsApp notifications. Each step is isolated so one
     failure doesn't block the rest. Logs a per-step summary at the end."""
@@ -662,7 +760,7 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     # Find the confirmed appointment for this phone
     conn = db.get_db()
     row = conn.execute(
-        "SELECT * FROM appointments WHERE phone = ? AND salon_id = ? AND status = 'confirmed' ORDER BY datetime_start ASC LIMIT 1",
+        "SELECT * FROM appointments WHERE phone = ? AND salon_id = ? AND status = 'confirmed' ORDER BY datetime_start DESC LIMIT 1",
         (phone, salon_id),
     ).fetchone()
     conn.close()
@@ -690,7 +788,7 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     log.info(f"[cancel] appt={appt_id} service='{service}' start={start_str} staff={staff_name} email={client_email} reference={reference}")
 
     results = {"db": False, "cal": False, "sheet": False,
-               "mail_client": False, "wa_owner": False, "wa_client": False}
+               "mail_owner": False, "mail_client": False, "wa_owner": False, "wa_client": False}
 
     # 1. Mark cancelled in DB
     try:
@@ -720,8 +818,8 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     except Exception as e:
         log.error(f"[cancel] step3 Sheets FAILED: {e}", exc_info=True)
 
-    # 4. Send cancellation email to client via Gmail (if email known)
-    if client_email and "@" in client_email:
+    # 4. Send cancellation email to client via Gmail (skipped when rescheduling — new booking email covers it)
+    if not silent and client_email and "@" in client_email:
         try:
             ok = await asyncio.to_thread(
                 _send_client_cancellation_email, salon_config, client_email,
@@ -734,9 +832,23 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     else:
         log.info(f"[cancel] step5 Mail client skipped — no email on file")
 
-    # 6. Notify owner via WhatsApp
+    # 5. Send cancellation email to owner via Gmail
+    owner_email = salon_config.get("owner_email", "")
+    if owner_email and "@" in owner_email:
+        try:
+            price_val = appt.get("price", 0.0)
+            ok = await asyncio.to_thread(
+                _send_cancellation_email, salon_config, service, client_name,
+                start_str, staff_name, price_val,
+            )
+            results["mail_owner"] = bool(ok)
+            log.info(f"[cancel] step5b Mail owner: ok={results['mail_owner']}")
+        except Exception as e:
+            log.error(f"[cancel] step5b Mail owner FAILED: {e}", exc_info=True)
+
+    # 6. Notify owner via WhatsApp (skipped when rescheduling — new booking notification covers it)
     owner_phone = salon_config.get("owner_phone", "")
-    if owner_phone:
+    if owner_phone and not silent:
         try:
             notification = (
                 f"Cita cancelada\n\n"
@@ -750,27 +862,27 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
         except Exception as e:
             log.error(f"[cancel] step6 WhatsApp owner FAILED: {e}", exc_info=True)
 
-    # 7. Confirm cancellation to client via WhatsApp
-    try:
-        # Format date nicely for the message
-        fecha_legible = start_str
+    # 7. Confirm cancellation to client via WhatsApp (skipped when rescheduling)
+    if not silent:
         try:
-            dt_obj = datetime.fromisoformat(start_str)
-            day_names = {0:"lunes",1:"martes",2:"miércoles",3:"jueves",4:"viernes",5:"sábado",6:"domingo"}
-            month_names = {1:"enero",2:"febrero",3:"marzo",4:"abril",5:"mayo",6:"junio",
-                           7:"julio",8:"agosto",9:"septiembre",10:"octubre",11:"noviembre",12:"diciembre"}
-            fecha_legible = f"{day_names[dt_obj.weekday()]} {dt_obj.day} de {month_names[dt_obj.month]} a las {dt_obj.strftime('%H:%M')}"
-        except Exception:
-            pass
+            fecha_legible = start_str
+            try:
+                dt_obj = datetime.fromisoformat(start_str)
+                day_names = {0:"lunes",1:"martes",2:"miércoles",3:"jueves",4:"viernes",5:"sábado",6:"domingo"}
+                month_names = {1:"enero",2:"febrero",3:"marzo",4:"abril",5:"mayo",6:"junio",
+                               7:"julio",8:"agosto",9:"septiembre",10:"octubre",11:"noviembre",12:"diciembre"}
+                fecha_legible = f"{day_names[dt_obj.weekday()]} {dt_obj.day} de {month_names[dt_obj.month]} a las {dt_obj.strftime('%H:%M')}"
+            except Exception:
+                pass
 
-        client_msg = (
-            f"Listo, tu cita de {service} del {fecha_legible} ha sido cancelada. "
-            f"Si quieres reservar otra, escríbenos cuando quieras. ¡Te esperamos!"
-        )
-        await whatsapp.send_text(phone, client_msg)
-        results["wa_client"] = True
-    except Exception as e:
-        log.error(f"[cancel] step7 WhatsApp client FAILED: {e}", exc_info=True)
+            client_msg = (
+                f"Listo, tu cita de {service} del {fecha_legible} ha sido cancelada. "
+                f"Si quieres reservar otra, escríbenos cuando quieras. ¡Te esperamos!"
+            )
+            await whatsapp.send_text(phone, client_msg)
+            results["wa_client"] = True
+        except Exception as e:
+            log.error(f"[cancel] step7 WhatsApp client FAILED: {e}", exc_info=True)
 
     log.info(
         f"[cancel] DONE db={results['db']} cal={results['cal']} "
@@ -935,13 +1047,13 @@ def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: s
 
         headers = all_values[0]
         try:
-            phone_col = headers.index("Telefono")
-            estado_col = headers.index("Estado")
+            phone_col = headers.index("Contacto")
+            estado_col = headers.index("Estatus")
         except ValueError:
             log.warning(f"[cancel] Sheets headers missing — got {headers}")
             return False
 
-        fecha_col = headers.index("Fecha") if "Fecha" in headers else -1
+        fecha_col = headers.index("Hora") if "Hora" in headers else -1
         date_prefix = datetime_start[:10] if datetime_start else ""
         phone_norm = _normalize_phone_for_sheet(phone)
 
@@ -971,6 +1083,7 @@ def _update_sheet_cancellation(salon_config: dict, phone: str, datetime_start: s
                 if estado.strip().lower() == "confirmada":
                     target_row = idx
                     break
+
         # Tier 3: last phone-matching row
         if not target_row:
             target_row = candidates[-1][0]
@@ -1576,7 +1689,7 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
     if not sheet_url:
         return
 
-    HEADERS = ["Fecha", "Cliente", "Telefono", "Servicio", "Personal", "Precio", "Estado"]
+    HEADERS = ["Nombre", "Contacto", "Servicio", "Profesional", "Precio", "Hora", "Estatus"]
 
     try:
         import sys as _sys
@@ -1608,12 +1721,12 @@ def _save_to_sheet(salon_config: dict, phone: str, bd: dict, start_str: str,
             ws.update("A1", [HEADERS])
 
         row = [
-            start_str,
             bd.get("client_name", ""),
             phone,
             bd.get("service", ""),
             staff_name,
             f"{price}€",
+            start_str,
             "Confirmada",
         ]
         ws.append_row(row, value_input_option="RAW")
