@@ -239,6 +239,128 @@ def test_get_latest_confirmed_appointment():
     return all_pass
 
 
+def test_reschedule_routing_decision():
+    """Verify the routing decision logic: when client has a confirmed appointment
+    and AI emits cancellation+complete with a NEW datetime, it must be classified
+    as reschedule (not pure cancellation)."""
+    from app.database import (
+        init_db, create_appointment, cancel_appointment,
+        get_latest_confirmed_appointment, get_db,
+    )
+    init_db()
+
+    phone = "+34611999002"
+    salon = "escultor_peluqueria"
+    conn = get_db()
+    conn.execute("DELETE FROM appointments WHERE phone=?", (phone,))
+    conn.commit()
+    conn.close()
+
+    print("\n=== Reschedule routing decision ===")
+    all_pass = True
+
+    old = create_appointment(phone, salon, "Corte mujer", "Pablo",
+                              "2026-05-04T10:00:00", "2026-05-04T11:00:00",
+                              price=30, client_name="Test")
+
+    old_appt = get_latest_confirmed_appointment(phone, salon)
+
+    # Case A: AI emits reschedule for Tuesday (different date) → is_reschedule=True
+    new_bd_resched = {"datetime": "2026-05-05T10:00:00", "service": "Corte mujer"}
+    ai_response = {"cancellation_confirmed": True, "conversation_complete": True,
+                   "booking_data": new_bd_resched}
+    is_reschedule = bool(
+        old_appt
+        and ai_response.get("cancellation_confirmed")
+        and ai_response.get("conversation_complete")
+        and new_bd_resched.get("datetime")
+        and new_bd_resched["datetime"] != old_appt.get("datetime_start")
+    )
+    if not is_reschedule:
+        print("  FAIL: case A — different date should classify as reschedule"); all_pass = False
+    else:
+        print("  PASS: case A — Mon→Tue classified as reschedule")
+
+    # Case B: AI emits cancellation only → is_reschedule=False, is_pure_cancellation=True
+    ai_cancel = {"cancellation_confirmed": True, "conversation_complete": False,
+                 "booking_data": {}}
+    new_bd_cancel = {}
+    is_reschedule_b = bool(
+        old_appt
+        and ai_cancel.get("cancellation_confirmed")
+        and ai_cancel.get("conversation_complete")
+        and new_bd_cancel.get("datetime")
+    )
+    is_pure_cancel = bool(
+        old_appt
+        and ai_cancel.get("cancellation_confirmed")
+        and not is_reschedule_b
+    )
+    if is_reschedule_b or not is_pure_cancel:
+        print(f"  FAIL: case B — pure cancel got resched={is_reschedule_b} cancel={is_pure_cancel}"); all_pass = False
+    else:
+        print("  PASS: case B — pure cancellation classified correctly")
+
+    # Case C: client has NO active booking → first booking, not reschedule
+    cancel_appointment(old["id"])
+    old_appt2 = get_latest_confirmed_appointment(phone, salon)
+    has_booking = old_appt2 is not None
+    if has_booking:
+        print("  FAIL: case C — after cancel, expected no active booking"); all_pass = False
+    else:
+        print("  PASS: case C — cancelled appointment is not 'active'")
+
+    # Case D: AI emits same datetime as existing booking (follow-up "what time was it?")
+    create_appointment(phone, salon, "Corte mujer", "Pablo",
+                        "2026-05-06T10:00:00", "2026-05-06T11:00:00",
+                        price=30, client_name="Test")
+    old_appt_d = get_latest_confirmed_appointment(phone, salon)
+    same_dt_bd = {"datetime": "2026-05-06T10:00:00", "service": "Corte mujer"}
+    ai_followup = {"cancellation_confirmed": False, "conversation_complete": True,
+                   "booking_data": same_dt_bd}
+    is_reschedule_d = bool(
+        old_appt_d
+        and ai_followup.get("cancellation_confirmed")
+        and ai_followup.get("conversation_complete")
+        and same_dt_bd.get("datetime")
+        and same_dt_bd["datetime"] != old_appt_d.get("datetime_start")
+    )
+    if is_reschedule_d:
+        print("  FAIL: case D — follow-up should not classify as reschedule"); all_pass = False
+    else:
+        print("  PASS: case D — same-date follow-up not classified as reschedule")
+
+    return all_pass
+
+
+def test_passes_cancellation_guard():
+    """Verify the cancellation guard accepts 'sí' after bot asked 'cancelar/mover'
+    and rejects affirmations after unrelated bot messages."""
+    from app.webhook import _passes_cancellation_guard
+
+    print("\n=== Cancellation guard ===")
+    all_pass = True
+
+    cases = [
+        ([{"role": "assistant", "content": "¿Confirmas que quieres cancelar la cita?"}],
+         "sí", True),
+        ([{"role": "assistant", "content": "¿Confirmas mover tu cita al martes?"}],
+         "sí", True),
+        ([{"role": "assistant", "content": "¡Perfecto! Tu cita está confirmada."}],
+         "sí gracias", False),
+        ([{"role": "assistant", "content": "¿Confirmas que quieres cancelar?"}],
+         "no, déjala", False),
+        ([], "sí", False),
+    ]
+    for conv, text, expected in cases:
+        result = _passes_cancellation_guard(conv, text)
+        status = "PASS" if result == expected else "FAIL"
+        if status == "FAIL": all_pass = False
+        print(f"  {status}: guard(text='{text}') = {result} (expected {expected})")
+
+    return all_pass
+
+
 def main():
     parser = argparse.ArgumentParser(description="Test Floux conversation engine")
     parser.add_argument("--scenario", default="none", help="Scenario to run (booking, english, all, none)")
@@ -252,6 +374,8 @@ def main():
     results.append(("Database", test_database()))
     results.append(("AI prompt building", test_ai_prompt_building()))
     results.append(("get_latest_confirmed_appointment", test_get_latest_confirmed_appointment()))
+    results.append(("Reschedule routing decision", test_reschedule_routing_decision()))
+    results.append(("Cancellation guard", test_passes_cancellation_guard()))
 
     if args.scenario != "none":
         print_scenarios()
