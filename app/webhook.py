@@ -1375,6 +1375,91 @@ def _send_cancellation_email(salon_config: dict, service: str, client_name: str,
         return False
 
 
+def _send_owner_reschedule_email(salon_config: dict, old_appt: dict, new_bd: dict) -> bool:
+    """Send a single 'Cita reagendada' email to the owner: shows old → new dates.
+    Amber accent (#c9a96e gold) — not red (cancellation) nor green (booking)."""
+    import base64
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    import sys as _sys
+    _sys.path.insert(0, str(BASE_DIR / "execution"))
+    from google_auth import get_google_credentials
+    from googleapiclient.discovery import build
+
+    owner_email = salon_config.get("owner_email", "")
+    if not owner_email:
+        return False
+
+    try:
+        ALL_SCOPES = [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = get_google_credentials(ALL_SCOPES)
+        if not creds:
+            return False
+
+        gmail = build("gmail", "v1", credentials=creds)
+        salon_name = salon_config.get("salon_name", "el salón")
+        client_name = new_bd.get("client_name") or old_appt.get("client_name", "")
+        service = new_bd.get("service") or old_appt.get("service", "")
+
+        def fmt(s: str) -> tuple[str, str]:
+            try:
+                from datetime import datetime as _dt
+                d = _dt.fromisoformat(s)
+                days = {0:"Lunes",1:"Martes",2:"Miércoles",3:"Jueves",4:"Viernes",5:"Sábado",6:"Domingo"}
+                months = {1:"enero",2:"febrero",3:"marzo",4:"abril",5:"mayo",6:"junio",
+                          7:"julio",8:"agosto",9:"septiembre",10:"octubre",11:"noviembre",12:"diciembre"}
+                return (f"{days[d.weekday()]}, {d.day} de {months[d.month]}", d.strftime("%H:%M"))
+            except Exception:
+                return (s, "")
+
+        old_fecha, old_hora = fmt(old_appt.get("datetime_start", ""))
+        new_fecha, new_hora = fmt(new_bd.get("datetime", ""))
+
+        plain = (
+            f"Cita reagendada — {salon_name}\n\n"
+            f"Cliente: {client_name}\n"
+            f"Servicio: {service}\n\n"
+            f"ANTES: {old_fecha} a las {old_hora}\n"
+            f"AHORA: {new_fecha} a las {new_hora}\n"
+        )
+
+        html = f"""<!DOCTYPE html><html><body style="font-family:Georgia,serif;background:#f5f0eb;margin:0;padding:24px;">
+<div style="max-width:560px;margin:0 auto;background:#1a1a1a;color:#fff;padding:32px 24px;text-align:center;">
+  <p style="margin:0;font-size:11px;letter-spacing:4px;color:#c9a96e;text-transform:uppercase;">Cita reagendada</p>
+  <h1 style="margin:10px 0 0;font-weight:400;letter-spacing:1px;">{salon_name}</h1>
+</div>
+<div style="max-width:560px;margin:0 auto;background:#fff;padding:32px;">
+  <p style="font-size:16px;color:#2c2c2c;">El cliente <strong>{client_name}</strong> ha movido su cita.</p>
+  <table width="100%" style="border-collapse:collapse;margin-top:16px;">
+    <tr><td style="padding:12px 0;border-bottom:1px solid #f0ebe4;color:#888;">Servicio</td><td style="padding:12px 0;border-bottom:1px solid #f0ebe4;">{service}</td></tr>
+    <tr><td style="padding:12px 0;border-bottom:1px solid #f0ebe4;color:#c0392b;">Antes</td><td style="padding:12px 0;border-bottom:1px solid #f0ebe4;">{old_fecha} · {old_hora}</td></tr>
+    <tr><td style="padding:12px 0;color:#27ae60;">Ahora</td><td style="padding:12px 0;font-weight:600;">{new_fecha} · {new_hora}</td></tr>
+  </table>
+</div>
+<p style="text-align:center;color:#aaa;font-size:12px;margin-top:24px;">Gestión automática por <strong style="color:#c9a96e;">Floux</strong></p>
+</body></html>"""
+
+        msg = MIMEMultipart("alternative")
+        msg["to"] = owner_email
+        msg["subject"] = f"🔄 Cita reagendada — {service} ({client_name})"
+        msg.attach(MIMEText(plain, "plain"))
+        msg.attach(MIMEText(html, "html"))
+
+        raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+        gmail.users().messages().send(userId="me", body={"raw": raw}).execute()
+        log.info(f"[reschedule] owner reschedule email sent to {owner_email}")
+        return True
+
+    except Exception as e:
+        log.error(f"[reschedule] owner email failed: {e}", exc_info=True)
+        return False
+
+
 def _send_client_cancellation_email(salon_config: dict, client_email: str,
                                      service: str, client_name: str,
                                      start_str: str, staff_name: str) -> bool:
