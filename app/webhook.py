@@ -745,6 +745,27 @@ async def _handle_booking_complete(phone: str, salon_config: dict, ai_response: 
     else:
         log.warning(f"[booking] No client email found — confirmation email not sent for {phone}")
 
+    # Send "Nueva cita" email to owner (was previously inside _create_calendar_event)
+    owner_email = salon_config.get("owner_email")
+    if owner_email:
+        try:
+            from google_auth import get_google_credentials
+            ALL_SCOPES = [
+                "https://www.googleapis.com/auth/calendar",
+                "https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/spreadsheets",
+                "https://www.googleapis.com/auth/drive",
+            ]
+            creds = get_google_credentials(ALL_SCOPES)
+            if creds:
+                await asyncio.to_thread(
+                    _send_booking_email, creds, owner_email,
+                    bd.get("service", ""), bd.get("client_name", ""),
+                    start_str, staff_name, price, "",
+                )
+        except Exception as e:
+            log.error(f"[booking] owner email failed: {e}")
+
     log.info(f"Booking created: {appointment}")
 
 
@@ -1758,11 +1779,9 @@ def _create_calendar_event(salon_config: dict, bd: dict, start_str: str, end_str
         event_url = created.get("htmlLink", "")
         log.info(f"Calendar event created: {event_url} (id={event_id})")
 
-        # Send email notification via Gmail
-        owner_email = salon_config.get("owner_email")
-        if owner_email:
-            _send_booking_email(creds, owner_email, svc_name, client_name,
-                                start_str, staff_name, price, event_url)
+        # NOTE: owner email is sent by the caller (_handle_booking_complete),
+        # not here, so the reschedule flow can send a single 'Cita reagendada'
+        # email instead of duplicating cancellation + new booking notifications.
 
         return event_id
 
