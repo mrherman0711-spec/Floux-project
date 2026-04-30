@@ -962,6 +962,38 @@ async def _handle_cancellation(phone: str, salon_config: dict, ai_response: dict
     )
 
 
+async def _persist_cancellation(phone: str, salon_config: dict, old_appt: dict) -> dict:
+    """Persist cancellation of an existing appointment: DB + Calendar + Sheets.
+    NO notifications. Returns dict of step results for logging."""
+    appt_id = old_appt["id"]
+    reference = old_appt.get("reference", "")
+    start_str = old_appt.get("datetime_start", "")
+    results = {"db": False, "cal": False, "sheet": False}
+
+    try:
+        db.cancel_appointment(appt_id)
+        results["db"] = True
+    except Exception as e:
+        log.error(f"[persist_cancel] DB failed: {e}", exc_info=True)
+
+    try:
+        results["cal"] = bool(await asyncio.to_thread(
+            _cancel_calendar_event, salon_config, reference, old_appt
+        ))
+    except Exception as e:
+        log.error(f"[persist_cancel] Calendar failed: {e}", exc_info=True)
+
+    try:
+        results["sheet"] = bool(await asyncio.to_thread(
+            _update_sheet_cancellation, salon_config, phone, start_str
+        ))
+    except Exception as e:
+        log.error(f"[persist_cancel] Sheets failed: {e}", exc_info=True)
+
+    log.info(f"[persist_cancel] appt={appt_id} db={results['db']} cal={results['cal']} sheet={results['sheet']}")
+    return results
+
+
 def _cancel_calendar_event(salon_config: dict, event_reference: str,
                            appt: dict | None = None) -> bool:
     """Delete the Google Calendar event. Uses event_reference (id) if available,
