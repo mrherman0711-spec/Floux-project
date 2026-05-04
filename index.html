@@ -257,27 +257,264 @@
 
     /* ── PROCESS ── */
     #como { background:var(--black); }
-    .process-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:2px; }
-    .process-card {
-      position:relative; overflow:hidden; aspect-ratio:4/3; cursor:default;
-      transition: transform 0.4s var(--ease-spring);
+
+    /* ── PROCESS ANIMATION ── */
+    .proc-stage {
+      display:grid; grid-template-columns: 1fr 1fr;
+      gap:80px; align-items:center;
+      max-width:1200px; margin:0 auto; padding:80px 48px 100px;
     }
-    .process-card:hover { transform: translateY(-4px); }
-    .process-card img {
-      width:100%; height:100%; object-fit:cover;
-      transition:transform 1.2s var(--ease-spring), filter 1.2s ease;
-      filter:brightness(0.52) saturate(0.7);
+    .proc-phone-col { display:flex; justify-content:center; align-items:center; min-height:640px; }
+    .proc-phone {
+      position:relative; width:300px; height:620px;
+      background:#0a0a0a;
+      border-radius:46px;
+      padding:12px;
+      box-shadow:
+        0 0 0 2px rgba(154,123,79,0.18),
+        0 60px 120px -20px rgba(0,0,0,0.9),
+        0 30px 60px -10px rgba(154,123,79,0.12),
+        inset 0 0 0 1px rgba(255,255,255,0.06);
     }
-    .process-card:hover img { transform:scale(1.06); filter:brightness(0.62) saturate(0.85); }
-    .process-card-overlay {
+    .proc-phone::before {
+      content:""; position:absolute; top:18px; left:50%; transform:translateX(-50%);
+      width:104px; height:28px; background:#000; border-radius:16px; z-index:5;
+    }
+    .proc-screen {
+      position:relative; width:100%; height:100%;
+      border-radius:34px; overflow:hidden;
+      background:linear-gradient(180deg, #1a2733 0%, #0d1418 100%);
+    }
+    .proc-screen-status {
+      position:absolute; top:0; left:0; right:0; height:54px; z-index:4;
+      display:flex; align-items:flex-end; justify-content:space-between;
+      padding:0 28px 8px; font-family:var(--sans); font-size:13px; font-weight:600; color:#fff;
+      pointer-events:none;
+    }
+    .proc-stage-layer {
       position:absolute; inset:0;
-      background:linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 55%, transparent 100%);
-      display:flex; flex-direction:column; justify-content:flex-end;
-      padding:40px 36px;
+      opacity:0; transition: opacity 0.6s ease;
     }
-    .process-num { font-family:var(--serif-sc); font-size:0.875rem; color:var(--gold); letter-spacing:0.2em; margin-bottom:16px; }
-    .process-card h3 { color:var(--white); font-size:1.5rem; text-transform:none; letter-spacing:0.02em; font-family:var(--serif); font-weight:300; margin-bottom:12px; line-height:1.2; }
-    .process-card p { font-size:0.875rem; color:rgba(255,255,255,0.65); line-height:1.7; }
+    .proc-stage-layer.active { opacity:1; }
+
+    /* ▸ Stage 1: incoming call ◂ */
+    .pcall {
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, #1a2733 0%, #0d1418 100%);
+      display:flex; flex-direction:column; align-items:center;
+      padding-top:90px;
+    }
+    .pcall-label { font-family:var(--sans); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-bottom:8px; }
+    .pcall-name { font-family:var(--serif); font-size:28px; font-weight:300; color:#fff; margin-bottom:6px; letter-spacing:0.01em; }
+    .pcall-num { font-family:var(--sans); font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:42px; }
+    .pcall-avatar {
+      width:110px; height:110px; border-radius:50%;
+      background:linear-gradient(135deg, #9a7b4f 0%, #6b5535 100%);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--serif); font-size:42px; color:#fff; font-weight:300;
+      box-shadow:0 0 0 0 rgba(154,123,79,0.5);
+      animation: pcall-pulse 1.6s ease-out infinite;
+      margin-bottom:60px;
+    }
+    @keyframes pcall-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(154,123,79,0.45); }
+      100% { box-shadow: 0 0 0 32px rgba(154,123,79,0); }
+    }
+    .pcall-actions { display:flex; gap:60px; margin-top:auto; margin-bottom:80px; }
+    .pcall-btn {
+      width:62px; height:62px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px;
+    }
+    .pcall-decline { background:#e5484d; color:#fff; }
+    .pcall-decline.shake { animation: pcall-shake 0.5s ease both; }
+    @keyframes pcall-shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px) rotate(-8deg); }
+      75% { transform: translateX(4px) rotate(8deg); }
+    }
+    .pcall-accept { background:#30c25c; color:#fff; }
+    .pcall-missed-overlay {
+      position:absolute; inset:0;
+      background:rgba(0,0,0,0.78); backdrop-filter:blur(8px);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      opacity:0; transition: opacity 0.5s ease;
+      z-index:3;
+    }
+    .pcall-missed-overlay.show { opacity:1; }
+    .pcall-missed-icon { font-size:36px; color:#e5484d; margin-bottom:18px; }
+    .pcall-missed-text { font-family:var(--sans); font-size:14px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.7); }
+
+    /* ▸ Stage 2: WhatsApp chat ◂ */
+    .pwa {
+      position:absolute; inset:0;
+      background:#0b141a;
+      display:flex; flex-direction:column;
+    }
+    .pwa-header {
+      display:flex; align-items:center; gap:10px;
+      padding:60px 16px 12px;
+      background:#1f2c33;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .pwa-avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:linear-gradient(135deg, #9a7b4f, #6b5535);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--serif); font-size:14px; color:#fff; font-weight:400;
+      flex-shrink:0;
+    }
+    .pwa-header-info { flex:1; min-width:0; }
+    .pwa-name { font-family:var(--sans); font-size:14px; font-weight:600; color:#fff; }
+    .pwa-status { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.55); margin-top:1px; }
+    .pwa-typing-indicator { color:#83cba7; }
+    .pwa-body {
+      flex:1; padding:18px 14px; overflow:hidden;
+      display:flex; flex-direction:column; gap:6px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(154,123,79,0.04), transparent 50%),
+        #0b141a;
+    }
+    .pwa-time-divider {
+      align-self:center; font-family:var(--sans); font-size:10px;
+      color:rgba(255,255,255,0.4);
+      background:rgba(31,44,51,0.6); padding:3px 10px; border-radius:6px;
+      margin:4px 0 8px;
+      opacity:0; transform:translateY(4px);
+    }
+    .pwa-bubble {
+      max-width:78%; padding:8px 11px;
+      font-family:var(--sans); font-size:13px; line-height:1.4; color:#e9edef;
+      border-radius:8px; position:relative;
+      opacity:0; transform:translateY(8px);
+      box-shadow:0 1px 0.5px rgba(0,0,0,0.13);
+    }
+    .pwa-bubble.from {
+      align-self:flex-start; background:#1f2c33;
+      border-top-left-radius:0;
+    }
+    .pwa-bubble.to {
+      align-self:flex-end; background:#005c4b;
+      border-top-right-radius:0;
+    }
+    .pwa-bubble .pwa-meta {
+      display:flex; align-items:center; gap:3px; justify-content:flex-end;
+      font-size:9px; color:rgba(255,255,255,0.5); margin-top:3px;
+    }
+    .pwa-bubble.to .pwa-meta { color:rgba(180,235,200,0.7); }
+    .pwa-typing {
+      align-self:flex-start; padding:10px 14px;
+      background:#1f2c33; border-radius:8px; border-top-left-radius:0;
+      display:flex; gap:4px; opacity:0; transform:translateY(8px);
+    }
+    .pwa-typing-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:rgba(255,255,255,0.4);
+      animation: pwa-typing 1.2s ease-in-out infinite;
+    }
+    .pwa-typing-dot:nth-child(2) { animation-delay:0.2s; }
+    .pwa-typing-dot:nth-child(3) { animation-delay:0.4s; }
+    @keyframes pwa-typing {
+      0%,60%,100% { opacity:0.3; transform:translateY(0); }
+      30% { opacity:1; transform:translateY(-3px); }
+    }
+
+    /* ▸ Stage 3: owner notification ◂ */
+    .psum {
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, #1a2733 0%, #0d1418 100%);
+    }
+    .psum-time {
+      text-align:center; padding-top:78px;
+      font-family:var(--sans); font-size:64px; font-weight:200; color:#fff;
+      letter-spacing:-0.02em;
+    }
+    .psum-date {
+      text-align:center; font-family:var(--sans); font-size:13px;
+      color:rgba(255,255,255,0.7); font-weight:500;
+      margin-bottom:32px;
+    }
+    .psum-notif {
+      margin:0 12px; padding:14px;
+      background:rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+      border-radius:18px; border:1px solid rgba(255,255,255,0.06);
+      opacity:0; transform:translateY(-12px) scale(0.96);
+    }
+    .psum-notif-header {
+      display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    }
+    .psum-notif-icon {
+      width:22px; height:22px; border-radius:6px;
+      background:linear-gradient(135deg, #c9a563, #9a7b4f);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--serif); font-size:12px; font-weight:500; color:#fff;
+    }
+    .psum-notif-app { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.6); flex:1; letter-spacing:0.05em; text-transform:uppercase; }
+    .psum-notif-time { font-family:var(--sans); font-size:11px; color:rgba(255,255,255,0.5); }
+    .psum-notif-title { font-family:var(--sans); font-size:14px; font-weight:600; color:#fff; margin-bottom:4px; }
+    .psum-notif-body { font-family:var(--sans); font-size:13px; color:rgba(255,255,255,0.78); line-height:1.45; }
+    .psum-notif-body b { color:#fff; font-weight:600; }
+    .psum-confirm {
+      margin:14px 12px 0; padding:12px 14px;
+      background:rgba(154,123,79,0.18);
+      border:1px solid rgba(154,123,79,0.45);
+      border-radius:14px;
+      display:flex; align-items:center; gap:10px;
+      opacity:0; transform:translateY(8px);
+    }
+    .psum-confirm-check {
+      width:22px; height:22px; border-radius:50%;
+      background:#9a7b4f; color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; flex-shrink:0;
+    }
+    .psum-confirm-text { font-family:var(--sans); font-size:12px; color:#fff; font-weight:500; letter-spacing:0.02em; }
+
+    /* Narrative steps on the right */
+    .proc-narrative { display:flex; flex-direction:column; gap:0; position:relative; }
+    .proc-narrative::before {
+      content:""; position:absolute; left:13px; top:36px; bottom:36px;
+      width:1px; background:rgba(154,123,79,0.18);
+    }
+    .proc-step {
+      display:grid; grid-template-columns:auto 1fr; gap:24px;
+      padding:22px 0; cursor:pointer;
+      opacity:0.32; transition: opacity 0.5s ease;
+    }
+    .proc-step.active { opacity:1; }
+    .proc-step-marker {
+      position:relative; width:28px; height:28px; margin-top:2px;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .proc-step-dot {
+      width:9px; height:9px; border-radius:50%;
+      background:rgba(154,123,79,0.35);
+      transition: all 0.4s ease;
+    }
+    .proc-step.active .proc-step-dot {
+      background:var(--gold); box-shadow:0 0 0 6px rgba(154,123,79,0.18);
+    }
+    .proc-step.done .proc-step-dot {
+      background:var(--gold);
+    }
+    .proc-step-num { font-family:var(--serif-sc); font-size:0.75rem; color:var(--gold); letter-spacing:0.22em; margin-bottom:8px; }
+    .proc-step h3 {
+      color:var(--white); font-family:var(--serif); font-weight:300;
+      font-size:1.5rem; line-height:1.25; letter-spacing:0.01em;
+      margin-bottom:14px; text-transform:none; text-wrap:balance;
+    }
+    .proc-step p {
+      font-family:var(--serif); font-weight:300;
+      font-size:0.9375rem; line-height:1.7;
+      color:rgba(255,255,255,0.55);
+    }
+
+    @media (max-width: 900px) {
+      .proc-stage { grid-template-columns:1fr; gap:40px; padding:60px 24px; }
+      .proc-phone-col { min-height:auto; }
+      .proc-phone { width:260px; height:540px; }
+    }
 
     /* ── STATEMENT ── */
     #statement { background:var(--black); text-align:center; padding:160px 0; }
@@ -415,8 +652,6 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .process-grid { grid-template-columns:1fr; }
-      .process-card { aspect-ratio:16/9; }
       .porque-grid { grid-template-columns:1fr; }
       .pricing-grid { grid-template-columns:1fr; }
       .historia-grid { grid-template-columns:1fr; gap:48px; }
@@ -678,29 +913,111 @@
       <div style="background:var(--black); padding:20px 0 40px; text-align:center;">
         <p style="font-size:0.6875rem; letter-spacing:0.24em; text-transform:uppercase; color:rgba(255,255,255,0.35); font-weight:500;">Más de 15 clientes recuperados de media al mes · Madrid</p>
       </div>
-      <div class="process-grid">
-        <div class="process-card reveal">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=85&auto=format&fit=crop" alt="Llamada perdida" />
-          <div class="process-card-overlay">
-            <div class="process-num">01</div>
-            <h3>Estás con un cliente. El teléfono suena.</h3>
-            <p>No puedes contestar. Antes, ese cliente llamaba a otro salón. Ahora Floux actúa.</p>
+      <hr class="section-divider" style="margin:0 auto;">
+      <div class="proc-stage" id="procStage">
+        <div class="proc-phone-col">
+          <div class="proc-phone">
+            <div class="proc-screen">
+              <div class="proc-screen-status"><span>9:41</span><span>▂▄▆ 5G</span></div>
+
+              <!-- Stage 1: Incoming call -->
+              <div class="proc-stage-layer pcall active" data-stage="1">
+                <div class="pcall-label">Llamada entrante · móvil</div>
+                <div class="pcall-name">Carmen R.</div>
+                <div class="pcall-num">+34 612 ·· ·· 47</div>
+                <div class="pcall-avatar">C</div>
+                <div class="pcall-actions">
+                  <div class="pcall-btn pcall-decline" id="pcallDecline">✕</div>
+                  <div class="pcall-btn pcall-accept">✓</div>
+                </div>
+                <div class="pcall-missed-overlay" id="pcallMissed">
+                  <div class="pcall-missed-icon">↙</div>
+                  <div class="pcall-missed-text">Llamada perdida</div>
+                </div>
+              </div>
+
+              <!-- Stage 2: WhatsApp chat -->
+              <div class="proc-stage-layer pwa" data-stage="2">
+                <div class="pwa-header">
+                  <div class="pwa-avatar">F</div>
+                  <div class="pwa-header-info">
+                    <div class="pwa-name">Floux · Salón Marina</div>
+                    <div class="pwa-status" id="pwaStatus">en línea</div>
+                  </div>
+                </div>
+                <div class="pwa-body" id="pwaBody">
+                  <div class="pwa-time-divider">HOY 11:42</div>
+                  <div class="pwa-bubble from">
+                    Hola Carmen 👋 Soy Floux, del Salón Marina. Hemos visto tu llamada — ahora mismo estamos atendiendo. ¿En qué te ayudamos?
+                    <div class="pwa-meta">11:42</div>
+                  </div>
+                  <div class="pwa-typing" id="pwaTyping1">
+                    <div class="pwa-typing-dot"></div><div class="pwa-typing-dot"></div><div class="pwa-typing-dot"></div>
+                  </div>
+                  <div class="pwa-bubble to">
+                    Quería pedir cita para corte y color
+                    <div class="pwa-meta">11:42 ✓✓</div>
+                  </div>
+                  <div class="pwa-bubble from">
+                    Perfecto. Tenemos hueco mañana viernes a las 17:00 o el sábado a las 11:30. ¿Cuál te va mejor?
+                    <div class="pwa-meta">11:43</div>
+                  </div>
+                  <div class="pwa-bubble to">
+                    Mañana a las 17:00 me viene bien 🙌
+                    <div class="pwa-meta">11:43 ✓✓</div>
+                  </div>
+                  <div class="pwa-bubble from">
+                    Reservado ✨ Te esperamos mañana a las 17:00. Recibirás recordatorio el día antes.
+                    <div class="pwa-meta">11:43</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stage 3: Owner notification -->
+              <div class="proc-stage-layer psum" data-stage="3">
+                <div class="psum-time">11:43</div>
+                <div class="psum-date">jueves 4 · mayo</div>
+                <div class="psum-notif" id="psumNotif">
+                  <div class="psum-notif-header">
+                    <div class="psum-notif-icon">F</div>
+                    <div class="psum-notif-app">Floux</div>
+                    <div class="psum-notif-time">ahora</div>
+                  </div>
+                  <div class="psum-notif-title">Nueva reserva confirmada</div>
+                  <div class="psum-notif-body"><b>Carmen R.</b> · corte + color<br>Viernes 5 mayo · <b>17:00</b></div>
+                </div>
+                <div class="psum-confirm" id="psumConfirm">
+                  <div class="psum-confirm-check">✓</div>
+                  <div class="psum-confirm-text">Añadida a tu agenda · 0 esfuerzo</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="process-card reveal reveal-delay-1">
-          <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=85&auto=format&fit=crop" alt="WhatsApp automático" />
-          <div class="process-card-overlay">
-            <div class="process-num">02</div>
-            <h3>Tu cliente recibe un WhatsApp en 30 segundos.</h3>
-            <p>Una conversación cálida y profesional le pregunta qué necesita y cuándo puede venir.</p>
+        <div class="proc-narrative">
+          <div class="proc-step active" data-step="1">
+            <div class="proc-step-marker"><div class="proc-step-dot"></div></div>
+            <div>
+              <div class="proc-step-num">01 · 11:42</div>
+              <h3>Estás con una clienta. El teléfono suena.</h3>
+              <p>No puedes contestar. Antes, ese cliente llamaba a otro salón. Ahora Floux actúa al instante.</p>
+            </div>
           </div>
-        </div>
-        <div class="process-card reveal reveal-delay-2">
-          <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=85&auto=format&fit=crop" alt="Cita confirmada" />
-          <div class="process-card-overlay">
-            <div class="process-num">03</div>
-            <h3>Tú recibes el resumen. Solo confirmas.</h3>
-            <p>Nombre, servicio y día directo a tu móvil. Sin apps nuevas. Sin complicaciones.</p>
+          <div class="proc-step" data-step="2">
+            <div class="proc-step-marker"><div class="proc-step-dot"></div></div>
+            <div>
+              <div class="proc-step-num">02 · 11:42 → 11:43</div>
+              <h3>Floux conversa por WhatsApp.</h3>
+              <p>Cálido, profesional, en menos de 30 segundos. Pregunta servicio y disponibilidad, propone hueco real y cierra la cita.</p>
+            </div>
+          </div>
+          <div class="proc-step" data-step="3">
+            <div class="proc-step-marker"><div class="proc-step-dot"></div></div>
+            <div>
+              <div class="proc-step-num">03 · 11:43</div>
+              <h3>Recibes el resumen. Solo confirmas.</h3>
+              <p>Nombre, servicio y día directo a tu móvil. Sin apps nuevas, sin paneles. La cita ya está en tu agenda.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1097,6 +1414,145 @@
         }
       });
     });
+
+    /* ── PROCESS PHONE ANIMATION ── */
+    (function(){
+      const stage = document.getElementById('procStage');
+      if (!stage) return;
+      const layers = stage.querySelectorAll('.proc-stage-layer');
+      const steps  = Array.from(stage.querySelectorAll('.proc-step'));
+      const narrative = stage.querySelector('.proc-narrative');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let timers = [];
+      let started = false;
+      let current = 0;
+      let progressRaf = null;
+
+      const D1 = 4200, D2 = 7200, D3 = 4500, TOTAL = D1 + D2 + D3;
+      const clearTimers = () => { timers.forEach(t => clearTimeout(t)); timers = []; if (progressRaf) cancelAnimationFrame(progressRaf); progressRaf = null; };
+
+      let rail = document.createElement('div');
+      rail.style.cssText = 'position:absolute; left:13px; top:36px; width:1px; height:0; background:var(--gold); box-shadow:0 0 8px rgba(201,165,99,0.4); z-index:1; transition:height 0.4s linear;';
+      narrative.style.position = 'relative';
+      narrative.appendChild(rail);
+
+      const dotPositions = () => steps.map(s => {
+        const marker = s.querySelector('.proc-step-marker');
+        const nb = narrative.getBoundingClientRect();
+        const mb = marker.getBoundingClientRect();
+        return (mb.top - nb.top) + marker.offsetHeight / 2;
+      });
+
+      const setStage = (i) => {
+        current = i;
+        layers.forEach(l => l.classList.toggle('active', +l.dataset.stage === i));
+        steps.forEach(s => {
+          const n = +s.dataset.step;
+          s.classList.toggle('active', n === i);
+          s.classList.toggle('done', n < i);
+        });
+      };
+
+      const animateRail = (toPx, dur) => {
+        if (progressRaf) cancelAnimationFrame(progressRaf);
+        const fromPx = parseFloat(rail.style.height) || 0;
+        const start = performance.now();
+        const tick = (now) => {
+          const t = Math.min(1, (now - start) / dur);
+          rail.style.height = (fromPx + (toPx - fromPx) * t) + 'px';
+          if (t < 1) progressRaf = requestAnimationFrame(tick);
+          else progressRaf = null;
+        };
+        progressRaf = requestAnimationFrame(tick);
+      };
+
+      const playCall = () => {
+        const decline = document.getElementById('pcallDecline');
+        const missed  = document.getElementById('pcallMissed');
+        if (decline) decline.classList.remove('shake');
+        if (missed)  missed.classList.remove('show');
+        timers.push(setTimeout(() => decline && decline.classList.add('shake'), 1800));
+        timers.push(setTimeout(() => missed && missed.classList.add('show'), 2600));
+      };
+
+      const playChat = () => {
+        const body = document.getElementById('pwaBody');
+        const status = document.getElementById('pwaStatus');
+        const typing1 = document.getElementById('pwaTyping1');
+        if (!body) return;
+        const divider = body.querySelector('.pwa-time-divider');
+        const bubbles = body.querySelectorAll('.pwa-bubble');
+        if (divider) { divider.style.opacity = '0'; divider.style.transform = 'translateY(4px)'; }
+        bubbles.forEach(b => { b.style.opacity = '0'; b.style.transform = 'translateY(8px)'; });
+        if (typing1) { typing1.style.opacity = '0'; typing1.style.display = 'flex'; }
+        if (status) status.textContent = 'en línea';
+        const show = (el, delay) => timers.push(setTimeout(() => { if (!el) return; el.style.transition = 'opacity 0.4s ease, transform 0.4s var(--ease-spring)'; el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, delay));
+        const hide = (el, delay) => timers.push(setTimeout(() => { if (!el) return; el.style.transition = 'opacity 0.3s ease'; el.style.opacity = '0'; }, delay));
+        show(divider, 200);
+        show(bubbles[0], 600);
+        timers.push(setTimeout(() => { if (status) status.innerHTML = '<span class="pwa-typing-indicator">escribiendo…</span>'; }, 1300));
+        show(typing1, 1400);
+        hide(typing1, 2400);
+        timers.push(setTimeout(() => { if (status) status.textContent = 'en línea'; }, 2500));
+        show(bubbles[1], 2600);
+        show(bubbles[2], 3500);
+        show(bubbles[3], 4600);
+        show(bubbles[4], 5500);
+      };
+
+      const playSummary = () => {
+        const notif = document.getElementById('psumNotif');
+        const conf  = document.getElementById('psumConfirm');
+        if (notif) { notif.style.opacity = '0'; notif.style.transform = 'translateY(-12px) scale(0.96)'; }
+        if (conf)  { conf.style.opacity  = '0'; conf.style.transform  = 'translateY(8px)'; }
+        timers.push(setTimeout(() => { if (!notif) return; notif.style.transition = 'opacity 0.5s ease, transform 0.6s var(--ease-spring)'; notif.style.opacity = '1'; notif.style.transform = 'translateY(0) scale(1)'; }, 300));
+        timers.push(setTimeout(() => { if (!conf) return; conf.style.transition = 'opacity 0.5s ease, transform 0.5s var(--ease-spring)'; conf.style.opacity = '1'; conf.style.transform = 'translateY(0)'; }, 1400));
+      };
+
+      const loop = () => {
+        clearTimers();
+        const positions = dotPositions();
+        rail.style.transition = 'none'; rail.style.height = '0px'; rail.offsetHeight; rail.style.transition = '';
+        setStage(1); playCall(); animateRail(positions[0], 400);
+        timers.push(setTimeout(() => animateRail(positions[1], D1 - 400), 400));
+        timers.push(setTimeout(() => { setStage(2); playChat(); animateRail(positions[2], D2); }, D1));
+        timers.push(setTimeout(() => { setStage(3); playSummary(); animateRail(positions[2] + 8, D3 - 200); }, D1 + D2));
+        timers.push(setTimeout(() => loop(), TOTAL));
+      };
+
+      steps.forEach(s => {
+        s.addEventListener('click', () => {
+          clearTimers();
+          const i = +s.dataset.step;
+          setStage(i);
+          if (i === 1) playCall(); else if (i === 2) playChat(); else playSummary();
+          const positions = dotPositions();
+          rail.style.transition = 'height 0.5s ease';
+          rail.style.height = (i === 3 ? positions[2] + 8 : positions[i - 1]) + 'px';
+          const dur = i === 1 ? D1 : i === 2 ? D2 : D3;
+          timers.push(setTimeout(() => loop(), dur + 600));
+        });
+      });
+
+      const startObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting && !started) {
+            started = true;
+            if (reduceMotion) { setStage(2); return; }
+            loop();
+          }
+        });
+      }, { threshold: 0.3 });
+      startObs.observe(stage);
+
+      window.addEventListener('resize', () => {
+        if (!started) return;
+        const positions = dotPositions();
+        const idx = current === 0 ? 0 : current - 1;
+        rail.style.transition = 'none';
+        rail.style.height = (current === 3 ? positions[2] + 8 : positions[idx]) + 'px';
+      });
+    })();
 
     /* ── FAQ ── */
     function toggleFaq(btn) {
