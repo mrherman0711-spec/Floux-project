@@ -2,6 +2,7 @@
 AI conversation engine — builds prompts, calls OpenAI, parses responses.
 Self-learning: logs interpretation errors and injects them as context so the
 bot doesn't repeat the same mistakes.
+chat() signature: chat(salon_config, conversation, user_message, availability_slots=None, booking_data=None)
 """
 from __future__ import annotations
 
@@ -222,7 +223,8 @@ def _is_ambiguous_correction(text: str, prev_reply: str) -> bool:
 # ── Main chat function ───────────────────────────────────────
 
 def chat(salon_config: dict, conversation: list[dict],
-         user_message: str, availability_slots: list[dict] | None = None) -> dict:
+         user_message: str, availability_slots: list[dict] | None = None,
+         booking_data: dict | None = None) -> dict:
     """
     Run one turn of AI conversation.
 
@@ -248,6 +250,27 @@ def chat(salon_config: dict, conversation: list[dict],
             extract_learning(salon_id, conversation, last_bot, user_message)
 
     messages = [{"role": "system", "content": system_prompt}]
+
+    # Inject already-collected booking fields so the AI never re-asks for known data
+    if booking_data:
+        collected = []
+        if booking_data.get("service"):
+            collected.append(f"servicio: {booking_data['service']}")
+        if booking_data.get("staff_preference"):
+            collected.append(f"profesional preferido: {booking_data['staff_preference']}")
+        elif booking_data.get("staff_assigned"):
+            collected.append(f"profesional asignado: {booking_data['staff_assigned']}")
+        if booking_data.get("client_name"):
+            collected.append(f"nombre del cliente: {booking_data['client_name']}")
+        if booking_data.get("datetime"):
+            collected.append(f"fecha/hora acordada: {booking_data['datetime']}")
+        if booking_data.get("client_email"):
+            collected.append(f"email: {booking_data['client_email']}")
+        if collected:
+            messages.append({
+                "role": "system",
+                "content": "DATOS YA RECOGIDOS (NO volver a preguntar): " + ", ".join(collected) + "."
+            })
 
     # Add conversation history
     for turn in conversation:
