@@ -438,5 +438,5 @@ Día 3:
 
 ---
 
-**Preguntas?** Contacta a flouxaim@gmail.com o abre issue en GitHub.
+**Preguntas?** Contacta a max@floux.es o abre issue en GitHub.
 ¡Listo para ir a producción! 🎉

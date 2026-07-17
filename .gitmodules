@@ -1,0 +1,12 @@
+[submodule "claude-seo"]
+	path = claude-seo
+	url = https://github.com/AgriciDaniel/claude-seo.git
+[submodule "codex-plugin-cc"]
+	path = codex-plugin-cc
+	url = https://github.com/openai/codex-plugin-cc.git
+[submodule ".claude/Skills/superpowers"]
+	path = .claude/Skills/superpowers
+	url = https://github.com/obra/superpowers.git
+[submodule ".agents/marketingskills"]
+	path = .agents/marketingskills
+	url = https://github.com/coreyhaines31/marketingskills.git

@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Floux — Agente WhatsApp Salón Madrid | Recupera Clientes Perdidos</title>
+  <meta name="description" content="Floux recupera las llamadas perdidas de tu salón en Madrid Oeste. WhatsApp automático en 30 segundos. Sin apps. Sin contratos. Desde €47/mes." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://floux.es/" />
+  <link rel="alternate" hreflang="es" href="https://floux.es/" />
+  <link rel="alternate" hreflang="x-default" href="https://floux.es/" />
+  <meta name="geo.region" content="ES-MD" />
+  <meta name="geo.placename" content="Madrid" />
+  <meta name="geo.position" content="40.4168;-3.7038" />
+  <meta name="ICBM" content="40.4168, -3.7038" />
+  <meta property="og:title" content="Floux — Asistente WhatsApp para Salones de Estética en Madrid" />
+  <meta property="og:description" content="Recupera los clientes que pierdes cuando no puedes coger el teléfono. Agente IA automático, WhatsApp nativo, sin comisiones." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://floux.es/" />
+  <meta property="og:image" content="https://floux.es/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Floux — Asistente WhatsApp para Salones" />
+  <meta name="twitter:description" content="Recupera los clientes que pierdes en llamadas perdidas. Automático, sin apps, desde €47/mes." />
+  <meta name="twitter:image" content="https://floux.es/og-image.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.remove('no-js');</script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:         #000000;
+      --charcoal:      #1A1714;
+      --charcoal-light:#2A2520;
+      --charcoal2:     #231F1B;
+      --cream:         #F2EDE6;
+      --white:         #FFFFFF;
+      --gold:          #9A7B4F;
+      --gold-light:    #B8956A;
+      --gold-h:        #7D6340;
+      --rose:          #E8B4A8;
+      --light:         #DED8D0;
+      --body:          #6B6560;
+      --serif:         'Cormorant Garamond', Georgia, serif;
+      --serif-sc:      'Cormorant SC', Georgia, serif;
+      --sans:          'Inter', 'Helvetica Neue', Arial, sans-serif;
+      --ease-spring:   cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out:      cubic-bezier(0.25, 0, 0.1, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--black);
+      color: var(--white);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* ── TYPOGRAPHY ── */
+    h1, h2, h3 { font-family: var(--serif); font-weight: 300; line-height: 1.08; letter-spacing: 0.04em; }
+    h1 { font-size: clamp(3rem, 6vw, 5.5rem); letter-spacing: 0.03em; }
+    h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--serif-sc); }
+    h3 { font-size: clamp(1.1rem, 1.8vw, 1.4rem); letter-spacing: 0.05em; font-family: var(--serif-sc); text-transform: uppercase; }
+    p { color: rgba(255,255,255,0.65); font-size: 1rem; font-weight: 300; line-height: 1.85; }
+    .eyebrow { display: block; font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); font-family: var(--sans); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    section { padding: 120px 0; }
+
+    /* ── SCROLL PROGRESS ── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; z-index: 1000;
+      height: 2px; width: 0%;
+      background: linear-gradient(to right, var(--gold), var(--rose));
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-block; position: relative; overflow: hidden;
+      font-family: var(--sans); font-size: 0.6875rem; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      padding: 16px 44px; border-radius: 0; cursor: pointer;
+      transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.3s var(--ease-spring), box-shadow 0.3s;
+      border: 1px solid transparent;
+    }
+    .btn:hover { transform: scale(1.02); }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: transparent; color: var(--white); border-color: var(--white); }
+    .btn-primary:hover { background: var(--white); color: var(--black); box-shadow: 0 8px 32px rgba(255,255,255,0.15); }
+    .btn-gold { background: transparent; color: var(--gold); border-color: var(--gold); }
+    .btn-gold:hover { background: var(--gold); color: var(--black); box-shadow: 0 8px 32px rgba(154,123,79,0.3); }
+    .btn-filled { background: var(--white); color: var(--black); border-color: var(--white); }
+    .btn-filled:hover { background: transparent; color: var(--white); box-shadow: 0 8px 32px rgba(255,255,255,0.15); }
+
+    /* ── HEADER ── */
+    #header {
+      position: fixed; inset: 0 0 auto 0; z-index: 100;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 100%);
+      transition: background .4s ease, border-color .4s ease;
+    }
+    #header.scrolled {
+      background: rgba(0,0,0,0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+    }
+    nav {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      height: 80px; max-width: 1400px; margin: 0 auto; padding: 0 48px;
+    }
+    .nav-logo { display: flex; align-items: center; }
+    .nav-cta { display: flex; justify-content: flex-end; align-items: center; }
+    .burger { display: none; justify-self: end; }
+    .logo {
+      font-family: var(--serif); font-size: 1.5rem; font-weight: 400;
+      color: var(--white); letter-spacing: 0.08em;
+    }
+    .logo em { font-style: normal; color: var(--gold); }
+    .logo-img-link { display: flex; align-items: center; text-decoration: none; }
+    .logo-svg { height: 44px; width: auto; display: block; }
+    .logo-svg--footer { height: 36px; }
+    .nav-links { display: flex; align-items: center; gap: 36px; justify-content: center; }
+    .nav-links a {
+      font-size: 0.625rem; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: rgba(255,255,255,0.6);
+      transition: color .2s; position: relative; padding-bottom: 2px;
+    }
+    .nav-links a:not(.btn)::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px; background: var(--gold);
+      transition: width 0.3s var(--ease-spring);
+    }
+    .nav-links a:not(.btn):hover { color: var(--white); }
+    .nav-links a:not(.btn):hover::after { width: 100%; }
+    .nav-links .btn { margin-left: 8px; padding: 11px 28px; font-size: 0.625rem; }
+
+    /* Burger */
+    .burger { display:none; flex-direction:column; justify-content:center; gap:5px; width:36px; height:36px; background:none; border:none; cursor:pointer; padding:4px; }
+    .burger span { display:block; width:22px; height:1px; background:var(--white); transition:transform .3s, opacity .3s; }
+    .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .mobile-drawer { display:none; position:fixed; top:80px; left:0; right:0; background:rgba(0,0,0,0.97); backdrop-filter:blur(16px); border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 40px 32px; flex-direction:column; gap:4px; z-index:99; }
+    .mobile-drawer.open { display:flex; }
+    .mobile-drawer a { font-size:0.625rem; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.6); padding:15px 0; border-bottom:1px solid rgba(255,255,255,0.07); transition:color .2s; }
+    .mobile-drawer a:last-of-type { border-bottom:none; }
+    .mobile-drawer a:hover { color:var(--white); }
+    .mobile-drawer .btn { margin-top:14px; text-align:center; border-bottom:none !important; }
+    @media (max-width: 960px) { .nav-links { display:none; } .burger { display:flex; } .nav-cta { display:none; } nav { grid-template-columns: 1fr auto; } }
+
+    /* ── HERO ── */
+    #hero { position:relative; height:100vh; min-height:700px; padding:0; overflow:hidden; }
+    .hero-img { position:absolute; inset:0; }
+    .hero-img img {
+      width:100%; height:100%; object-fit:cover; object-position:60% center;
+      transform: scale(1.06);
+      animation: heroZoom 14s ease-out forwards;
+      will-change: transform;
+    }
+    @keyframes heroZoom { from { transform: scale(1.06); } to { transform: scale(1.0); } }
+    .hero-img::after {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.15) 100%);
+    }
+    .hero-topbar {
+      position:absolute; top:80px; left:0; right:0; z-index:3;
+      display:flex; justify-content:center;
+      padding:14px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      font-size:0.625rem; font-weight:500; letter-spacing:0.22em; text-transform:uppercase;
+      color:rgba(255,255,255,0.55);
+    }
+    .hero-topbar span { margin:0 20px; }
+    .hero-copy {
+      position:absolute; bottom:0; left:0; right:0; padding:0 48px 120px;
+      max-width:1400px; margin:0 auto; z-index:2;
+      top: 50%;
+      bottom: auto;
+      transform: translateY(0);
+    }
+    .hero-copy .eyebrow { margin-bottom:24px; color:rgba(255,255,255,0.6); animation: heroFade 1s ease-out 0.2s both; }
+
+    /* Split text hero */
+    .hero-h1 { color:var(--white); max-width:900px; font-weight:300; text-transform:uppercase; letter-spacing:0.02em; font-size:clamp(2.2rem,5vw,4rem); margin-bottom:0; }
+    .hero-word { display:inline-block; vertical-align: bottom; }
+    .hero-word span {
+      display:inline-block;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: wordIn 0.7s var(--ease-spring) both;
+    }
+    .hero-word-em { font-style:italic; text-transform:none; }
+    @keyframes wordIn { to { opacity: 1; transform: translateY(0); } }
+
+    .hero-sub { color:rgba(255,255,255,0.7); font-size:1.0625rem; font-weight:300; line-height:1.7; max-width:540px; margin:20px 0 0; animation: heroFade 1.2s ease-out 1.2s both; }
+    @keyframes heroFade { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .hero-btns { display:flex; gap:16px; flex-wrap:wrap; margin-top:40px; animation: heroFade 1.2s ease-out 1.4s both; }
+    .hero-scroll {
+      position:absolute; bottom:32px; right:48px; z-index:3;
+      display:flex; align-items:center; gap:12px;
+      font-size:0.5625rem; letter-spacing:0.28em; text-transform:uppercase;
+      color:rgba(255,255,255,0.45); writing-mode:vertical-rl;
+      animation: heroFade 1.4s ease-out 1.6s both;
+    }
+    .hero-scroll::before {
+      content:''; display:block; width:1px; height:48px;
+      background:rgba(255,255,255,0.35);
+      animation: lineGrow 1.5s ease-out 1.8s both;
+    }
+    @keyframes lineGrow { from { height:0; } to { height:48px; } }
+
+    /* Floating gold accents */
+    .float-el {
+      position:absolute; border-radius:50%; pointer-events:none; z-index:1;
+      background: radial-gradient(circle, rgba(154,123,79,0.18) 0%, transparent 70%);
+      animation: floatAnim linear infinite;
+      will-change: transform;
+    }
+    @keyframes floatAnim {
+      0%   { transform: translateY(0px) rotate(0deg); }
+      50%  { transform: translateY(-20px) rotate(180deg); }
+      100% { transform: translateY(0px) rotate(360deg); }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity:0; transform:translateY(44px); transition:opacity 0.9s var(--ease-spring), transform 0.9s var(--ease-spring); }
+    /* Fallback: si el usuario prefiere reduced motion o JS no carga, mostrar contenido */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-left { opacity:1 !important; transform:none !important; transition:none !important; }
+    }
+    .no-js .reveal, .no-js .reveal-left { opacity:1 !important; transform:none !important; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-delay-1 { transition-delay:0.12s; }
+    .reveal-delay-2 { transition-delay:0.24s; }
+    .reveal-delay-3 { transition-delay:0.36s; }
+    .reveal-delay-4 { transition-delay:0.48s; }
+    .reveal-left { opacity:0; transform:translateX(-40px); transition:opacity 0.9s var(--ease-spring), transform 0.9s var(--ease-spring); }
+    .reveal-left.visible { opacity:1; transform:translateX(0); }
+
+    /* ── DIVIDERS ── */
+    .gold-divider { width:36px; height:1px; background:var(--gold); margin:20px auto 0; }
+    .gold-divider-left { width:36px; height:1px; background:var(--gold); margin:20px 0 0; }
+    .section-divider {
+      border:none; height:1px;
+      background: linear-gradient(to right, transparent 0%, rgba(154,123,79,0.4) 20%, rgba(154,123,79,0.7) 50%, rgba(154,123,79,0.4) 80%, transparent 100%);
+    }
+
+    /* ── PROCESS ── */
+    #como { background:var(--black); }
+    .process-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:2px; }
+    .process-card {
+      position:relative; overflow:hidden; aspect-ratio:4/3; cursor:default;
+      transition: transform 0.4s var(--ease-spring);
+    }
+    .process-card:hover { transform: translateY(-4px); }
+    .process-card img {
+      width:100%; height:100%; object-fit:cover;
+      transition:transform 1.2s var(--ease-spring), filter 1.2s ease;
+      filter:brightness(0.52) saturate(0.7);
+    }
+    .process-card:hover img { transform:scale(1.06); filter:brightness(0.62) saturate(0.85); }
+    .process-card-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 55%, transparent 100%);
+      display:flex; flex-direction:column; justify-content:flex-end;
+      padding:40px 36px;
+    }
+    .process-num { font-family:var(--serif-sc); font-size:0.875rem; color:var(--gold); letter-spacing:0.2em; margin-bottom:16px; }
+    .process-card h3 { color:var(--white); font-size:1.5rem; text-transform:none; letter-spacing:0.02em; font-family:var(--serif); font-weight:300; margin-bottom:12px; line-height:1.2; }
+    .process-card p { font-size:0.875rem; color:rgba(255,255,255,0.65); line-height:1.7; }
+
+    /* ── STATEMENT ── */
+    #statement { background:var(--black); text-align:center; padding:160px 0; }
+    #statement h2 { font-size:clamp(2rem,3.5vw,3rem); color:var(--white); letter-spacing:0.16em; max-width:800px; margin:0 auto 32px; line-height:1.15; }
+    #statement p { max-width:560px; margin:0 auto 48px; color:rgba(255,255,255,0.6); font-size:1.0625rem; line-height:1.9; }
+
+    /* ── PRICING ── */
+    #precios { background:var(--charcoal); }
+    .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(255,255,255,0.07); margin-top:72px; }
+    .pricing-card {
+      background:var(--black); padding:56px 40px; position:relative;
+      transition: background 0.3s, transform 0.4s var(--ease-spring), box-shadow 0.4s;
+    }
+    .pricing-card:hover { background:#0d0b09; transform: translateY(-6px); box-shadow: 0 24px 64px rgba(0,0,0,0.4); }
+    .pricing-card.featured { background:var(--charcoal2); }
+    .pricing-card.featured:hover { background:#201c19; }
+    .plan-badge { position:absolute; top:0; left:0; right:0; background:var(--gold); color:var(--black); font-size:0.5625rem; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; text-align:center; padding:6px 0; }
+    .plan-name { font-family:var(--serif-sc); font-size:0.75rem; letter-spacing:0.32em; text-transform:uppercase; color:var(--gold); }
+    .plan-price { font-family:var(--serif); font-size:4rem; font-weight:300; color:var(--white); line-height:1; margin:24px 0 4px; }
+    .plan-price .plan-mes { font-size:1rem; color:rgba(255,255,255,0.4); }
+    .plan-sub { font-size:0.75rem; color:rgba(255,255,255,0.4); letter-spacing:0.08em; margin-bottom:32px; }
+    .plan-divider { width:100%; height:1px; background:rgba(255,255,255,0.08); margin-bottom:32px; }
+    .plan-features { display:flex; flex-direction:column; gap:12px; margin-bottom:40px; }
+    .plan-features li { font-size:0.875rem; color:rgba(255,255,255,0.72); line-height:1.5; transition: color 0.2s; }
+    .plan-features li.dim { color:rgba(255,255,255,0.3); }
+
+    /* ── PORQUE ── */
+    #porque { background:var(--black); padding: 0; }
+    .porque-grid { display:grid; grid-template-columns:1fr 1fr; gap:2px; }
+    .porque-card {
+      position:relative; overflow:hidden; aspect-ratio:4/3;
+      transition: transform 0.4s var(--ease-spring);
+    }
+    .porque-card:hover { transform: translateY(-4px); }
+    .porque-card img { width:100%; height:100%; object-fit:cover; filter:brightness(0.5) saturate(0.7); transition:transform 1.1s var(--ease-spring), filter 1.1s; }
+    .porque-card:hover img { transform:scale(1.05); filter:brightness(0.6) saturate(0.85); }
+    .porque-card-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 60%); padding:40px; display:flex; flex-direction:column; justify-content:flex-end; }
+    .porque-card h3 { color:var(--white); font-size:1.5rem; font-family:var(--serif); font-weight:300; text-transform:none; letter-spacing:0.01em; margin-bottom:10px; line-height:1.2; }
+    .porque-card p { font-size:0.875rem; color:rgba(255,255,255,0.62); line-height:1.65; }
+
+    /* ── HISTORIA ── */
+    #historia { background:var(--charcoal); }
+    .historia-grid { display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:center; }
+    .historia-img { position:relative; overflow:hidden; height:600px; }
+    .historia-img img { width:100%; height:100%; object-fit:cover; filter:brightness(0.85) saturate(0.85); transition:transform 1.2s ease, filter 1.2s ease; }
+    .historia-img:hover img { transform:scale(1.03); filter:brightness(0.9) saturate(0.95); }
+    .historia-img::before { content:''; position:absolute; inset:0; z-index:1; background:linear-gradient(135deg, rgba(154,123,79,0.1) 0%, transparent 60%); pointer-events:none; }
+    .stats-row { display:flex; gap:48px; padding-top:40px; border-top:1px solid rgba(255,255,255,0.08); margin-top:40px; }
+    .stat-val { font-family:var(--serif); font-size:2.75rem; font-weight:300; color:var(--gold); line-height:1; }
+    .stat-label { font-size:0.6875rem; color:rgba(255,255,255,0.45); margin-top:8px; letter-spacing:0.1em; text-transform:uppercase; line-height:1.6; }
+
+    /* ── FAQs ── */
+    #faqs { background:var(--black); }
+    .faq-item { border-bottom:1px solid rgba(255,255,255,0.08); transition: background 0.3s; }
+    .faq-item.open { background: rgba(154,123,79,0.04); }
+    .faq-btn { width:100%; background:none; border:none; display:flex; align-items:center; justify-content:space-between; padding:26px 16px; cursor:pointer; text-align:left; font-family:var(--serif); font-size:1.125rem; color:var(--white); gap:16px; transition: color 0.2s; }
+    .faq-btn:hover { color: var(--gold-light); }
+    .faq-ic { flex-shrink:0; width:28px; height:28px; border:1px solid rgba(255,255,255,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.5); font-size:1rem; font-style:normal; transition:transform .45s var(--ease-spring), background .3s, border-color .3s, color .3s; }
+    .faq-btn.open .faq-ic { transform:rotate(45deg); background:var(--gold); border-color:var(--gold); color:var(--black); }
+    .faq-ans { max-height:0; overflow:hidden; transition:max-height .45s ease; }
+    .faq-ans p { padding:0 16px 28px; font-size:0.9375rem; line-height:1.85; color:rgba(255,255,255,0.55); }
+    .faq-item.open .faq-ans { max-height:400px; }
+
+    /* ── SOCIAL ── */
+    .social-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .social-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px;
+      border: 1px solid rgba(154,123,79,0.4);
+      color: rgba(255,255,255,0.55);
+      transition: border-color 0.25s, color 0.25s, background 0.25s, transform 0.3s var(--ease-spring);
+    }
+    .social-btn:hover {
+      border-color: var(--gold);
+      color: var(--black);
+      background: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    /* ── CONTACT ── */
+    #contacto { background:var(--charcoal); }
+    .contacto-grid { display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:start; }
+    .contact-icon { width:1px; height:32px; background:var(--gold); flex-shrink:0; margin-top:4px; }
+    .contact-info-item { display:flex; align-items:flex-start; gap:20px; }
+    .form-field { display:flex; flex-direction:column; gap:8px; position: relative; }
+    .form-label { font-size:0.625rem; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.45); transition: color 0.25s; }
+    .form-field:focus-within .form-label { color: var(--gold-light); }
+    .form-input {
+      width:100%; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.15);
+      padding:12px 0; color:var(--white); font-family:var(--sans); font-size:0.9375rem; outline:none;
+      transition: border-color .25s;
+      position: relative;
+    }
+    .form-input::after { content:''; position:absolute; bottom:0; left:0; width:0; height:1px; background:var(--gold); transition: width 0.25s var(--ease-spring); }
+    .form-input:focus { border-color: transparent; }
+    .form-input-wrap { position: relative; }
+    .form-input-wrap::after {
+      content:''; position:absolute; bottom:0; left:0; width:0; height:1px;
+      background: var(--gold); transition: width 0.25s var(--ease-spring);
+      pointer-events:none;
+    }
+    .form-input-wrap:focus-within::after { width:100%; }
+    .form-input:focus { border-color: rgba(255,255,255,0.08); }
+    .form-input::placeholder { color:rgba(255,255,255,0.25); }
+    .form-check { position:absolute; right:0; top:12px; color: #6fcf97; font-size:0.875rem; opacity:0; transition: opacity 0.3s; }
+    .form-check.show { opacity: 1; }
+
+    /* ── FOOTER ── */
+    footer { background:var(--black); padding:80px 0 40px; border-top:1px solid rgba(255,255,255,0.07); }
+    .footer-grid { display:grid; grid-template-columns:280px 1fr 1fr; gap:60px; margin-bottom:64px; }
+    .footer-brand .logo-img-link { display:block; margin-bottom:16px; }
+    .footer-brand p { font-size:0.8125rem; color:rgba(255,255,255,0.35); line-height:1.75; max-width:210px; }
+    .footer-col h4 { font-family:var(--serif); font-style:italic; font-size:1rem; color:rgba(255,255,255,0.5); font-weight:300; margin-bottom:24px; }
+    .footer-col a { display:block; font-size:0.6875rem; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:16px; transition:color .25s, text-shadow .25s; }
+    .footer-col a:hover { color:var(--gold-light); text-shadow: 0 0 20px rgba(184,149,106,0.4); }
+    .footer-bottom { border-top:1px solid rgba(255,255,255,0.06); padding-top:28px; display:flex; justify-content:space-between; align-items:center; font-size:0.6875rem; letter-spacing:0.08em; color:rgba(255,255,255,0.22); }
+
+    /* ── SCROLL TO TOP ── */
+    #scroll-top {
+      position:fixed; bottom:32px; right:32px; z-index:200;
+      width:44px; height:44px; background:rgba(0,0,0,0.8); border:1px solid rgba(154,123,79,0.4);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; opacity:0; transform:translateY(16px);
+      transition: opacity 0.3s, transform 0.3s, background 0.2s, border-color 0.2s;
+      color: var(--gold);
+      backdrop-filter: blur(8px);
+    }
+    #scroll-top.show { opacity:1; transform:translateY(0); }
+    #scroll-top:hover { background: var(--gold); border-color: var(--gold); color: var(--black); }
+
+    /* ── REDUCED MOTION ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .process-grid { grid-template-columns:1fr; }
+      .process-card { aspect-ratio:16/9; }
+      .porque-grid { grid-template-columns:1fr; }
+      .pricing-grid { grid-template-columns:1fr; }
+      .historia-grid { grid-template-columns:1fr; gap:48px; }
+      .historia-img { height:360px; }
+      .contacto-grid { grid-template-columns:1fr; gap:60px; }
+      .footer-grid { grid-template-columns:1fr; gap:40px; }
+      .footer-bottom { flex-direction:column; gap:8px; text-align:center; }
+      .hero-topbar { display:none; }
+    }
+    @media (max-width: 600px) {
+      .container { padding:0 24px; }
+      nav { padding:0 24px; }
+      .hero-copy { padding:0 24px 60px; }
+      .hero-h1 { font-size: 2.1rem !important; letter-spacing: 0.01em; }
+      .hero-scroll { display:none; }
+      .stats-row { flex-direction: column; gap: 28px; }
+      .historia-grid { gap: 32px; }
+    }
+    @media (hover: none) {
+      .float-el { display: none; }
+    }
+    /* WhatsApp float — mobile only */
+    .whatsapp-float {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      background: #25D366;
+      color: #fff;
+      padding: 12px 20px 12px 14px;
+      gap: 8px;
+      align-items: center;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    @media (max-width: 768px) {
+      .whatsapp-float { display: flex; }
+    }
+  </style>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://floux.es/#organization",
+    "name": "Floux",
+    "url": "https://floux.es/",
+    "email": "max@floux.es",
+    "telephone": "+34665776235",
+    "logo": "https://floux.es/favicon.svg",
+    "description": "Asistente WhatsApp automático para salones de estética en Madrid Oeste. Recupera los clientes que pierdes en llamadas perdidas.",
+    "foundingDate": "2025",
+    "foundingLocation": "Madrid, España",
+    "areaServed": [
+      {"@type": "City", "name": "Majadahonda", "addressCountry": "ES"},
+      {"@type": "City", "name": "Pozuelo de Alarcón", "addressCountry": "ES"},
+      {"@type": "City", "name": "Boadilla del Monte", "addressCountry": "ES"},
+      {"@type": "City", "name": "Villaviciosa de Odón", "addressCountry": "ES"},
+      {"@type": "City", "name": "Las Rozas", "addressCountry": "ES"}
+    ],
+    "sameAs": [
+      "https://www.linkedin.com/company/flouxaim/",
+      "https://www.instagram.com/flouxaim/",
+      "https://www.facebook.com/profile.php?id=61588789281127",
+      "https://www.youtube.com/@flouxaim",
+      "https://www.tiktok.com/@flouxaim"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["LocalBusiness", "ProfessionalService"],
+    "@id": "https://floux.es/#local",
+    "name": "Floux",
+    "url": "https://floux.es/",
+    "telephone": "+34665776235",
+    "email": "max@floux.es",
+    "priceRange": "€€",
+    "description": "Agente WhatsApp que recupera los clientes que pierdes cuando no puedes coger el teléfono. Para salones de estética en Madrid Oeste.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Madrid",
+      "addressRegion": "Comunidad de Madrid",
+      "addressCountry": "ES"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 40.41650,
+      "longitude": -3.88250
+    },
+    "areaServed": [
+      {"@type": "City", "name": "Majadahonda", "addressCountry": "ES"},
+      {"@type": "City", "name": "Pozuelo de Alarcón", "addressCountry": "ES"},
+      {"@type": "City", "name": "Boadilla del Monte", "addressCountry": "ES"},
+      {"@type": "City", "name": "Villaviciosa de Odón", "addressCountry": "ES"},
+      {"@type": "City", "name": "Las Rozas", "addressCountry": "ES"}
+    ],
+    "openingHoursSpecification": [
+      {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], "opens": "00:00", "closes": "23:59"}
+    ],
+    "parentOrganization": {"@id": "https://floux.es/#organization"}
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Floux",
+    "applicationCategory": "BusinessApplication",
+    "description": "Agente WhatsApp que recupera los clientes que pierdes cuando no puedes coger el teléfono",
+    "url": "https://floux.es/",
+    "operatingSystem": "Web, WhatsApp",
+    "offers": [
+      {"@type": "Offer", "name": "Plan Básico", "price": "47", "priceCurrency": "EUR"},
+      {"@type": "Offer", "name": "Plan Agente", "price": "97", "priceCurrency": "EUR"},
+      {"@type": "Offer", "name": "Plan Completo", "price": "147", "priceCurrency": "EUR"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "¿Funciona Floux en Majadahonda?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Floux funciona en Majadahonda, Pozuelo, Boadilla, Villaviciosa y Las Rozas. Nos especializamos en salones de Madrid Oeste."}},
+      {"@type": "Question", "name": "¿Cuánto cuesta Floux?", "acceptedAnswer": {"@type": "Answer", "text": "Básico €47/mes, Agente €97/mes, Completo €147/mes. Se paga solo con UN cliente recuperado al mes."}},
+      {"@type": "Question", "name": "¿Es diferente de Treatwell?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Treatwell cobra 20-35% de comisión. Floux es suscripción fija sin comisiones."}},
+      {"@type": "Question", "name": "¿Necesito descargar una app?", "acceptedAnswer": {"@type": "Answer", "text": "No. Funciona directo por WhatsApp. Cero apps."}},
+      {"@type": "Question", "name": "¿Cómo se integra con mi sistema?", "acceptedAnswer": {"@type": "Answer", "text": "Se integra con Treatwell, Booksy y Google Calendar. Comprueba disponibilidad real automáticamente."}},
+      {"@type": "Question", "name": "¿Hay contrato de permanencia?", "acceptedAnswer": {"@type": "Answer", "text": "No. Cancela cuando quieras, sin penalizaciones."}}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Floux",
+    "alternateName": "Floux — Agente WhatsApp para Salones",
+    "url": "https://floux.es/",
+    "description": "Recupera los clientes que pierdes cuando no puedes coger el teléfono. Agente WhatsApp para salones de estética en Madrid Oeste.",
+    "inLanguage": "es-ES"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": "https://floux.es/#founder",
+    "name": "Max Herman",
+    "jobTitle": "Fundador",
+    "worksFor": {
+      "@type": "Organization",
+      "name": "Floux",
+      "url": "https://floux.es/"
+    },
+    "url": "https://floux.es/#historia",
+    "email": "max@floux.es",
+    "sameAs": [
+      "https://www.linkedin.com/in/maxherman711/"
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Scroll progress -->
+  <div id="progress-bar" role="progressbar" aria-hidden="true"></div>
+
+  <!-- Scroll to top -->
+  <button id="scroll-top" aria-label="Volver arriba">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 12V4M4 8l4-4 4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <!-- Header -->
+  <header id="header">
+    <nav>
+      <div class="nav-logo"><a href="#" class="logo-img-link"><svg class="logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Floux"><defs><linearGradient id="goldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9A7B4F"/></linearGradient><linearGradient id="flameG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#888"/><stop offset="100%" stop-color="#555"/></linearGradient></defs><!-- Flame --><path d="M26 2 C24 6 21 8 22 13 C23 16 26 17 26 17 C26 17 29 16 30 13 C31 8 28 6 26 2Z" fill="url(#flameG)" opacity="0.85"/><path d="M24 5 C23 8 21 10 22 14 C22.5 16 24 17 24 17" stroke="#aaa" stroke-width="0.5" fill="none" opacity="0.5"/><!-- Chevron 1 (top) --><path d="M14 18 L26 28 L38 18" stroke="url(#goldG)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><!-- Chevron 2 --><path d="M16 25 L26 34 L36 25" stroke="url(#goldG)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><!-- Chevron 3 (bottom) --><path d="M18 32 L26 40 L34 32" stroke="url(#goldG)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><!-- Wordmark --><text x="54" y="36" font-family="'Cormorant SC', Georgia, serif" font-size="22" font-weight="400" letter-spacing="6" fill="url(#goldG)">FLOUX</text></svg></a></div>
+      <ul class="nav-links">
+        <li><a href="#como">Cómo funciona</a></li>
+        <li><a href="#porque">Por qué Floux</a></li>
+        <li><a href="#precios">Precios</a></li>
+        <li><a href="#historia">Nuestra historia</a></li>
+        <li><a href="#faqs">FAQs</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#contacto" class="btn btn-primary">Ver demostración</a>
+      </div>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+    <div class="mobile-drawer" id="drawer">
+      <a href="#como">Cómo funciona</a>
+      <a href="#porque">Por qué Floux</a>
+      <a href="#precios">Precios</a>
+      <a href="#historia">Nuestra historia</a>
+      <a href="#faqs">FAQs</a>
+      <a href="#contacto">Contacto</a>
+      <a href="#contacto" class="btn btn-primary">Ver demostración</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ── HERO ── -->
+    <section id="hero">
+      <!-- Floating gold accent elements -->
+      <div class="float-el" style="width:300px;height:300px;top:20%;left:5%;animation-duration:8s;animation-delay:0s;"></div>
+      <div class="float-el" style="width:200px;height:200px;top:60%;left:70%;animation-duration:11s;animation-delay:-3s;"></div>
+      <div class="float-el" style="width:150px;height:150px;top:30%;right:15%;animation-duration:9s;animation-delay:-5s;"></div>
+
+      <div class="hero-img">
+        <img id="hero-bg-img" src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1800&q=90&auto=format&fit=crop" alt="Salón de estética elegante Madrid" loading="eager" />
+      </div>
+      <div class="hero-topbar">
+        <span>Madrid · Majadahonda</span>
+        <span>Pozuelo · Las Rozas</span>
+        <span>Boadilla · Villaviciosa</span>
+      </div>
+      <div class="hero-copy">
+        <span class="eyebrow">El asistente de WhatsApp para salones · Madrid</span>
+        <h1 class="hero-h1" id="hero-h1">Recupera los clientes que pierdes mientras trabajas</h1>
+        <p class="hero-sub">El asistente de WhatsApp para salones de estética en Madrid. Cada llamada perdida, convertida en cita confirmada — en 30 segundos.</p>
+        <div class="hero-btns">
+          <a href="#contacto" class="btn btn-primary">Ver demostración</a>
+          <a href="#como" class="btn btn-gold">Cómo funciona</a>
+        </div>
+      </div>
+      <div class="hero-scroll">Descubrir</div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ── CÓMO FUNCIONA ── -->
+    <section id="como" style="padding:0;">
+      <div style="background:var(--black); padding:100px 0 60px;">
+        <div class="container">
+          <div class="reveal" style="text-align:center; max-width:580px; margin:0 auto;">
+            <span class="eyebrow">El proceso</span>
+            <h2 style="color:var(--white); margin-top:20px; margin-bottom:20px;">Mientras tú trabajas,<br>nosotros reservamos</h2>
+            <p style="color:rgba(255,255,255,0.5); max-width:420px; margin:0 auto;">Cada llamada perdida es dinero que se va. Floux actúa en menos de 30 segundos — antes de que ese cliente llame a la competencia.</p>
+            <div class="gold-divider"></div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--black); padding:20px 0 40px; text-align:center;">
+        <p style="font-size:0.6875rem; letter-spacing:0.24em; text-transform:uppercase; color:rgba(255,255,255,0.35); font-weight:500;">Más de 15 clientes recuperados de media al mes · Madrid</p>
+      </div>
+      <div class="process-grid">
+        <div class="process-card reveal">
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=85&auto=format&fit=crop" alt="Llamada perdida" />
+          <div class="process-card-overlay">
+            <div class="process-num">01</div>
+            <h3>Estás con un cliente. El teléfono suena.</h3>
+            <p>No puedes contestar. Antes, ese cliente llamaba a otro salón. Ahora Floux actúa.</p>
+          </div>
+        </div>
+        <div class="process-card reveal reveal-delay-1">
+          <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=85&auto=format&fit=crop" alt="WhatsApp automático" />
+          <div class="process-card-overlay">
+            <div class="process-num">02</div>
+            <h3>Tu cliente recibe un WhatsApp en 30 segundos.</h3>
+            <p>Una conversación cálida y profesional le pregunta qué necesita y cuándo puede venir.</p>
+          </div>
+        </div>
+        <div class="process-card reveal reveal-delay-2">
+          <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=85&auto=format&fit=crop" alt="Cita confirmada" />
+          <div class="process-card-overlay">
+            <div class="process-num">03</div>
+            <h3>Tú recibes el resumen. Solo confirmas.</h3>
+            <p>Nombre, servicio y día directo a tu móvil. Sin apps nuevas. Sin complicaciones.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ── STATEMENT ── -->
+    <section id="statement">
+      <div class="container">
+        <div class="reveal">
+          <span class="eyebrow" style="text-align:center; display:block;">La promesa</span>
+          <h2 style="margin-top:28px;">Ningún negocio<br>debería perder un cliente<br>por estar trabajando</h2>
+          <p>Floux recoge esa llamada perdida y la convierte en una cita confirmada. Sin que tengas que hacer nada.</p>
+          <a href="#contacto" class="btn btn-primary">Solicita tu demostración gratuita →</a>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ── POR QUÉ FLOUX ── -->
+    <section id="porque" style="padding:0;">
+      <div style="background:var(--black); padding:100px 0 60px;">
+        <div class="container">
+          <div class="reveal" style="text-align:center; max-width:560px; margin:0 auto;">
+            <span class="eyebrow">Diferencial</span>
+            <h2 style="color:var(--white); margin-top:20px; margin-bottom:20px;">Por qué Floux</h2>
+            <div class="gold-divider"></div>
+          </div>
+        </div>
+      </div>
+      <div class="porque-grid">
+        <div class="porque-card reveal">
+          <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=900&q=85&auto=format&fit=crop" alt="Salón de estética" />
+          <div class="porque-card-overlay">
+            <span class="eyebrow" style="margin-bottom:12px;">Respuesta inmediata</span>
+            <h3>30 segundos.<br>No 30 minutos.</h3>
+            <p>La mayoría de los clientes que no obtienen respuesta llaman a la competencia en menos de 5 minutos. Floux responde antes de que eso pase.</p>
+          </div>
+        </div>
+        <div class="porque-card reveal reveal-delay-1">
+          <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=900&q=85&auto=format&fit=crop" alt="Citas automáticas" />
+          <div class="porque-card-overlay">
+            <span class="eyebrow" style="margin-bottom:12px;">Sin esfuerzo</span>
+            <h3>Cero cambios<br>en tu rutina.</h3>
+            <p>No necesitas aprender nada nuevo. Floux se instala en tu número actual y funciona en segundo plano mientras tú te concentras en tus clientes.</p>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--black); padding:2px 0;"></div>
+      <div class="porque-grid">
+        <div class="porque-card reveal">
+          <img src="https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=900&q=85&auto=format&fit=crop" alt="Conversación natural" />
+          <div class="porque-card-overlay">
+            <span class="eyebrow" style="margin-bottom:12px;">Conversación natural</span>
+            <h3>Tus clientes<br>no notan nada.</h3>
+            <p>El tono, el nombre de tu salón y los servicios son completamente tuyos. Tus clientas no notan la diferencia.</p>
+          </div>
+        </div>
+        <div class="porque-card reveal reveal-delay-1">
+          <img src="https://images.unsplash.com/photo-1607008829749-c0f284a49fc4?w=900&q=85&auto=format&fit=crop" alt="Sin contratos" />
+          <div class="porque-card-overlay">
+            <span class="eyebrow" style="margin-bottom:12px;">Sin permanencia</span>
+            <h3>Cancelas cuando<br>quieras. Sin penalización.</h3>
+            <p>No hay contratos ni permanencia. Pagas mes a mes y te quedas porque ves resultados, no porque estés atada.</p>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--black); padding:60px 0;"></div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ── PRECIOS ── -->
+    <section id="precios" style="background:var(--charcoal);">
+      <div class="container">
+        <div class="reveal" style="text-align:center; max-width:560px; margin:0 auto;">
+          <span class="eyebrow">Inversión</span>
+          <h2 style="color:var(--white); margin-top:20px; margin-bottom:20px;">Precios</h2>
+          <p style="color:rgba(255,255,255,0.5);">Sin permanencia. Sin letra pequeña.<br>La mayoría de salones recuperan más de 15 clientes al mes.</p>
+          <div class="gold-divider"></div>
+        </div>
+        <div style="max-width:480px; margin:72px auto 0;">
+          <div class="pricing-card featured reveal" style="background:var(--charcoal2);">
+            <div class="plan-badge">Lanzamiento</div>
+            <div style="height:24px;"></div>
+            <div class="plan-name">Agente</div>
+            <div class="plan-price">€<span class="counter" data-target="97">0</span><span class="plan-mes">/mes</span></div>
+            <div class="plan-sub">Alta gratuita (valor €197) — solo durante el lanzamiento</div>
+            <div class="plan-divider"></div>
+            <ul class="plan-features">
+              <li>✓ Tu cliente queda apuntada automáticamente — sin que hagas nada</li>
+              <li>✓ Tu cliente elige servicio, día y hora — sin intervenir tú</li>
+              <li>✓ Sabes exactamente quién viene, qué quiere y cuándo</li>
+              <li>✓ Te avisamos al instante — tú solo confirmas la cita</li>
+              <li>✓ Cero llamadas perdidas — cada cliente recibe respuesta en 30s</li>
+              <li>✓ Google Calendar sincronizado — agenda siempre actualizada</li>
+              <li>✓ Resumen diario por WhatsApp — no necesitas abrir apps</li>
+              <li>✓ Sin complicaciones — funciona en tu número actual</li>
+            </ul>
+            <a href="#contacto" class="btn btn-filled" style="width:100%;text-align:center;">Quiero el plan Agente</a>
+            <p style="font-size:0.6875rem; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-align:center; margin-top:12px;">Sin permanencia · Cancelas cuando quieras</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <hr class="section-divider">
+
+  <!-- ── HISTORIA ── -->
+  <section id="historia" style="background:var(--black); padding:120px 0;">
+    <div class="container">
+      <div class="historia-grid">
+        <div class="reveal">
+          <span class="eyebrow">El fundador</span>
+          <h2 style="color:var(--white); margin:20px 0 28px; line-height:1.1;">Una idea nacida<br><em>de caminar por<br>Madrid Oeste</em></h2>
+          <p style="color:rgba(255,255,255,0.65); line-height:1.9; margin-bottom:20px;">Soy Max Herman, fundador de Floux. La idea de Floux surge de algo muy simple: caminar por salones de estética en Majadahonda, Boadilla, Pozuelo — ciudades donde viven miles de propietarias que trabajan sin parar.</p>
+          <p style="color:rgba(255,255,255,0.65); line-height:1.9; margin-bottom:20px;">Visitando salones de estética de la zona, vi el mismo patrón repetirse: propietarias extraordinarias en su oficio, con agenda llena y manos ocupadas, incapaces de coger el teléfono cuando sonaba. Cada llamada perdida era una cita que se iba a la competencia.</p>
+          <p style="color:rgba(255,255,255,0.65); line-height:1.9; margin-bottom:40px;">Mi visión es sencilla: que ningún negocio local pierda un cliente por estar demasiado ocupado trabajando.</p>
+          <div class="stats-row">
+            <div class="reveal reveal-delay-1">
+              <div class="stat-val"><span class="counter" data-target="15" data-prefix="+">0</span></div>
+              <div class="stat-label">Clientes recuperados<br>de media al mes</div>
+            </div>
+            <div class="reveal reveal-delay-2">
+              <div class="stat-val"><span id="stat-30s">30s</span></div>
+              <div class="stat-label">Tiempo hasta la<br>primera respuesta</div>
+            </div>
+            <div class="reveal reveal-delay-3">
+              <div class="stat-val"><span class="counter" data-target="0">0</span></div>
+              <div class="stat-label">Apps nuevas<br>que aprender</div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal reveal-delay-1 historia-img">
+          <img src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=900&q=90&auto=format&fit=crop" alt="Esteticien trabajando con cliente en salón de belleza" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── FAQs ── -->
+  <section id="faqs" style="background:var(--charcoal); padding:120px 0;">
+    <div class="container">
+      <div class="reveal" style="text-align:center; max-width:560px; margin:0 auto 80px;">
+        <span class="eyebrow">Preguntas frecuentes</span>
+        <h2 style="color:var(--white); margin-top:20px; margin-bottom:0;">Todo lo que<br>necesitas saber</h2>
+        <div class="gold-divider"></div>
+      </div>
+      <div style="max-width:760px; margin:0 auto;" id="faq-list">
+        <div class="faq-item reveal">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Necesito instalar alguna aplicación o programa?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>No. Nosotros nos encargamos de toda la configuración. Tú no tienes que descargar nada ni aprender a usar ninguna plataforma. En menos de 48 horas está funcionando.</p></div>
+        </div>
+        <div class="faq-item reveal reveal-delay-1">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Qué pasa si un cliente pregunta algo muy específico?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>Floux está configurado con todos los servicios y precios de tu salón. Para el 95% de las conversaciones — reservas, horarios, precios habituales — lo gestiona solo sin que intervengas. Si surge algo muy particular, te manda un aviso directo al móvil para que respondas tú. Tus clientes siempre quedan atendidos.</p></div>
+        </div>
+        <div class="faq-item reveal reveal-delay-2">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Puedo personalizar lo que le dice a mis clientes?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>Sí, completamente. El tono, el nombre de tu salón, los servicios y el mensaje de bienvenida son configurables. Lo ajustamos contigo durante la instalación para que suene exactamente como tú.</p></div>
+        </div>
+        <div class="faq-item reveal reveal-delay-3">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Funciona con cualquier número de teléfono?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>Sí. Funciona con el número que ya tienes, ya sea fijo o móvil. No necesitas cambiar tu número ni contratar una línea nueva.</p></div>
+        </div>
+        <div class="faq-item reveal">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Hay permanencia o contrato mínimo?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>No hay permanencia. Puedes cancelar cualquier mes con un aviso de 15 días. Sin penalizaciones, sin letra pequeña. Queremos que te quedes porque estás satisfecha, no porque estés atada.</p></div>
+        </div>
+        <div class="faq-item reveal reveal-delay-1">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Qué pasa cuando mi salón está cerrado o de vacaciones?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>Puedes pausar el servicio cuando quieras o configurar un mensaje especial. También podemos establecer un horario de activación automática para que solo funcione cuando tú elijas.</p></div>
+        </div>
+        <div class="faq-item reveal reveal-delay-2">
+          <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false"><span>¿Merece la pena económicamente?</span><i class="faq-ic" aria-hidden="true">+</i></button>
+          <div class="faq-ans"><p>Una sesión media en Madrid cuesta entre €40 y €80. Con recuperar un único cliente al mes, Floux ya se paga solo. La mayoría de nuestras clientas recuperan entre 10 y 20 clientes al mes que de otra forma habrían ido a la competencia.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── CONTACTO ── -->
+  <section id="contacto" style="background:var(--black); padding:120px 0;">
+    <div class="container">
+      <div class="contacto-grid">
+        <div class="reveal">
+          <span class="eyebrow">Contacto</span>
+          <h2 style="color:var(--white); margin:20px 0 28px; line-height:1.1;">Hablemos.<br><em>Sin presión.</em></h2>
+          <p style="color:rgba(255,255,255,0.6); line-height:1.9; margin-bottom:48px;">Cuéntanos cómo funciona tu salón y te explicamos exactamente qué puede hacer Floux por ti. Sin compromisos, en español, y en menos de 15 minutos.</p>
+          <div style="display:flex; flex-direction:column; gap:32px;">
+            <div class="contact-info-item">
+              <div class="contact-icon"></div>
+              <div>
+                <div style="font-size:0.625rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Email</div>
+                <a href="mailto:max@floux.es" style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300;">max@floux.es</a>
+                <a href="tel:+34665776235" style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300; display:block; margin-top:0.5rem;">+34 665 77 62 35</a>
+                <a href="https://wa.me/34665776235" target="_blank" rel="noopener" class="btn-whatsapp-contact">
+                  Escríbenos por WhatsApp
+                </a>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="contact-icon"></div>
+              <div>
+                <div style="font-size:0.625rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Zona</div>
+                <span style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300;">Madrid — Majadahonda, Pozuelo,<br>Las Rozas, Boadilla, Villaviciosa</span>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="contact-icon"></div>
+              <div>
+                <div style="font-size:0.625rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:16px;">Síguenos</div>
+                <div class="social-links">
+                  <a href="https://www.instagram.com/flouxaim/" target="_blank" rel="noopener" class="social-btn" aria-label="Instagram">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                  </a>
+                  <a href="https://www.facebook.com/profile.php?id=61588789281127" target="_blank" rel="noopener" class="social-btn" aria-label="Facebook">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                  </a>
+                  <a href="https://www.youtube.com/@flouxaim" target="_blank" rel="noopener" class="social-btn" aria-label="YouTube">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>
+                  </a>
+                  <a href="https://www.tiktok.com/@flouxaim" target="_blank" rel="noopener" class="social-btn" aria-label="TikTok">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.54V6.79a4.85 4.85 0 0 1-1.02-.1z"/></svg>
+                  </a>
+                  <a href="https://www.linkedin.com/company/flouxaim/?viewAsMember=true" target="_blank" rel="noopener" class="social-btn" aria-label="LinkedIn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal reveal-delay-1" id="contact-form-wrap">
+          <h3 style="font-family:var(--serif); font-size:1.25rem; font-weight:300; color:var(--white); letter-spacing:0.04em; text-transform:none; margin-bottom:40px;">Reserva una demostración gratuita</h3>
+          <form id="contact-form" onsubmit="sendForm(event)" style="display:flex; flex-direction:column; gap:28px;" novalidate>
+            <div class="form-field">
+              <label class="form-label" for="f-nombre">Nombre</label>
+              <div class="form-input-wrap">
+                <input type="text" id="f-nombre" required placeholder="Tu nombre" class="form-input" autocomplete="name" />
+                <span class="form-check" id="chk-nombre">✓</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="f-salon">Nombre del salón</label>
+              <div class="form-input-wrap">
+                <input type="text" id="f-salon" required placeholder="Nombre de tu centro o salón" class="form-input" />
+                <span class="form-check" id="chk-salon">✓</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="f-tel">Teléfono o WhatsApp</label>
+              <div class="form-input-wrap">
+                <input type="tel" id="f-tel" required placeholder="+34 600 000 000" class="form-input" autocomplete="tel" />
+                <span class="form-check" id="chk-tel">✓</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="f-msg">Mensaje (opcional)</label>
+              <div class="form-input-wrap">
+                <textarea id="f-msg" rows="3" placeholder="Cuéntanos algo sobre tu salón..." class="form-input" style="resize:none;"></textarea>
+              </div>
+            </div>
+            <button type="submit" id="submit-btn" class="btn btn-primary" style="margin-top:8px; align-self:flex-start; min-width:240px;">
+              <span id="submit-text">Reservar mi demostración gratuita</span>
+              <span id="submit-loading" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 16 16" style="animation:spin 0.8s linear infinite;vertical-align:middle;" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="28" stroke-dashoffset="10" stroke-linecap="round"/></svg>
+                Enviando…
+              </span>
+            </button>
+          </form>
+          <div id="form-success" style="display:none; opacity:0; transition: opacity 0.4s; text-align:center; padding: 48px 0;">
+            <div style="font-size:2rem; color:var(--gold); margin-bottom:16px;">✓</div>
+            <p style="color:var(--white); font-family:var(--serif); font-size:1.25rem; font-weight:300; margin-bottom:12px;">¡Mensaje enviado!</p>
+            <p style="color:rgba(255,255,255,0.5); font-size:0.875rem;">Te contactamos en menos de 24 horas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="reveal">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo-img-link"><svg class="logo-svg logo-svg--footer" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Floux"><defs><linearGradient id="goldG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9A7B4F"/></linearGradient><linearGradient id="flameG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#888"/><stop offset="100%" stop-color="#555"/></linearGradient></defs><path d="M26 2 C24 6 21 8 22 13 C23 16 26 17 26 17 C26 17 29 16 30 13 C31 8 28 6 26 2Z" fill="url(#flameG2)" opacity="0.85"/><path d="M24 5 C23 8 21 10 22 14 C22.5 16 24 17 24 17" stroke="#aaa" stroke-width="0.5" fill="none" opacity="0.5"/><!-- Chevron 1 (top) --><path d="M14 18 L26 28 L38 18" stroke="url(#goldG2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><!-- Chevron 2 --><path d="M16 25 L26 34 L36 25" stroke="url(#goldG2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><!-- Chevron 3 (bottom) --><path d="M18 32 L26 40 L34 32" stroke="url(#goldG2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><!-- Wordmark --><text x="54" y="36" font-family="'Cormorant SC', Georgia, serif" font-size="22" font-weight="400" letter-spacing="6" fill="url(#goldG2)">FLOUX</text></svg></a>
+          <p>Recuperamos las llamadas perdidas de tu salón. En menos de 30 segundos.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navegación</h4>
+          <a href="#como">Cómo funciona</a>
+          <a href="#porque">Por qué Floux</a>
+          <a href="#precios">Precios</a>
+          <a href="#historia">Nuestra historia</a>
+          <a href="#faqs">FAQs</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contacto</h4>
+          <a href="mailto:max@floux.es">max@floux.es</a>
+          <a href="tel:+34665776235">+34 665 77 62 35</a>
+          <a href="#contacto">Reservar demostración</a>
+          <a href="/privacidad/">Privacidad</a>
+          <a href="/aviso-legal/">Aviso Legal</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Floux · Madrid · Todos los derechos reservados</span>
+        <span><a href="/privacidad/" style="color:inherit;opacity:0.6;text-decoration:none;">Privacidad</a> · <a href="/aviso-legal/" style="color:inherit;opacity:0.6;text-decoration:none;">Aviso Legal</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+  <script>
+    /* ── HERO SPLIT TEXT ──
+       Progressive enhancement: el H1 ya viene con texto puro en el HTML
+       (para SEO/SSR). Aquí lo vaciamos y lo reconstruimos palabra a palabra
+       para la animación. Si JS falla, el texto puro queda visible. */
+    const heroWords = ['Recupera', 'los', 'clientes', 'que', 'pierdes', 'mientras', 'trabajas'];
+    const heroItalic = ['pierdes', 'mientras', 'trabajas'];
+    const h1 = document.getElementById('hero-h1');
+    h1.textContent = '';
+    heroWords.forEach((word, i) => {
+      const wrap = document.createElement('span');
+      wrap.className = 'hero-word' + (heroItalic.includes(word) ? ' hero-word-em' : '');
+      const inner = document.createElement('span');
+      inner.textContent = word;
+      inner.style.animationDelay = `${0.3 + i * 0.1}s`;
+      wrap.appendChild(inner);
+      h1.appendChild(wrap);
+      if (i < heroWords.length - 1) h1.appendChild(document.createTextNode(' '));
+    });
+
+    /* ── SCROLL PROGRESS ── */
+    const progressBar = document.getElementById('progress-bar');
+    function updateProgress() {
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      progressBar.style.width = (window.scrollY / docH * 100) + '%';
+    }
+
+    /* ── HEADER ── */
+    const header = document.getElementById('header');
+    function onScroll() {
+      const y = window.scrollY;
+      header.classList.toggle('scrolled', y > 60);
+      document.getElementById('scroll-top').classList.toggle('show', y > 500);
+      const heroImg = document.querySelector('.hero-img img');
+      if (heroImg && y < window.innerHeight) {
+        heroImg.style.transform = `scale(1.0) translateY(${y * 0.22}px)`;
+      }
+      updateProgress();
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* ── SCROLL TO TOP ── */
+    document.getElementById('scroll-top').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    /* ── BURGER ── */
+    const burger = document.getElementById('burger');
+    const drawer = document.getElementById('drawer');
+    burger.addEventListener('click', () => {
+      const open = drawer.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open);
+    });
+    drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      drawer.classList.remove('open'); burger.classList.remove('open');
+    }));
+    document.addEventListener('click', e => {
+      if (!header.contains(e.target)) { drawer.classList.remove('open'); burger.classList.remove('open'); }
+    });
+
+    /* ── SMOOTH SCROLL ── */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) {
+          e.preventDefault();
+          const top = t.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+
+    /* ── FAQ ── */
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-btn').classList.remove('open');
+        el.querySelector('.faq-btn').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    /* ── INTERSECTION OBSERVER ── */
+    const countersDone = new Set();
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('visible');
+
+        entry.target.querySelectorAll('.counter').forEach(el => {
+          if (countersDone.has(el)) return;
+          countersDone.add(el);
+          const target = parseInt(el.dataset.target);
+          const prefix = el.dataset.prefix || '';
+          const dur = 1200;
+          const start = performance.now();
+          function step(now) {
+            const t = Math.min((now - start) / dur, 1);
+            const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+            el.textContent = prefix + Math.round(ease * target);
+            if (t < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        });
+
+        revealObs.unobserve(entry.target);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('.reveal, .reveal-left').forEach(el => revealObs.observe(el));
+
+    /* ── FORM ── */
+    function validateField(input, checkId) {
+      const chk = document.getElementById(checkId);
+      if (!chk) return;
+      const valid = input.value.trim().length >= 2;
+      chk.classList.toggle('show', valid && input.required);
+    }
+    document.getElementById('f-nombre').addEventListener('input', e => validateField(e.target, 'chk-nombre'));
+    document.getElementById('f-salon').addEventListener('input', e => validateField(e.target, 'chk-salon'));
+    document.getElementById('f-tel').addEventListener('input', e => validateField(e.target, 'chk-tel'));
+
+    function sendForm(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('f-nombre').value;
+      const salon  = document.getElementById('f-salon').value;
+      const tel    = document.getElementById('f-tel').value;
+      const msg    = document.getElementById('f-msg').value;
+
+      document.getElementById('submit-text').style.display = 'none';
+      document.getElementById('submit-loading').style.display = 'inline';
+
+      const body = `Nombre: ${nombre}%0ASalón: ${salon}%0ATeléfono: ${tel}%0AMensaje: ${msg}`;
+      window.location.href = `mailto:max@floux.es?subject=Demostración Floux - ${salon}&body=${body}`;
+
+      setTimeout(() => {
+        const form = document.getElementById('contact-form');
+        const success = document.getElementById('form-success');
+        form.style.opacity = '0'; form.style.transition = 'opacity 0.4s';
+        setTimeout(() => {
+          form.style.display = 'none';
+          success.style.display = 'block';
+          requestAnimationFrame(() => { success.style.opacity = '1'; });
+        }, 400);
+      }, 800);
+    }
+  </script>
+  <!-- WhatsApp float CTA — mobile only -->
+  <a href="https://wa.me/34665776235" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Contactar por WhatsApp">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <span>WhatsApp</span>
+  </a>
+</body>
+</html>

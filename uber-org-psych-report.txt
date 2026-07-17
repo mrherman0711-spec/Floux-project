@@ -1,0 +1,335 @@
+Uber's Toxic Growth Culture — An Organisational Psychology Diagnosis
+WHEN SPEED OUTRAN JUDGEMENT: AN ORGANISATIONAL PSYCHOLOGY DIAGNOSIS OF UBER'S 2017 CULTURE CRISIS
+
+Organisational Psychology Consulting Report
+
+Client case: Uber Technologies, Inc. (2017) Prepared by: Organisational Psychology Consulting Team Frameworks applied: Schein's Three Levels of Culture · Psychological Safety · Organisational Justice · Transformational Leadership
+
+____________________________________________________________
+
+Part 1 — Written Report
+
+Executive summary
+
+In February 2017, a 3,000-word blog post by a former site reliability engineer named Susan Fowler did more damage to Uber than any competitor had managed in eight years. It described sexual harassment reported on her first day on a team, an HR function that protected the manager because he was a "high performer," a threat of retaliation through her performance review, and the collapse of women in her engineering organisation from over 25% to roughly 3% (Fowler, 2017). Within months Uber had fired more than 20 employees for harassment and related conduct (Solon, 2017), commissioned an external investigation led by former US Attorney General Eric Holder that produced 47 recommendations the board adopted in full (Carson, 2017), and lost its founder-CEO. The company's valuation, hiring pipeline, and public standing all took the hit.
+
+This report treats that crisis not as a public-relations accident but as a predictable organisational outcome. Our central diagnosis is that Uber had engineered a high-performance culture with almost no countervailing system to protect fairness, voice, or wellbeing. Aggressive growth values, weak and conflicted HR processes, and leaders who modelled "win at any cost" combined to teach employees a single durable lesson: results buy immunity, and complaints buy risk. Once people internalised that lesson, silence became the rational choice, problems compounded out of sight, and the only remaining escape valve was to go public.
+
+We apply four organisational psychology frameworks directly to the case. Schein's model shows a sharp split between Uber's espoused values and a tacit assumption that high performance excuses misconduct. Edmondson's work on psychological safety explains why capable employees stayed quiet. Organisational justice theory accounts for why the breach of trust was experienced as a fairness violation severe enough to justify whistleblowing. Transformational leadership theory exposes what was missing at the top: idealised influence and individualised consideration were replaced by transactional reward for output alone.
+
+From this diagnosis we draw a single causal chain — leadership failure to HR failure to reduced psychological safety to employee silence to diversity and retention loss to public crisis — and we make three strategic recommendations: a Leadership Accountability Framework, an Independent Employee Voice and Reporting System, and a Psychological Safety and Inclusion Programme. Each is costed into an 18-month implementation plan and tied to measurable outcomes. The core message to the client is not that ambition was the problem. The problem was ambition without accountability.
+
+1. Introduction
+
+We were engaged to analyse a real organisational failure and to recommend evidence-based changes, working as organisational psychology consultants rather than as case historians. The aim throughout is diagnosis and action: what was actually happening inside Uber, why it happened, what it cost the organisation, and what a credible recovery would require.
+
+Uber Technologies in 2017 is a useful case precisely because the company was, on the surface, a success. It had grown faster than almost any private company in history, operated in hundreds of cities, and was valued near $70 billion. Its problems were not caused by weak performance. They were caused by the way performance was pursued. That makes it a cleaner test of an organisational psychology argument than a failing firm would be, because it isolates culture and leadership from the confound of commercial decline.
+
+The report is structured as a consulting engagement. We first describe the situation and the observable behaviour, then set the organisational and cultural context, then state the problem precisely. We diagnose the problem through four frameworks in turn, integrate those diagnoses into a single root-cause chain, and convert the diagnosis into three strategic recommendations with an implementation plan and a measurement system. We close with the risks of the intervention itself and a consultant's judgement on what the case teaches.
+
+2. Situation description
+
+Uber was founded in 2009 as a ride-hailing platform built to disrupt the licensed taxi industry. Disruption was not only the business model; it was the temperament. The company expanded by entering markets first and resolving the regulatory and legal questions later, and it hired and promoted people who were comfortable operating that way. Speed, boldness, and a willingness to fight were rewarded. For several years this produced extraordinary growth.
+
+The internal cost of that approach surfaced publicly on 19 February 2017, when Susan Fowler published an account of her year as an engineer at the company. On her first official day on a new team, she wrote, her manager messaged her over company chat looking for sex. She screenshotted the messages and reported them to Human Resources, expecting the conduct to be treated as serious misconduct (Fowler, 2017).
+
+What followed is the heart of the case. According to Fowler, HR and upper management acknowledged the messages were inappropriate but declined to take meaningful action because the manager was a strong performer and this was, they said, his "first offense." She was given a choice: move to another team, or stay and accept that the same manager would later score her performance and that the company would not protect her from a poor review. She later learned from other women that the same manager had been reported before, meaning the "first offense" framing was, at best, an institutional fiction (Fowler, 2017).
+
+Fowler's account widened from there into a portrait of the wider organisation: managers fighting each other for territory in what she called a "game-of-thrones" political culture, projects abandoned mid-flight, objectives rewritten without explanation, and constant reorganisation that left engineers unsure whether their team would still exist in a quarter. Against that backdrop, women were leaving. The proportion of women in her organisation fell from more than 25% when she joined to about 3% by the time she resigned (Fowler, 2017).
+
+The post forced a response. Uber commissioned two investigations: an internal harassment review handled by a law firm, which led to more than 20 firings (Solon, 2017), and a broader cultural review led by Eric Holder and Covington & Burling, which produced 47 recommendations spanning leadership, board oversight, HR processes, diversity, and the company's own value statements. The board accepted every recommendation (Carson, 2017). Within months the founder-CEO had resigned under investor pressure. The breadth of that institutional response is itself diagnostic: an organisation does not rewrite its leadership structure, its complaints process, and its stated values over one disputed complaint. It does so when it recognises a systemic failure.
+
+3. Observable behaviours
+
+A diagnosis should rest on what people did, not on what the organisation intended. The case gives us a clear behavioural record, and six patterns stand out.
+
+HR declined to protect a complainant. A documented harassment report, supported by screenshots, produced no protective action. The behaviour signalled that the reporting channel existed to manage liability, not to protect employees (Fowler, 2017).
+
+Strong performers were shielded from consequences. The explicit reason given for inaction was the manager's value to the business. This was not a one-off; Fowler describes it as a recurring pattern in which output bought tolerance for behaviour that would otherwise have ended a career (Fowler, 2017).
+
+Reporting carried career risk. Fowler was told, in effect, that staying near her harasser meant accepting a hostile performance review with no recourse, and she describes later being threatened in connection with her continued reporting. The behaviour taught a clear lesson about the cost of speaking up (Fowler, 2017).
+
+Internal politics overrode coordinated work. Observable symptoms included objectives (OKRs) changing mid-quarter, projects abandoned, information withheld between managers, and repeated reorganisations. Engineers responded by protecting themselves rather than committing fully to shared goals (Fowler, 2017).
+
+Women left at scale. The drop from roughly a quarter of the organisation to a twentieth is the single most measurable behavioural outcome in the case. People rarely leave en masse over compensation alone; this scale of exit points to environment.
+
+Aggressive values were enacted, not just printed. Slogans such as "always be hustlin'" and "principled confrontation" were used to justify conduct, which is why the Holder review specifically recommended rewriting them (Carson, 2017). When a value statement has to be retired because people are hiding behind it, the value has become behaviour.
+
+4. Organisational and cultural context
+
+None of these behaviours occurred in a vacuum. Uber operated in a hyper-competitive, capital-rich, winner-take-most market, fighting regulators in the courts and rivals on price, under intense investor pressure to grow before competitors locked up each city. Environments like that reward speed and risk tolerance, and within limits that orientation is a genuine asset. It becomes dangerous when speed is treated as more important than ethics and when the absence of internal friction is mistaken for efficiency.
+
+Three messages appear to have been encoded into the day-to-day climate. Growth comes first. Strong performers are protected. Aggression is acceptable if it helps the company win. Employees do not learn culture from posters; they learn it from what gets rewarded and what gets ignored (Schein, 2017), and these three messages were reliably reinforced by promotion and tolerance decisions.
+
+The wider Silicon Valley context amplified the pattern. The industry celebrated disruption, long hours, and founder mythology, and it tended to treat discomfort as the price of working somewhere important. That backdrop made it easier for employees to normalise instability and disrespect as the cost of being at a company that was changing the world. The problem at Uber was never ambition itself. It was ambition with no system of accountability strong enough to constrain it.
+
+5. Problem statement
+
+The organisational problem can be stated in one sentence. Uber operated a high-performance culture in which speed and individual output were rewarded far more strongly than fair treatment, employee protection, and ethical conduct, with no organisational mechanism powerful enough to correct the resulting behaviour.
+
+The problem was systemic rather than individual. It was not one manager, one HR adviser, or one bad week. It was a self-reinforcing system in which leadership signals, HR design, and cultural values all pointed the same direction, so that misconduct by valuable employees was absorbed rather than addressed, voice was suppressed rather than invited, and the people most harmed left rather than escalated. The remainder of this report diagnoses how that system worked and how to dismantle it.
+
+6. Diagnosis using Schein's organisational culture model
+
+Schein (2017) argues that culture operates at three levels: visible artefacts, espoused values, and the underlying assumptions that actually drive behaviour. The value of the model here is that it forces us past Uber's stated culture to the tacit beliefs that produced the conduct. We use it as a diagnostic instrument, working from the visible surface down to the assumption that explains everything above it.
+
+6.1 Artefacts
+The visible layer at Uber included a harassment report met with inaction, an offer to move the victim rather than the offender, women resigning in numbers, frequent reorganisations, public investigations, and a wave of misconduct firings. Read together, these artefacts describe a workplace that was unstable and unsafe for a sizeable part of its workforce. Artefacts are easy to observe and hard to interpret on their own, so they function here as symptoms pointing to a deeper cause.
+
+6.2 Espoused values
+Uber publicly valued growth, speed, meritocracy, and bold confrontation. On paper these read like ordinary high-performance ambitions. In practice, several were written in a way that licensed harm. "Always be hustlin'" and "principled confrontation" could be invoked to justify cutting corners and treating colleagues aggressively, which is exactly why the external review recommended rewriting them (Carson, 2017). The telling sign in Schein's terms is the gap between the espoused values and the artefacts: when stated values and observable behaviour diverge this far, the espoused layer is not governing behaviour. Something underneath it is.
+
+6.3 Underlying assumptions
+The deepest level is where the diagnosis lands. The tacit, shared, taken-for-granted assumption operating at Uber was that high performance excuses bad behaviour. This belief was never written down, because basic assumptions never are; they are simply how the organisation has learned the world works (Schein, 2017). It explains the entire artefact layer at once. It explains why a documented harassment complaint was discounted, why "high performer" was treated as a mitigating fact, why complainants were seen as friction, and why aggression was tolerated. A second assumption reinforced the first: that chaos, conflict, and instability are the normal and acceptable conditions of a high-growth company, so employees should absorb them rather than object.
+
+6.4 Cultural diagnosis
+Uber's culture was a performance culture with no ethical governor. The deep assumption that results purchase immunity sat beneath everything else and quietly overrode the company's own stated values. This matters for the recommendations, because surface fixes — new slogans, a revised handbook — cannot work while the underlying assumption survives. Schein's framework predicts that culture change must reach the assumption layer, and it can only be reached by changing what leaders visibly reward and punish (Schein, 2017). That prediction shapes our first recommendation.
+
+7. Diagnosis using psychological safety
+
+Psychological safety is the shared belief that the team is safe for interpersonal risk-taking, so that members can speak up, admit mistakes, and raise concerns without fear of punishment or humiliation (Edmondson, 1999). It is one of the strongest known predictors of whether problems in an organisation get surfaced and corrected or stay hidden until they explode. Uber is close to a textbook example of its absence.
+
+The behavioural evidence is direct. Fowler reported misconduct through the proper channel and the act of reporting created risk rather than protection; she was steered toward leaving the team and warned that her harasser would still control her review (Fowler, 2017). In Edmondson's terms, the cost of voice was made explicit and the benefit was shown to be zero. A rational, capable employee in that environment learns to stay silent, and silence is precisely what spreads. Others who had reported the same manager had also seen nothing change, so the lesson was reinforced across the group, not just for one person.
+
+Politics deepened the problem. When objectives shift without explanation, projects vanish, and managers withhold information to gain advantage (Fowler, 2017), employees cannot predict how candour will be received, and unpredictability is corrosive to safety. People shift their energy from doing good work to protecting their position. The observable result is exactly what Edmondson's research would forecast: capable engineers withholding concerns, problems going unreported, and the only people willing to speak doing so on their way out the door or, eventually, in public.
+
+The diagnosis is that Uber did not merely have a misconduct problem; it had a voice problem layered on top of it. Even where employees saw harm, the environment taught them that raising it was costly and useless. That is the mechanism that converts isolated misconduct into systemic failure, and it is why the public blog post, rather than an internal escalation, became the channel of last resort.
+
+8. Diagnosis using organisational justice
+
+Organisational justice concerns employees' perceptions of fairness, and it is usually analysed across three dimensions: distributive (are outcomes fair?), procedural (are the processes that produce outcomes fair?), and interactional (are people treated with dignity and given honest explanations?) (Colquitt, 2001; Greenberg, 1990). The framework is useful here because it explains the intensity of the reaction. Fowler did not simply leave a bad job; she experienced a fairness violation severe enough to justify going public, and justice theory predicts that response.
+
+8.1 Distributive justice
+The outcomes were visibly skewed toward the powerful party. The person who reported harassment was offered a worse position — move teams or accept career risk — while the alleged harasser kept his role with, at most, a warning (Fowler, 2017). The distribution of consequences tracked organisational value rather than conduct, which signals to everyone watching that protection is allocated by performance ranking, not by fairness.
+
+8.2 Procedural justice
+The process failed on its own terms. A complaint supported by evidence was processed inconsistently, framed as a "first offense" despite prior reports, and resolved without transparency or apparent appeal (Fowler, 2017). Procedural justice research shows that people will accept unfavourable outcomes if they trust the process, but they withdraw trust entirely when the process appears rigged (Colquitt, 2001). Uber's process taught employees that the system itself could not be relied on, which is why reporting rates and faith in HR collapse in cases like this.
+
+8.3 Interactional justice
+The interpersonal treatment compounded the harm. Fowler describes being questioned, doubted, and made to feel that she was the problem rather than the conduct she reported (Fowler, 2017). When the dignity dimension of justice fails alongside the procedural one, employees do not just disengage from the process; they conclude the organisation is not acting in good faith.
+
+8.4 Justice diagnosis
+All three dimensions of justice failed at once, which is unusual and consequential. Justice theory holds that when internal channels are perceived as unjust across outcomes, processes, and treatment simultaneously, employees seek redress outside the organisation (Greenberg, 1990). That is a precise prediction of what Fowler did. The public blog post was not an anomaly of personality; it was the predictable behaviour of an employee for whom every internal route to fairness had been closed.
+
+9. Diagnosis using transformational leadership
+
+Transformational leadership theory distinguishes leaders who inspire and develop followers from those who merely exchange rewards for output. Bass (1985) identifies four components: idealised influence (leaders modelling the values they expect), inspirational motivation (a compelling shared purpose), intellectual stimulation (encouraging challenge and new thinking), and individualised consideration (genuine attention to followers' needs and growth) (Bass & Riggio, 2006). Reading Uber's leadership against these four components shows what was missing, and the gaps map almost exactly onto the failures already diagnosed.
+
+Idealised influence was inverted. Leaders model culture whether they intend to or not, and at Uber the modelled behaviour was that winning excuses conduct. By protecting high-performing offenders, senior management did not just fail to set a standard; they actively demonstrated the operative one. The Holder recommendations targeted exactly this layer, calling for reduced concentration of power around the CEO, a strong chief operating officer, and senior accountability for ethics and diversity (Carson, 2017), which confirms the problem was located at the top, not merely among line managers.
+
+Inspirational motivation was distorted into pressure. Uber had no shortage of mission energy, but it was channelled into speed and dominance rather than a purpose that dignified the people delivering it. Inspiration that runs on fear and competition produces output in the short run and burnout and exit in the longer run.
+
+Intellectual stimulation was unsafe. The theory assumes followers are encouraged to challenge assumptions, but challenge requires psychological safety, which the previous section showed was absent. Dissent at Uber looked like political risk, not valued contribution.
+
+Individualised consideration was effectively absent. The case shows the opposite of attention to individual welfare: a harassed employee treated as a liability and a body of women allowed to leave without the organisation treating their exit as a signal worth acting on (Fowler, 2017).
+
+The leadership diagnosis is that Uber was led transactionally where it needed to be led transformationally. Leaders rewarded output and tolerated the behaviour that produced it, which is the defining transactional pattern, and they omitted the modelling, development, and individual care that transformational leadership requires. Crucially, leadership sits upstream of the other three diagnoses: it is leadership that sets the rewarded behaviour (Schein's assumptions), determines whether voice is safe (psychological safety), and decides whether processes are applied fairly (organisational justice). That is why our root-cause analysis begins with leadership.
+
+10. Integrated root cause analysis
+
+The four diagnoses are not four separate problems. They are one mechanism seen from four angles, and they connect into a single causal chain. Mapping that chain matters for the client because it shows that the public crisis was the last link, not the first, and that intervening only at the visible end would change nothing.
+
+Leadership failure. Senior leaders rewarded results and tolerated the conduct that produced them, modelling the assumption that performance buys immunity. This is the root cause, because it sets the conditions for everything downstream.
+
+↓
+
+HR failure. Operating under that leadership signal, HR functioned to protect the organisation and its high performers rather than to enforce fairness. The complaints process became a liability-management tool, not a protective one.
+
+↓
+
+Reduced psychological safety. Once employees saw that reporting was costly and useless, the perceived safety of speaking up collapsed. Voice came to look like a career risk.
+
+↓
+
+Employee silence. Rational employees stopped raising concerns. Problems that should have surfaced and been corrected stayed hidden and compounded.
+
+↓
+
+Diversity and retention problems. The people least protected by the system — women in engineering, in this case — left in large numbers, and the organisation lost both talent and the diversity it claimed to value.
+
+↓
+
+Public crisis. With every internal route to fairness closed, redress was sought externally. One blog post detonated because the pressure behind it had been building, unaddressed, for years.
+
+The chain is reinforcing, not merely sequential. Silence hid the retention problem, which kept leaders from feeling pressure to change, which preserved the rewards that produced the leadership failure in the first place. This is why the situation was stable for so long and then failed all at once. It also explains why the Holder review reached so broadly across leadership, HR, values, and diversity simultaneously (Carson, 2017): a chain this interlocked cannot be fixed one link at a time. The recommendations that follow are designed to break it at three points at once.
+
+11. Strategic recommendations
+
+We recommend three interventions. Each targets a specific link in the root-cause chain, and together they are designed to be mutually reinforcing rather than additive. We deliberately keep the set small. A long list of fixes is easy to nod along to and easy to dilute; three well-resourced changes that reach the assumption layer of the culture have a real chance of holding.
+
+Recommendation 1: Leadership Accountability Framework
+Rationale. Schein's model and transformational leadership theory both locate the root cause in what leaders reward. If leaders continue to be evaluated and promoted on output alone, every other intervention will be quietly overridden by the incentives. The framework's purpose is to change the rewarded behaviour itself, which is the only way to reach the underlying assumption that performance buys immunity.
+
+Implementation actions. Introduce a dual leadership scorecard so that no manager can be rated successful on business results while damaging their people. The behavioural half of the scorecard should carry real weight (we recommend at least 40%) and include team psychological safety scores, voluntary turnover and diversity retention within the team, 360-degree feedback, complaint and conduct record, and the quality of how the manager handled any escalations. Tie promotion, bonus, and equity decisions explicitly to this scorecard. Make senior leaders, including the executive team, accountable for diversity and ethics outcomes, consistent with the Holder recommendations on leadership accountability and power concentration (Carson, 2017). Train managers in transformational leadership behaviours — modelling values, individualised support, inviting challenge — and gate promotion on demonstrating them, because training without consequence changes nothing.
+
+Expected outcomes. Within a year, a manager who delivers numbers while harming people should no longer be a viable promotion candidate. Over time, the rewarded behaviour shifts, and because culture follows what leaders reward, the underlying assumption begins to change. The leading indicators are improving 360 and safety scores in teams led by retained managers, and the slowing of regretted attrition.
+
+Recommendation 2: Independent Employee Voice and Reporting System
+Rationale. The organisational justice diagnosis showed that internal channels failed on outcomes, process, and treatment at once, and that employees consequently sought redress outside the company. The fix is a reporting system whose independence employees can actually believe in, restoring procedural justice so that voice no longer has to escape the organisation to be heard.
+
+Implementation actions. Establish reporting channels that do not run through the complainant's own manager or local HR partner: an anonymous reporting tool, an externally operated ethics hotline, and an independent investigations team with authority to act on senior staff. Codify a strict anti-retaliation policy with teeth: freeze any change to a complainant's performance rating, transfer, or promotion after a complaint unless independently reviewed; monitor complainants' trajectories for twelve months; and treat retaliation, including subtle forms, as a terminable offence. Commit to published investigation timelines and written outcomes to every complainant, so the process is transparent even when the result is not what the employee hoped. This set of actions responds directly to the specific failures Fowler documented — the "first offense" framing, the review threat, and the steering of the victim rather than the offender (Fowler, 2017).
+
+Expected outcomes. Reporting rates should rise in the first year — counter-intuitively, a good sign, because it means latent problems are surfacing internally rather than externally. Over eighteen months, faith in HR and the proportion of employees who believe complaints are handled fairly should climb, and the likelihood of another externally routed crisis should fall.
+
+Recommendation 3: Psychological Safety and Inclusion Programme
+Rationale. The first two recommendations change incentives and channels. This one changes the day-to-day climate in which work happens, addressing the silence and the retention loss directly. Edmondson's research shows that psychological safety is built locally, in teams, through repeated leader behaviour, so the programme is deliberately team-level rather than a company-wide announcement.
+
+Implementation actions. Rewrite the company values into observable behaviours, replacing slogans that licensed harm with statements that specify conduct — for example, "challenge ideas directly and treat people with respect" in place of "principled confrontation," and "move fast within ethical and legal limits" in place of "always be hustlin'" (Carson, 2017). Run a recurring, anonymous psychological safety survey at team level and feed results back to managers as part of the scorecard in Recommendation 1. Build inclusion into the system rather than the brochure: structured, blind-reviewed hiring and a Rooney-style rule requiring diverse candidate slates (Carson, 2017), plus equity audits of pay, promotion, and performance ratings broken down by gender and minority status, and mentoring and sponsorship for under-represented engineers. Stabilise the work itself by limiting unnecessary reorganisations and protecting quarterly priorities, since the chaos Fowler described was itself a driver of insecurity (Fowler, 2017). Reward collaboration rather than internal political competition.
+
+Expected outcomes. Team-level safety scores rise, women and minority retention improves toward parity with the wider workforce, and the regretted attrition that hollowed out Fowler's organisation reverses. The deeper outcome is cultural: employees learn that performance still matters but no longer excuses everything, which is precisely the assumption-level change Schein's model says is required.
+
+12. Implementation plan
+
+The three recommendations are sequenced across eighteen months. The logic of the sequence is to stop the bleeding first, change the incentives next, and embed the culture last, because attempting cultural change before fixing the reporting system and the leadership incentives would lack credibility with a workforce that has learned to distrust announcements.
+
+Phase | Actions | Owner
+Immediate (0–3 months) | Launch the independent reporting channel and external hotline. Publish and communicate the anti-retaliation policy. Re-open and independently review all open harassment and discrimination complaints. Remove or discipline leaders with substantiated serious misconduct. Announce the new leadership behaviour standards and run the first baseline psychological safety and trust survey. | CEO, Board, interim Chief People Officer, external investigators
+Medium term (3–9 months) | Rewrite company values into observable behaviours and roll them out. Train all managers in transformational and inclusive leadership. Build and deploy the dual leadership scorecard. Audit performance-rating, pay, and promotion fairness by gender and minority status. Stand up the ethics and culture committee. Implement structured, blind-reviewed hiring and diverse-slate requirements. | Chief People Officer, ethics committee, people analytics
+Long term (9–18 months) | Tie bonus and equity decisions to scorecard outcomes. Publish internal culture-progress reports. Run psychological safety surveys every six months and act on the results. Sustain mentoring and sponsorship for under-represented staff. Review and adjust the whole system against the KPIs below. | Executive team, Board, Chief People Officer
+
+13. Evaluation measures and KPIs
+
+Culture change is easy to claim and hard to prove, so the engagement should be judged on movement in a small set of measurable indicators rather than on activity. We recommend baselining all of them in the first three months and tracking them at six-month intervals. Targets are directional; the client should set precise thresholds against its own baseline.
+
+KPI | How it is measured | Direction of success
+Employee trust score | Anonymous survey item on trust in leadership and HR to act fairly; tracked company-wide and by demographic group | Sustained increase; closing gap between demographic groups
+Psychological safety score | Edmondson's 7-item team safety scale, run anonymously at team level and aggregated | Rising team-level scores; fewer low-scoring teams
+Diversity retention | Voluntary attrition and promotion rates for women and minority staff vs. the overall workforce; representation in engineering over time | Attrition gap narrows toward zero; representation recovers
+Leadership effectiveness | 360-degree feedback scores and the behavioural half of the leadership scorecard, plus team safety and turnover for each manager | Rising behavioural scores; no high-output/low-behaviour managers promoted
+Misconduct reporting | Volume of reports, time-to-resolution, proportion resolved with action, and substantiated retaliation cases | Reporting rises then stabilises; resolution time falls; retaliation cases approach zero
+
+One measure deserves a note. A rise in reported misconduct in year one should be read as success, not failure: it means problems are surfacing through the system instead of festering and then erupting publicly. The failure signal is the opposite — silence — which is exactly what preceded the 2017 crisis.
+
+14. Risks and limitations
+
+An honest consulting report states the risks to its own recommendations. There are four worth flagging.
+
+Leadership resistance. Managers who thrived under the old incentives will experience the accountability framework as friction that slows them down. This is the most dangerous risk, because these are often the highest-output and most influential people. The mitigation is uncompromising board-level sponsorship and a willingness to lose some high performers, which the case itself suggests is survivable.
+
+Trust takes time and cannot be announced. A workforce that has learned to distrust HR will not believe new channels because leadership says so. Trust returns only through a visible track record of fair outcomes, which means the early, hard cases handled well are worth more than any communications campaign.
+
+Symbolic change. The largest risk is that Uber rewrites its values and trains its managers without changing what it rewards, leaving the underlying assumption intact. This is why the recommendations tie values and training to the scorecard and to pay; decoupled from consequences, culture work becomes theatre.
+
+Limitations of the diagnosis. Our evidence base leans heavily on Fowler's first-person account and contemporaneous reporting (Fowler, 2017; Carson, 2017; Solon, 2017). It is a strong and corroborated account, but it is one vantage point, and a full engagement would triangulate it with internal survey data, exit-interview records, and management interviews before finalising thresholds. The frameworks we apply are also Western in origin, and a global firm like Uber would need to adapt the inclusion measures to local context.
+
+15. Consultant conclusion
+
+Uber's 2017 crisis was an organisational psychology failure that happened to become a public one. The company had built a culture that rewarded speed, competition, and output and had not built any system strong enough to protect fairness, voice, or the people doing the work. Across all four frameworks the diagnosis converges on the same point: a tacit assumption that high performance excuses bad behaviour, set and reinforced by leaders, enforced through a captured HR function, which suppressed voice, drove out the least-protected employees, and finally forced the truth out through the only channel left open.
+
+The instructive error is that Uber mistook aggressive performance for a strong culture. A strong culture is not only one that works hard and wins. It is one that surfaces its own problems, treats people fairly under pressure, and holds its most valuable people to the same standard as everyone else. High performance without trust is not durable; it produces a few good years and then loses the people, the reputation, and the talent pipeline all at once.
+
+The recovery does not require less ambition. It requires accountability strong enough to constrain ambition, leadership willing to model the standard it sets, and systems that make speaking up safe and worthwhile. The message we would leave with the client is the one the case keeps repeating: Uber did not need to stop winning. It needed to win in a way it could defend.
+
+References
+
+Bass, B. M. (1985). Leadership and performance beyond expectations. Free Press.
+
+Bass, B. M., & Riggio, R. E. (2006). Transformational leadership (2nd ed.). Lawrence Erlbaum Associates.
+
+Carson, B. (2017, June 13). Here are all the changes Uber is making in response to its harassment scandal. Business Insider. https://www.businessinsider.com/uber-holder-report-recommendations-2017-6
+
+Colquitt, J. A. (2001). On the dimensionality of organizational justice: A construct validation of a measure. Journal of Applied Psychology, 86(3), 386–400. https://doi.org/10.1037/0021-9010.86.3.386
+
+Edmondson, A. C. (1999). Psychological safety and learning behavior in work teams. Administrative Science Quarterly, 44(2), 350–383. https://doi.org/10.2307/2666999
+
+Edmondson, A. C. (2018). The fearless organization: Creating psychological safety in the workplace for learning, innovation, and growth. Wiley.
+
+Fowler, S. (2017, February 19). Reflecting on one very, very strange year at Uber [Blog post]. https://www.susanjfowler.com/blog/2017/2/19/reflecting-on-one-very-strange-year-at-uber
+
+Greenberg, J. (1990). Organizational justice: Yesterday, today, and tomorrow. Journal of Management, 16(2), 399–432. https://doi.org/10.1177/014920639001600208
+
+Isaac, M. (2019). Super pumped: The battle for Uber. W. W. Norton & Company.
+
+Schein, E. H. (2017). Organizational culture and leadership (5th ed.). Wiley.
+
+Solon, O. (2017, June 6). Uber fires more than 20 employees after sexual harassment investigation. The Guardian. https://www.theguardian.com/technology/2017/jun/06/uber-fires-employees-sexual-harassment-investigation
+
+____________________________________________________________
+
+Part 2 — Presentation (6–7 minutes)
+
+Eight slides. Estimated total speaking time: 6 minutes 45 seconds.
+
+Slide 1 — Title: When speed outran judgement (≈30 sec)
+• Uber Technologies, 2017 culture crisis
+• An organisational psychology diagnosis
+• Frameworks: Schein · Psychological Safety · Organisational Justice · Transformational Leadership
+Speaker notes: Open with the hook. In February 2017 a single blog post by one engineer did more damage to Uber than any competitor had in eight years. We were asked to diagnose why, as organisational psychologists, not journalists. Our argument in one line: this was not a PR accident, it was a predictable result of how the company was built.
+
+Slide 2 — The situation (≈50 sec)
+• Susan Fowler reports harassment on day one of a new team
+• HR declines to act — manager is a "high performer," "first offense"
+• Victim told to move teams or risk her review
+• Women in her org fell from 25%+ to ~3%
+• Aftermath: 20+ fired, Holder review, 47 recommendations, CEO out
+Speaker notes: Walk through the facts quickly but let the "first offense" line land — other women had already reported the same manager. Note the scale of the institutional response: you don't rewrite leadership, HR, and your values over one complaint. That breadth is itself evidence of a systemic problem.
+
+Slide 3 — What we actually observed (≈45 sec)
+• HR protected the company, not the complainant
+• High performers shielded from consequences
+• Reporting carried career risk
+• Internal politics over coordinated work
+• Women leaving at scale
+• Aggressive values enacted, not just printed
+Speaker notes: Stress that a diagnosis rests on behaviour, not intentions. These six patterns are the symptoms. The rest of the talk explains the disease underneath them.
+
+Slide 4 — Diagnosis: culture and safety (≈60 sec)
+• Schein: espoused values said "meritocracy"; the real, tacit assumption was "performance excuses bad behaviour"
+• Assumptions, not slogans, drive behaviour — and they're invisible
+• Psychological safety (Edmondson): reporting was costly and useless, so silence became rational
+• Silence is how isolated misconduct becomes systemic failure
+Speaker notes: This is the analytical core. Use Schein to get below the surface: the gap between stated values and behaviour tells you something deeper is in charge. Then Edmondson explains why nobody stopped it internally — capable people learned that speaking up was a career risk with no payoff.
+
+Slide 5 — Diagnosis: justice and leadership (≈60 sec)
+• Organisational justice failed on all three dimensions: outcomes, process, and dignity
+• When every internal route to fairness closes, people go external — that's the blog post
+• Transformational leadership: idealised influence inverted, individualised consideration absent
+• Leadership sits upstream — it sets rewards, safety, and fairness
+Speaker notes: Justice theory explains the intensity of the reaction and why it went public — that's a predictable response, not a personality quirk. Then leadership: leaders modelled the wrong standard, and because leadership is upstream of everything else, that's where the root cause sits.
+
+Slide 6 — Root cause chain (≈50 sec)
+• Leadership failure → HR failure → reduced psychological safety → employee silence → diversity & retention loss → public crisis
+• The chain is reinforcing: silence hid the problem, so leaders felt no pressure to change
+• You cannot fix it one link at a time
+Speaker notes: This is the slide to slow down on. Trace the arrow left to right. The key insight: the public crisis was the last link, not the first. Fixing only the visible end — better PR, a new value statement — changes nothing.
+
+Slide 7 — Three recommendations (≈75 sec)
+• 1. Leadership Accountability Framework — dual scorecard, behaviour worth 40%+, tied to promotion and pay
+• 2. Independent Voice & Reporting System — external hotline, anti-retaliation with teeth, published timelines
+• 3. Psychological Safety & Inclusion Programme — rewritten values as behaviours, team safety surveys, equity audits, diverse slates
+• Sequenced over 18 months: stop the bleeding → change incentives → embed culture
+Speaker notes: Each recommendation breaks a specific link in the chain. Emphasise that we kept it to three on purpose — three funded changes that reach the culture beat a list of twenty that get diluted. Mention each maps to rationale, actions, and outcomes in the report.
+
+Slide 8 — How we'll know it worked + close (≈55 sec)
+• KPIs: trust score, psychological safety score, diversity retention, leadership effectiveness, misconduct reporting
+• Counter-intuitive signal: reports going up in year one is success — problems surfacing internally
+• Biggest risk: symbolic change without changing what gets rewarded
+• Closing line: Uber didn't need less ambition — it needed to win in a way it could defend
+Speaker notes: Land the measurement point — culture claims are cheap, so we judge on movement in five numbers. Flag the main risk honestly. Then close on the one-liner; pause, and stop. Don't add anything after it.
+
+____________________________________________________________
+
+Part 3 — Individual Contribution Report
+
+Maximum 3 pages
+
+Overview
+This report sets out my individual contribution to the Uber organisational psychology consulting project, covering the research, analysis, and recommendations I worked on, how I collaborated with the group, and what I took away from the process. The team's task was to diagnose a real organisational failure using course frameworks and to produce consultant-style recommendations, and my role concentrated on the diagnostic core and the link between diagnosis and action.
+
+Research contribution
+My first contribution was building the evidence base. I sourced and read the primary account — Susan Fowler's 2017 blog post — closely, and I treated it as a consultant would treat a client interview: extracting observable behaviours and specific figures rather than impressions. I then corroborated her account against contemporaneous reporting, in particular the Business Insider summary of the Holder review and its 47 recommendations (Carson, 2017) and the Guardian's reporting on the 20-plus dismissals (Solon, 2017), so that the diagnosis would not rest on a single source. Alongside the case evidence I assembled the theoretical sources the analysis needed: Schein on culture, Edmondson on psychological safety, Colquitt and Greenberg on organisational justice, and Bass and Riggio on transformational leadership. A deliberate part of this work was checking that each framework I proposed could actually be applied to the Uber facts, rather than chosen because it sounded impressive, which kept the later analysis grounded.
+
+Analysis contribution
+The analysis was where I contributed most. I led the application of Schein's three-level model, and the insight I pushed the group toward — that the team should not stop at artefacts and espoused values but name the underlying assumption, "high performance excuses bad behaviour" — became the spine of the whole report. I argued that this assumption, not the slogans, was what actually governed behaviour, and that any recommendation which left it intact would fail. I also worked on the psychological safety and organisational justice sections, drawing the explicit causal link between a justice system that failed on all three dimensions and the decision to go public, which I framed as a predictable response rather than an individual quirk. My main analytical contribution to the group was insisting we connect the four frameworks into one mechanism rather than presenting them as four separate essays, which led directly to the integrated root-cause chain.
+
+Recommendation contribution
+I helped convert the diagnosis into action. I was an advocate for cutting a long list of fixes down to three strategic recommendations, on the reasoning that a small set of well-resourced changes that reach the culture is more credible than a comprehensive list that gets diluted. I worked specifically on the Leadership Accountability Framework, including the dual-scorecard idea and the argument that the behavioural half had to carry enough weight to actually influence promotion and pay, because incentives that are merely symbolic get overridden. I also contributed the counter-intuitive KPI point — that a rise in reported misconduct in year one is a success signal, since it means problems are surfacing internally instead of erupting publicly — which strengthened the evaluation section.
+
+Group collaboration
+The group divided the work by framework initially, which risked producing four disconnected analyses. My role in collaboration was partly integrative: I pushed for a shared causal model early so that each person's section fed the same conclusion, and I reviewed teammates' sections for consistency with that model. There were genuine disagreements — one was whether to keep the original draft's eight recommendations or cut to three — and I made the case for fewer, which the group adopted after discussion. I tried to give feedback the way the report itself recommends treating voice: directly but without making it personal. We used shared documents for version control and held short working sessions to resolve points of difference rather than letting them sit.
+
+Reflection on learning
+The biggest shift in my thinking was learning to diagnose rather than describe. My instinct at the start was to explain each theory and then point at Uber; the project taught me that the value is in the other direction — start with the behaviour, then use theory to explain why it happened. Schein's distinction between espoused values and underlying assumptions changed how I read organisations generally; I now look for the gap between what a group says it values and what it actually rewards, because that gap is where the real culture lives. I was also struck by how mechanistic the failure was. It was tempting to read Uber as a story about a few bad individuals, but the frameworks showed a system in which reasonable people behaved badly because the incentives and the absence of safety made it rational. That is a more uncomfortable and more useful conclusion.
+
+Professional skills developed
+I developed several skills I expect to carry forward. I became better at evidence triangulation — not trusting a single source and actively seeking corroboration. I improved at analytical writing in a consulting register, which is leaner and more decision-oriented than essay writing, and I learned to make recommendations concrete enough to implement and measure rather than leaving them as aspirations. I also practised the softer skill of disagreeing productively within a team and integrating other people's work into a coherent whole. Finally, applying organisational justice and psychological safety to a real case sharpened my judgement about workplaces I will join myself: I now know what to look for, and what the early warning signs of a failing culture actually are.

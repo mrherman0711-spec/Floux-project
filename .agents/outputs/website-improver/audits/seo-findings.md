@@ -175,7 +175,7 @@ The page has strong local intent signals and good Spanish copy, but is technical
   },
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "flouxaim@gmail.com",
+    "email": "max@floux.es",
     "contactType": "sales",
     "availableLanguage": ["Spanish", "English"]
   }

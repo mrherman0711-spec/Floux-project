@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "brand_name": "Floux",
+  "tagline": "Recuperamos los clientes que pierdes cuando no puedes coger el teléfono",
+  "website_url": "https://floux.es",
+  "extracted_at": "2026-04-29",
+  "extraction_method": "Manual consolidation from .claude/rules/brand-voice.md, .claude/rules/design-system.md, brand/historia-floux.md, and index.html — preferred over WebFetch because all source assets are already authoritative.",
+
+  "founder": {
+    "name": "Max Herman",
+    "origin": "Guatemala → España",
+    "narrative_anchor": "Inmigrante guatemalteco que vivió en carne propia la frustración de llamar a salones en España y no obtener respuesta. Construyó Floux desde la frustración del cliente Y la empatía con la dueña que está demasiado ocupada dando un buen servicio.",
+    "key_insight": "Las dueñas no pierden clientes porque den un mal servicio, sino porque están demasiado ocupadas dando un buen servicio. Y eso no debería ser un castigo."
+  },
+
+  "voice": {
+    "formal_casual": 7,
+    "rational_emotional": 6,
+    "playful_serious": 4,
+    "bold_subtle": 7,
+    "traditional_innovative": 8,
+    "expert_accessible": 8,
+    "descriptors": ["directo", "cálido sin ser empalagoso", "resultados primero"],
+    "confidence": "high",
+    "evidence": [
+      "Uso de tú (no usted)",
+      "Frases cortas tipo: 'Sin permanencia. Mes a mes.'",
+      "Anchor de pricing: 'Se paga solo con UN cliente recuperado al mes'",
+      "Empatía operacional: habla del dolor real, no de features"
+    ]
+  },
+
+  "language_rules": {
+    "forbidden_words_customer_facing": [
+      "inteligencia artificial",
+      "IA",
+      "bot",
+      "robot",
+      "automático",
+      "recepcionista virtual"
+    ],
+    "preferred_words": [
+      "sistema",
+      "asistente",
+      "recuperamos",
+      "responde",
+      "convierte conversaciones en reservas"
+    ],
+    "comparison_rule": "NUNCA comparar Floux a una recepcionista (triggers reacción defensiva en dueñas)",
+    "form_of_address": "tú (jamás usted)",
+    "language_default": "Español. Inglés solo si el cliente escribe en inglés (auto-detect)."
+  },
+
+  "anchor_phrases": [
+    "Recuperamos los clientes que pierdes cuando no puedes coger el teléfono",
+    "Sin permanencia. Mes a mes.",
+    "Se paga solo con un cliente recuperado al mes",
+    "¿Te lo enseño ahora mismo?",
+    "Las dueñas no pierden clientes porque den mal servicio, sino porque están demasiado ocupadas dando un buen servicio"
+  ],
+
+  "colors": {
+    "primary": "#9A7B4F",
+    "primary_name": "gold (acento)",
+    "secondary": ["#1A1714", "#F2EDE6"],
+    "background_dark": "#1A1714",
+    "background_dark_name": "charcoal (calidez, no negro puro)",
+    "background_alt": "#0E0C0A",
+    "text_light": "#F2EDE6",
+    "text_light_name": "cream",
+    "text_body": "#6B6560",
+    "gold_hover": "#7D6340",
+    "rose_accent": "#E8B4A8",
+    "forbidden": ["#FFFFFF puro como fondo", "neón", "azules tech-startup", "verdes saturados"]
+  },
+
+  "typography": {
+    "heading_font": "Cormorant Garamond",
+    "heading_smallcaps": "Cormorant SC",
+    "body_font": "Inter",
+    "weights": {
+      "headings": [300, 400],
+      "body": [300, 400, 500]
+    },
+    "rules": {
+      "h1": "Cormorant Garamond, weight 300, letter-spacing 0.03em",
+      "h2": "Cormorant SC, uppercase, letter-spacing 0.12-0.14em",
+      "eyebrows": "Cormorant SC, uppercase, gold #9A7B4F, letter-spacing 0.32em",
+      "body_min_opacity": 0.75,
+      "buttons": "All caps, letter-spacing 0.2em, 0.6875rem, ZERO border-radius, outlined transparent fill"
+    },
+    "pairing_descriptor": "Editorial Cormorant Garamond + Inter geométrica — combinación de revista de lujo / boutique brand, no startup tech"
+  },
+
+  "imagery": {
+    "style": "professional photography editorial — calidez cinematográfica, NUNCA stock corporativo",
+    "subjects": [
+      "manos trabajando (peluquera con tinte, manicurista, esteticista)",
+      "interiores de salón con luz cálida natural",
+      "móvil sobre mostrador con notificación de WhatsApp",
+      "primer plano de teléfono fijo sonando ignorado",
+      "dueña de salón sonriendo sin ser estereotipo de stock"
+    ],
+    "composition": "Encuadre cerrado, profundidad de campo cinematográfica, luz cálida natural (warm tungsten/golden hour), composición editorial con espacio negativo generoso",
+    "color_grading": "Tonos warm: golds, creams, charcoal. NUNCA cool tones tech.",
+    "forbidden": [
+      "stock photos genéricos de gente sonriendo en oficinas",
+      "ilustraciones flat tech de robots/IA",
+      "imágenes con elementos de inteligencia artificial visibles (chips, redes neuronales)",
+      "comparaciones visuales con recepcionistas",
+      "fondo blanco puro",
+      "neón / colores saturados tipo Web3"
+    ],
+    "reference_aesthetic": "Aesop, Apothecary, revistas de belleza editoriales (Marie Claire, Vogue Beauty), no SaaS B2B"
+  },
+
+  "aesthetic": {
+    "mood_keywords": ["editorial", "cálido", "boutique", "premium accesible", "íntimo"],
+    "texture": "minimal con detalles cálidos (madera, papel, luz tenue)",
+    "negative_space": "generoso",
+    "vibe": "Si Floux fuera una persona: alguien que trabaja en una marca de cosmética premium pero entiende el día a día de una dueña de barrio"
+  },
+
+  "brand_values": [
+    "Empatía operacional — entendemos que la dueña está ocupada porque hace bien su trabajo",
+    "Sin permanencia, sin trampas — confianza por encima de retención forzada",
+    "Resultados primero — siempre cuantificables (€ recuperados, llamadas convertidas)"
+  ],
+
+  "target_audience": {
+    "primary": {
+      "age_range": "35-58",
+      "profession": "Dueña-operadora de salón de estética / belleza / peluquería",
+      "location": "Madrid oeste (Majadahonda, Pozuelo de Alarcón, Boadilla del Monte, Las Rozas, Villaviciosa de Odón, Móstoles)",
+      "team_size": "2-8 empleados",
+      "tools_used": ["Treatwell", "Booksy", "WhatsApp Business", "Instagram"],
+      "pain_points": [
+        "Pierde 3-15 llamadas/día porque está con manos ocupadas",
+        "El cliente que no contesta no vuelve a llamar",
+        "Treatwell pesca online pero no resuelve la llamada que entra al teléfono fijo",
+        "No tiene tiempo de aprender otra app",
+        "Desconfianza de soluciones de 'IA' que prometen mucho y entregan poco"
+      ],
+      "aspirations": [
+        "No perder clientes que ya querían venir",
+        "Que el negocio funcione mientras ella hace su trabajo de verdad (cortar, peinar, atender)",
+        "Tener un sistema que no requiera supervisión constante",
+        "Recuperar el ingreso fantasma de las llamadas perdidas"
+      ],
+      "media_consumption": ["Instagram (Reels, Stories)", "TikTok (consumo creciente, dueñas 35-50)", "Grupos de Facebook de profesionales del sector", "WhatsApp Business"]
+    },
+    "future_segments": [
+      "Inmobiliarias (después de primeros casos de éxito en salones)",
+      "Clínicas privadas (dentistas, fisios)",
+      "Electricistas / fontaneros / oficios (mismo dolor: están en obra, no cogen el teléfono)"
+    ]
+  },
+
+  "pricing": {
+    "single_price": "97€/mes",
+    "anchor": "Se paga solo con UN cliente recuperado al mes",
+    "no_commitment": "Mes a mes, sin permanencia",
+    "note": "Decisión 2026-04-26 de Max: precio único 97€/mes (eliminado tier 47€ y 147€)"
+  },
+
+  "channels_active": {
+    "instagram": "@flouxaim",
+    "facebook": "Floux (página conectada a Business Suite)",
+    "tiktok": "@flouxaim (creado, sin contenido)",
+    "linkedin": "linkedin.com/company/flouxaim/",
+    "youtube": "@flouxaim (creado, sin contenido)",
+    "whatsapp_business": "+34 632 84 25 10",
+    "phone": "+34 665 77 62 35",
+    "email": "max@floux.es",
+    "website": "https://floux.es"
+  },
+
+  "creative_constraints_for_ai_generation": {
+    "image_aspect_ratios_priority": ["9:16 (Reels/Stories/TikTok)", "1:1 (Feed IG/FB)", "4:5 (Feed IG vertical)", "1.91:1 (LinkedIn/FB link preview)"],
+    "video_duration_priority": ["15-30s (Reels/TikTok)", "45-60s (Reel founder, LinkedIn)", "5-8min (YouTube long form)"],
+    "lighting_directive": "warm cinematic, golden hour, tungsten, NUNCA fluorescente azulado de oficina",
+    "model_directives": "Si aparece persona: mujer 35-58 años, profesional, NO modelo glamour. Manos cuidadas pero working. Look natural, no editorial extremo.",
+    "negative_prompts_universal": [
+      "no robot, no AI visualization, no chip, no neural network",
+      "no white background, no studio sterile",
+      "no stock photo smile, no corporate photography",
+      "no neon, no Web3 aesthetics, no tech bro vibes"
+    ]
+  }
+}

@@ -398,7 +398,7 @@
         <li><a href="#historia">Nuestra historia</a></li>
         <li><a href="#faqs">FAQs</a></li>
         <li><a href="#contacto">Contacto</a></li>
-        <li><a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a></li>
+        <li><a href="mailto:max@floux.es?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a></li>
       </ul>
       <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -411,7 +411,7 @@
       <a href="#historia">Nuestra historia</a>
       <a href="#faqs">FAQs</a>
       <a href="#contacto">Contacto</a>
-      <a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a>
+      <a href="mailto:max@floux.es?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a>
     </div>
   </header>
 
@@ -426,7 +426,7 @@
         <h1>Recupera los<br>clientes que<br><em>pierdes mientras trabajas</em></h1>
         <p style="color:rgba(255,255,255,0.7); font-size:1.0625rem; font-weight:300; line-height:1.7; max-width:540px; margin:20px 0 0;">El asistente de WhatsApp para salones de estética en Madrid. Cada llamada perdida, convertida en cita confirmada — en 30 segundos.</p>
         <div class="hero-btns">
-          <a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a>
+          <a href="mailto:max@floux.es?subject=Quiero una demostración de Floux" class="btn btn-primary">Ver demostración</a>
           <a href="#como" class="btn btn-gold">Cómo funciona</a>
         </div>
       </div>
@@ -568,7 +568,7 @@
               <li>✓ El mensaje lleva el nombre de TU salón</li>
               <li class="dim">— Tu cliente recibe el mensaje, pero tú tienes que llamar para confirmar la cita</li>
             </ul>
-            <a href="mailto:flouxaim@gmail.com?subject=Plan Básico Floux" class="btn btn-gold" style="width:100%;text-align:center;">Probar el plan Básico</a>
+            <a href="mailto:max@floux.es?subject=Plan Básico Floux" class="btn btn-gold" style="width:100%;text-align:center;">Probar el plan Básico</a>
             <p style="font-size:0.6875rem; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-align:center; margin-top:12px;">Sin permanencia · Cancelas cuando quieras</p>
           </div>
 
@@ -585,7 +585,7 @@
               <li>✓ Sabes quién viene, qué quiere y cuándo</li>
               <li>✓ Te avisamos al momento — tú solo confirmas</li>
             </ul>
-            <a href="mailto:flouxaim@gmail.com?subject=Plan Agente Floux" class="btn btn-filled" style="width:100%;text-align:center;">Quiero el plan Agente</a>
+            <a href="mailto:max@floux.es?subject=Plan Agente Floux" class="btn btn-filled" style="width:100%;text-align:center;">Quiero el plan Agente</a>
             <p style="font-size:0.6875rem; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-align:center; margin-top:12px;">Sin permanencia · Cancelas cuando quieras</p>
           </div>
 
@@ -600,7 +600,7 @@
               <li>✓ Tus clientes se acuerdan de la cita — reduces no-shows</li>
               <li>✓ Recupera clientas que llevan 2+ meses sin venir</li>
             </ul>
-            <a href="mailto:flouxaim@gmail.com?subject=Plan Completo Floux" class="btn btn-gold" style="width:100%;text-align:center;">Quiero el plan Completo</a>
+            <a href="mailto:max@floux.es?subject=Plan Completo Floux" class="btn btn-gold" style="width:100%;text-align:center;">Quiero el plan Completo</a>
             <p style="font-size:0.6875rem; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-align:center; margin-top:12px;">Sin permanencia · Cancelas cuando quieras</p>
           </div>
 
@@ -704,7 +704,7 @@
               <div class="contact-icon"></div>
               <div>
                 <div style="font-size:0.625rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Email</div>
-                <a href="mailto:flouxaim@gmail.com" style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300;">flouxaim@gmail.com</a>
+                <a href="mailto:max@floux.es" style="color:var(--white); font-size:1rem; font-family:var(--serif); font-weight:300;">max@floux.es</a>
               </div>
             </div>
             <div class="contact-info-item">
@@ -761,8 +761,8 @@
         </div>
         <div class="footer-col">
           <h4>Contacto</h4>
-          <a href="mailto:flouxaim@gmail.com">flouxaim@gmail.com</a>
-          <a href="mailto:flouxaim@gmail.com?subject=Quiero una demostración gratuita de Floux">Reservar demostración</a>
+          <a href="mailto:max@floux.es">max@floux.es</a>
+          <a href="mailto:max@floux.es?subject=Quiero una demostración gratuita de Floux">Reservar demostración</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -822,7 +822,7 @@
       const tel    = document.getElementById('f-tel').value;
       const msg    = document.getElementById('f-msg').value;
       const body   = `Nombre: ${nombre}%0ASalón: ${salon}%0ATeléfono: ${tel}%0AMensaje: ${msg}`;
-      window.location.href = `mailto:flouxaim@gmail.com?subject=Demostración Floux - ${salon}&body=${body}`;
+      window.location.href = `mailto:max@floux.es?subject=Demostración Floux - ${salon}&body=${body}`;
       document.getElementById('form-ok').style.display = 'block';
     }
 

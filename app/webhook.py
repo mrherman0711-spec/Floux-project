@@ -70,7 +70,8 @@ def _passes_cancellation_guard(conversation_so_far: list, user_text: str) -> boo
             break
     user_msg_lower = user_text.lower().strip()
     bot_asked = any(w in prev_bot_msg for w in
-                    ["cancelar", "cancel", "cancela", "mover", "cambiar", "mueve", "cambia"])
+                    ["cancelar", "cancel", "cancela", "mover", "cambiar", "mueve", "cambia",
+                     "reagendar", "reagenda", "confirmas", "confirmar"])
     # Allow affirmation anywhere in the message if it's short (≤8 words)
     # e.g. "perfecto entonces sí", "sí, confirmo", "ok dale"
     word_count = len(user_msg_lower.split())
@@ -458,6 +459,9 @@ async def handle_whatsapp_message(sender: str, text: str, msg_id: str, remote_ji
             else:
                 ok = await _handle_reschedule(phone, salon_config, old_appt, new_bd, conversation)
                 final_status = "booked" if ok else "active"
+                # Clear pending datetime so the next turn doesn't re-trigger reschedule
+                if ok:
+                    merged_bd.pop("datetime", None)
                 db.update_session(session["id"], status=final_status,
                                 conversation=conversation, booking_data=merged_bd)
 

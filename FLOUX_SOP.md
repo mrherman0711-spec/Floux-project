@@ -5,7 +5,7 @@
 **What is Floux?**
 Floux is an AI-powered WhatsApp booking agent for local service businesses in Spain. When a business misses a phone call, Floux sends the customer a WhatsApp message within 30 seconds, has a full AI conversation (in Spanish or English, auto-detected), qualifies the booking, checks real availability in the salon's system (Treatwell, Booksy, or Google Calendar), books the appointment, assigns the correct staff member, and notifies the business owner.
 
-**Official email:** flouxaim@gmail.com
+**Official email:** max@floux.es
 **Brand email:** hello@floux.es
 **Positioning:** "Recuperamos los clientes que pierdes cuando no puedes coger el teléfono."
 **What Floux is NOT:** An AI receptionist, a booking platform, or a Fresha/Booksy competitor. Floux sits upstream — catches the phone crowd that existing booking tools miss.
@@ -146,7 +146,7 @@ Register as autónomo BEFORE first invoice. Tarifa plana: €80/month (12 months
 | Twilio | ✅ Created (trial credit) |
 | WhatsApp Business API | ✅ Ready |
 | OpenAI | ✅ Available |
-| Gmail (flouxaim@gmail.com) | ✅ Active |
+| Gmail (max@floux.es) | ✅ Active |
 | Google Workspace | ⬜ Sheets + Calendar needed |
 | Autónomo | ⬜ Before first client payment |
 | Domain (floux.es) | ⬜ Website not built yet |

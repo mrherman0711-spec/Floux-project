@@ -1,0 +1,26 @@
+Create a luxury beauty salon Facebook cover photo. Dimensions: 2560×1440px (displays as 820×312px on desktop — design for impact in both views).
+
+BRAND COLORS (use exclusively):
+- Primary dark background: #1A1714 (charcoal black)
+- Gold accent: #9A7B4F (warm, muted gold)
+- Text/cream: #F2EDE6 (off-white)
+
+DESIGN REQUIREMENTS:
+- Luxury, minimal aesthetic — no clutter
+- Dark charcoal background (#1A1714) as base
+- Incorporate the Floux gold chevron logo (upward-pointing triangle shape, #9A7B4F)
+- Include the main positioning text: "Recuperamos los clientes que pierdes cuando no coges el teléfono" in #F2EDE6
+- Add subtle secondary text: "Asistente WhatsApp IA para salones" in smaller type, #9A7B4F
+- Use elegant, modern sans-serif typography (minimal serif if any)
+- Add subtle texture or gradient (optional) to the dark background to avoid flatness — keep it sophisticated
+- Include subtle spa/beauty imagery elements (hint of beauty tools, flowers, or abstract shapes) in the gold/cream colors — do NOT make it literal or cartoonish
+- Center the chevron logo prominently
+- Ensure text is readable at both 2560×1440px and when displayed as 820×312px (test readability at compressed width)
+- Leave safe margins at edges (text/logo should not be in outer 10% of frame)
+
+TONE:
+Premium, exclusive, professional. This is a high-end salon tool, not a budget service. Convey luxury and precision.
+
+FILE FORMAT:
+- Export as PNG with transparent background preferred, or high-quality JPEG
+- Dimensions exactly 2560×1440px

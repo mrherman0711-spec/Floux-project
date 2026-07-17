@@ -96,7 +96,7 @@ Expected ranking (90 days):
 ────────────────────────────────────────────────────────────────────────────
 Public website:  https://floux.es
 Bot API:         https://floux.es/webhook (internal)
-Admin:           flouxaim@gmail.com
+Admin:           max@floux.es
 
 🚀 DEPLOYMENT TIMELINE
 ────────────────────────────────────────────────────────────────────────────
@@ -136,7 +136,7 @@ DAY 3:
 ❓ QUESTIONS BEFORE LAUNCH?
 ────────────────────────────────────────────────────────────────────────────
 See: DEPLOYMENT_GUIDE.md (Sección PARTE 10: Troubleshooting)
-Email: flouxaim@gmail.com
+Email: max@floux.es
 
 ════════════════════════════════════════════════════════════════════════════════
 

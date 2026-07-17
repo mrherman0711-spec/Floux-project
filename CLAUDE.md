@@ -1,7 +1,7 @@
 # Floux
 
 AI-powered WhatsApp booking agent for beauty salons in west Madrid, Spain.
-Brand email: flouxaim@gmail.com
+Brand email: max@floux.es
 
 ## Stack
 Claude Code (all logic) · Twilio (voice/missed-call detection) · Meta WhatsApp Cloud API (messaging) · OpenAI GPT-4o-mini · SQLite (sessions) · Google Sheets (owner visibility) · Chrome DevTools MCP (Treatwell/Booksy browser automation) · Google Calendar (fallback booking)
@@ -74,3 +74,7 @@ Missed call → Twilio webhook → respond 200 → normalize phone → filter no
 
 ## Rules
 See `.claude/rules/` for brand voice and design system.
+
+## Output Format Rules
+- NEVER deliver prospect lists, lead lists, or research results as .md files — always as a document (CSV, DOCX, or Google Sheets-compatible format)
+- When generating any list or report for Max to use operationally (call sheets, prospect lists, outreach lists), the deliverable must be a file he can open and use directly, not a markdown file
